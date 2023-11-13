@@ -1,1 +1,9 @@
-let xabc = 3.2 302;
+let y = 12.1;
+if(bool) {
+	let x = 2*2+3/6;
+} else if(bool2()) {
+	let x = y+3*22
+} else {
+	let x = 0xABC | 0b0101;
+}
+exit(x);

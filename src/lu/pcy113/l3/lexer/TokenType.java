@@ -6,9 +6,31 @@ public enum TokenType {
 	
 	NUM_LIT(),
 	DEC_NUM_LIT(),
+	HEX_NUM_LIT(),
+	BIN_NUM_LIT(),
+	
 	IDENT(),
 	
 	SEMICOLON(';'),
+	
+	PAREN_OPEN('('),
+	PAREN_CLOSE(')'),
+	BRACKET_OPEN('['),
+	BRACKET_CLOSE(']'),
+	CURLY_OPEN('{'),
+	CURLY_CLOSE('}'),
+	
+	SINGLE_QUOTE('\''),
+	DOUBLE_QUOTE('\"'),
+	
+	STRING(),
+	
+	IF("if"),
+	ELSE("else"),
+	FOR("for"),
+	WHILE("while"),
+	RETURN("return"),
+	DO("do"),
 	
 	PLUS('+'),
 	MINUS('-'),
@@ -63,9 +85,9 @@ public enum TokenType {
 	@Override
 	public String toString() {
 		if(fixed && string) {
-			return TokenType.class.getName()+"[name="+name()+", fixed="+fixed+", string="+string+", stringValue="+stringValue+"]";
+			return TokenType.class.getName()+"["+name()+", fixed="+fixed+", string="+string+", stringValue="+stringValue+"]";
 		}else if(fixed && !string) {
-			return TokenType.class.getName()+"[name="+name()+", fixed="+fixed+", string="+string+", charValue="+charValue+"]";
+			return TokenType.class.getName()+"["+name()+", fixed="+fixed+", string="+string+", charValue="+charValue+"]";
 		}else {
 			return TokenType.class.getName()+"["+name()+", fixed="+fixed+", string="+string+"]";
 		}
