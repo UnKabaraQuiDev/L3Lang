@@ -1,9 +1,8 @@
 package lu.pcy113.l3.lexer;
 
-import java.util.HexFormat;
-
 import lu.pcy113.l3.parser.ValueType;
 import lu.pcy113.l3.utils.BinFormat;
+import lu.pcy113.l3.utils.HexFormat;
 
 public class NumericLiteralToken extends LiteralToken<Number> {
 	
@@ -14,23 +13,25 @@ public class NumericLiteralToken extends LiteralToken<Number> {
 	public NumericLiteralToken(TokenType type, int line, int column, String literal) throws LexerException {
 		super(type, line, column);
 		
-		literal = literal.trim();
+		literal = literal.trim().replace('_', ' ');
+		
 		this.literal = literal;
 		if(type.equals(TokenType.DEC_NUM_LIT)) {
 			try {
 				value = Double.parseDouble(literal);
+				valueType = ValueType.DECIMAL;
 			} catch(NumberFormatException e) {
 				throw new LexerException(e, "Invalid number format: "+e.getMessage(), line, column, literal);
 			}
 		} else if(type.equals(TokenType.HEX_NUM_LIT)) {
 			try {
-				value = HexFormat.fromHexDigitsToLong(literal.substring(2));
+				value = HexFormat.fromHexDigitsToLong(literal);
 			} catch(NumberFormatException e) {
 				throw new LexerException(e, "Invalid number format: "+e.getMessage(), line, column, literal);
 			}
 		} else if(type.equals(TokenType.BIN_NUM_LIT)) {
 			try {
-				value = BinFormat.fromBinDigitsToLong(literal.substring(2));
+				value = BinFormat.fromBinDigitsToLong(literal);
 			} catch(NumberFormatException e) {
 				throw new LexerException(e, "Invalid number format: "+e.getMessage(), line, column, literal);
 			}
@@ -41,9 +42,7 @@ public class NumericLiteralToken extends LiteralToken<Number> {
 				throw new LexerException(e, "Invalid number format: "+e.getMessage(), line, column, literal);
 			}
 		}
-		if(value instanceof Double) {
-			valueType = ValueType.DECIMAL;
-		}else {
+		if(value instanceof Long) {
 			if((long) value <= Byte.MAX_VALUE) {
 				valueType = ValueType.BYTE;
 			}else if((long) value <= Short.MAX_VALUE) {

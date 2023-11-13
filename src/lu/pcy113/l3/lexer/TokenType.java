@@ -31,6 +31,16 @@ public enum TokenType {
 	WHILE("while"),
 	RETURN("return"),
 	DO("do"),
+	FINALLY("finally"),
+	
+	BIT_OR('|'),
+	BIT_AND('&'),
+	BIT_XOR('^'),
+	BIT_NOT('~'),
+	
+	OR("||"),
+	AND("&&"),
+	NOT('!'),
 	
 	PLUS('+'),
 	MINUS('-'),
@@ -40,6 +50,7 @@ public enum TokenType {
 	ASSIGN('='),
 	
 	EQUALS("=="),
+	NOT_EQUALS("!="),
 	
 	LOWER('<'),
 	LOWER_EQUALS("<="),
