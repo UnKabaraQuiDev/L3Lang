@@ -1,10 +1,14 @@
 package lu.pcy113.l3.parser;
 
-public class ExpressionContainer {
+import java.util.ArrayList;
+import java.util.List;
 
-	public void add(VariableVariableDeclaration variableVariableDeclaration) {
-		// TODO Auto-generated method stub
-		
+public class ExpressionContainer extends Expression {
+	
+	protected List<Expression> expressions = new ArrayList<>();
+	
+	public void add(VariableAllocation variableVariableDeclaration) {
+		expressions.add(variableVariableDeclaration);
 	}
 
 }

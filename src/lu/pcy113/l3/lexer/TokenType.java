@@ -2,7 +2,13 @@ package lu.pcy113.l3.lexer;
 
 public enum TokenType {
 	
-	LET("let"),
+	BYTE("byte"),
+	SHORT("short"),
+	INTEGER("int"),
+	LONG("long"),
+	BOOLEAN("bool"),
+	FLOAT("float"),
+	DOUBLE("double"),
 	
 	NUM_LIT(),
 	DEC_NUM_LIT(),
@@ -46,6 +52,7 @@ public enum TokenType {
 	MINUS('-'),
 	MUL('*'),
 	DIV('/'),
+	MODULO('%'),
 	
 	ASSIGN('='),
 	

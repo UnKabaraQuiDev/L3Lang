@@ -7,6 +7,7 @@ import static lu.pcy113.l3.lexer.TokenType.BIT_AND;
 import static lu.pcy113.l3.lexer.TokenType.BIT_NOT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_OR;
 import static lu.pcy113.l3.lexer.TokenType.BIT_XOR;
+import static lu.pcy113.l3.lexer.TokenType.BOOLEAN;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.CURLY_CLOSE;
@@ -22,10 +23,12 @@ import static lu.pcy113.l3.lexer.TokenType.GREATER_EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.HEX_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.IDENT;
 import static lu.pcy113.l3.lexer.TokenType.IF;
-import static lu.pcy113.l3.lexer.TokenType.LET;
+import static lu.pcy113.l3.lexer.TokenType.INTEGER;
+import static lu.pcy113.l3.lexer.TokenType.LONG;
 import static lu.pcy113.l3.lexer.TokenType.LOWER;
 import static lu.pcy113.l3.lexer.TokenType.LOWER_EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.MINUS;
+import static lu.pcy113.l3.lexer.TokenType.MODULO;
 import static lu.pcy113.l3.lexer.TokenType.MUL;
 import static lu.pcy113.l3.lexer.TokenType.NOT;
 import static lu.pcy113.l3.lexer.TokenType.NOT_EQUALS;
@@ -35,6 +38,7 @@ import static lu.pcy113.l3.lexer.TokenType.PAREN_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.PAREN_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.PLUS;
 import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
+import static lu.pcy113.l3.lexer.TokenType.SHORT;
 import static lu.pcy113.l3.lexer.TokenType.STRING;
 
 import java.io.IOException;
@@ -137,15 +141,34 @@ public class L3Lexer {
 				flushToken();
 				break;
 				
-			case 'l':
-				if(peek("et")) {
-					consume(2);
-					type = LET;
+			case 'b':
+				if(peek("ool")) {
+					consume(3);
+					type = BOOLEAN;
 					flushToken();
 				}
 				break;
+			case 's':
+				if(peek("hort")) {
+					consume(4);
+					type = SHORT;
+					flushToken();
+				}
+				break;
+			case 'l':
+				if(peek("ong")) {
+					consume(3);
+					type = LONG;
+					flushToken();
+				}
+				break;
+				
 			case 'i':
-				if(peek() == 'f') {
+				if(peek("nt")) {
+					consume(2);
+					type = INTEGER;
+					flushToken();
+				}else if(peek() == 'f') {
 					consume(1);
 					type = IF;
 					flushToken();
@@ -183,6 +206,10 @@ public class L3Lexer {
 					type = BIT_AND;
 				flushToken();
 				break;
+			
+			case '%':
+				type = MODULO;
+				flushToken();
 				
 			case '!':
 				if(peek() == '=') {

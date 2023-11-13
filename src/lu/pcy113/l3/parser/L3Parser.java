@@ -2,7 +2,9 @@ package lu.pcy113.l3.parser;
 
 import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.IDENT;
-import static lu.pcy113.l3.lexer.TokenType.LET;
+import static lu.pcy113.l3.lexer.TokenType.INTEGER;
+import static lu.pcy113.l3.lexer.TokenType.MUL;
+import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
 
 import java.util.List;
 
@@ -27,29 +29,59 @@ public class L3Parser {
 		this.input = tokens;
 	}
 	
-	private Token token = null;
-	
 	public void parse() throws ParserException {
 		while(hasNext()) {
-			token = consume();
 			
-			if(token.getType().equals(LET)/* &&
-					peek().getType().equals(IDENT) &&
-					peek(1).getType().equals(ASSIGN)*/) {
-				parseVariableDeclaration();
+			if(peek(INTEGER)) {
+				Token token = consume();
+				parseVariableDeclaration(token.getType());
 			}
+			
 		}
 	}
 	
 	private ExpressionContainer container;
 	
-	private void parseVariableDeclaration() throws ParserException {
+	private void parseVariableDeclaration(TokenType type) throws ParserException {
 		IdentifierToken varName = (IdentifierToken) needs(IDENT);
-		Token assign = needs(ASSIGN);
-		LiteralToken value = needsLiteral();
-		container.add(new VariableVariableDeclaration(value.getValueType(), varName.getIdentifier(), value.getValue()));
+		Token assign;
+		//List<Token> value;
+		
+		if(peek(ASSIGN)) {
+			assign = needs(ASSIGN);
+			/*value = new ArrayList<Token>();
+			while(!peek(SEMICOLON)) {
+				value.add(consume());
+			}*/
+			parseMath();
+			/*if(value.isEmpty())
+				throw new ParserException("Expected a value but got "+peek());*/
+		}
+		
+		switch(type) {
+		case INTEGER:
+			container.add(new IntegerVariableAllocation(varName.getIdentifier()));
+			//if(value != null)
+			//	container.add(new VariableSet(varNameOPEN_PARENT.getIdentifier(), new IntegerLiteral(value.getValue())));
+			break;
+		}
 	}
 
+	private EvaluableExpression parseMath() {
+		EvaluableExpression expression = new EvaluableExpression();
+		
+		// TODO
+		
+		do {
+			if(peek(MUL)) {
+				Token left = consume(-1);
+				Token right = consume(1);
+			}
+		}while(peek(SEMICOLON));
+		
+		return expression;
+	}
+	
 	private LiteralToken needsLiteral() throws ParserException {
 		Token t = consume();
 		if(t instanceof LiteralToken) {
@@ -81,6 +113,9 @@ public class L3Parser {
 	}
 	public Token peek(int i) {
 		return input.get(index+i);
+	}
+	private boolean peek(TokenType type) {
+		return peek().getType().equals(type);
 	}
 	
 }
