@@ -53,7 +53,7 @@ public class L3Parser {
 			while(!peek(SEMICOLON)) {
 				value.add(consume());
 			}*/
-			parseMath();
+			parseNumericLiteralMath();
 			/*if(value.isEmpty())
 				throw new ParserException("Expected a value but got "+peek());*/
 		}
