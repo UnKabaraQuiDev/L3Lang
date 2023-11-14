@@ -1,18 +1,19 @@
 package lu.pcy113.l3.parser.expressions;
 
+import java.io.PrintStream;
+
+import lu.pcy113.l3.parser.expressions.containers.ExprContainer;
+
 public class Expr {
 	
 	protected ExprContainer parent = null;
 	
-	public String toString(int tabs) {
-		System.out.println("sub: "+tabs);
+	public void print(int index, PrintStream out, int tabCount) {
+		String tabs = "";
+		for(int i = 0; i < tabCount; i++)
+			tabs += "\t";
 		
-		String str = "";
-		for(int i = 0; i < tabs; i++)
-			str += "\t";
-		str += getClass().getSimpleName()+"["+toString()+"]";
-		
-		return str;
+		out.println(tabs+index+". "+getClass().getSimpleName()+"["+toString()+"]");
 	}
 	
 	public ExprContainer getParent() {return parent;}

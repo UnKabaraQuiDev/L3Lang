@@ -1,10 +1,13 @@
 package lu.pcy113.l3.utils;
 
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.lexer.tokens.IdentifierToken;
+import lu.pcy113.l3.lexer.tokens.Token;
 
 public class MemorySize {
 	
 	private int bits, bytes;
+	private String customSizeIdent;
 	
 	public MemorySize(int bits, int bytes) {
 		this.bits = bits;
@@ -18,9 +21,19 @@ public class MemorySize {
 			throw new IllegalArgumentException("Invalid token type.");
 		}
 	}
+	public MemorySize(Token token) {
+		TokenType type = token.getType();
+		this.bits = getBits(type);
+		this.bytes = getBytes(type);
+		
+		if((bits == -1 || bytes == -1) && token instanceof IdentifierToken) {
+			this.customSizeIdent = ((IdentifierToken) token).getIdentifier();
+		}
+	}
 	
 	public int getBits() {return bits;}
 	public int getBytes() {return bytes;}
+	public String getCustomSizeIdent() {return customSizeIdent;}
 	
 	/**
 	 * @returns number of bits needed

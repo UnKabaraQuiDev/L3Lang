@@ -1,5 +1,7 @@
-package lu.pcy113.l3.lexer;
+package lu.pcy113.l3.lexer.tokens;
 
+import lu.pcy113.l3.lexer.LexerException;
+import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ValueType;
 import lu.pcy113.l3.utils.BinFormat;
 import lu.pcy113.l3.utils.HexFormat;

@@ -115,7 +115,7 @@ public enum TokenType {
 		return charValue;
 	}
 	public Object getValue() {
-		return !fixed ? null : (string ? stringValue : charValue);
+		return !fixed ? name() : (string ? stringValue : charValue);
 	}
 	
 	@Override

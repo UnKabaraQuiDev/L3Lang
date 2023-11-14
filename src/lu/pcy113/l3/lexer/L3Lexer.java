@@ -56,6 +56,12 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import lu.pcy113.l3.lexer.tokens.CommentToken;
+import lu.pcy113.l3.lexer.tokens.IdentifierToken;
+import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
+import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
+import lu.pcy113.l3.lexer.tokens.Token;
+import lu.pcy113.l3.parser.ParserException;
 import lu.pcy113.l3.utils.StringUtils;
 
 public class L3Lexer {
@@ -110,7 +116,10 @@ public class L3Lexer {
 				case '/':
 					if(peek() == '/') {
 						type = COMMENT;
-						while(hasNext() && consume() != '\n'); // ignore ligne
+						strValue = "/";
+						while(hasNext() && peek() != '\n') { // ignore ligne
+							strValue += consume();
+						}
 						flushToken();
 						break next;
 					}
@@ -176,7 +185,9 @@ public class L3Lexer {
 					break next;
 					
 				case 'v':
+					strValue = "v";
 					if(peek("ar")) {
+						strValue += "ar";
 						if(peek(2, "1")) {
 							consume(3);
 							type = VAR_1;
@@ -192,10 +203,16 @@ public class L3Lexer {
 						}else if(peek(2, "64")) {
 							consume(4);
 							type = VAR_64;
+						}else {
+							throw new LexerException("Unknown variable type: "+strValue, line, column);
 						}
 						if(peek("s")) {
 							consume();
-							type = TokenType.valueOf(type.name()+"_S");
+							try {
+								type = TokenType.valueOf(type.name()+"_S");
+							}catch(IllegalArgumentException e) {
+								throw new LexerException(e, "Unknown variable type: "+strValue, line, column);
+							}
 						}
 						if(type != null) {
 							flushToken();
@@ -421,6 +438,8 @@ public class L3Lexer {
 			tokens.add(new NumericLiteralToken(type, line, column-strValue.length(), strValue));
 		}else if(STRING.equals(type)) {
 			tokens.add(new StringLiteralToken(type, line, column-strValue.length(), strValue));
+		}else if(COMMENT.equals(type)) {
+			tokens.add(new CommentToken(type, line, column-strValue.length(), strValue));
 		}else {
 			tokens.add(new Token(type, line, column-strValue.length()));
 		}

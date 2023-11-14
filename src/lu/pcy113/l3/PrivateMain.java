@@ -10,6 +10,7 @@ import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.parser.L3Parser;
 import lu.pcy113.l3.parser.ParserException;
+import lu.pcy113.l3.parser.expressions.containers.FileContainer;
 
 public class PrivateMain {
 
@@ -22,9 +23,9 @@ public class PrivateMain {
 		lexer.getTokens().forEach(System.out::println);
 		
 		L3Parser parser = new L3Parser(lexer);
-		parser.parse();
+		parser.parse(new FileContainer("main.l3"));
 		
-		System.out.println(parser.getContainer().getOriginalParent().toString(0));
+		parser.getContainer().getOriginalParent().print(0, System.out, 0);
 	}
 
 }

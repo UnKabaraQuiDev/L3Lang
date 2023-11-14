@@ -1,7 +1,10 @@
-package lu.pcy113.l3.parser.expressions;
+package lu.pcy113.l3.parser.expressions.containers;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import lu.pcy113.l3.parser.expressions.Expr;
 
 public class ExprContainer extends Expr {
 	
@@ -23,26 +26,20 @@ public class ExprContainer extends Expr {
 	}
 	
 	@Override
-	public String toString(int tabs) {
-		System.out.println("par: "+tabs);
+	public void print(int index, PrintStream out, int tabCount) {
+		String tab="";
+		for(int i = 0; i < tabCount; i++)
+			tab += "\t";
 		
-		String str = "", childr = "";
-		str += "\n";
-		for(int i = 0; i < tabs; i++)
-			str += "\t";
-		
+		out.println(tab+index+". "+getClass().getSimpleName()+"("+toString()+") {");
 		if(!children.isEmpty()) {
 			int i = 0;
 			for(Expr e : children) {
-				childr += (i++)+". "+e.toString(tabs+1)+",\n";
+				e.print(i++, out, tabCount+1);
+				//out.println(tab++"."+e.toString(tabs+1)+",");
 			}
 		}
-		
-		str += getClass().getSimpleName()+" {\n";
-		str += childr;
-		str += "}";
-		
-		return str;
+		out.println(tab+"}");
 	}
 	
 }

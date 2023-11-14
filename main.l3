@@ -1,1 +1,16 @@
-var32s xas = 123;
+var32s xas;
+();
+xas = 123;
+xas = 123;
+xas = 0b1010;
+xas = 0x123;
+xas = 123;
+// ex comment 
+
+void function1(var8s a, var1 b);
+
+var64s function(var8s a, var1 b) {
+	var1 x = 12;
+	x = 3;
+	a = 0x12;
+}
