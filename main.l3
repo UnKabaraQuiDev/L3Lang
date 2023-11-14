@@ -1,2 +1,1 @@
-let xas = 123 | 0xABC | 0b0101;
-exit(xas);
+var32s xas = 123;

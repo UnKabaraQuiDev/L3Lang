@@ -23,6 +23,8 @@ public class PrivateMain {
 		
 		L3Parser parser = new L3Parser(lexer);
 		parser.parse();
+		
+		System.out.println(parser.getContainer().getOriginalParent().toString(0));
 	}
 
 }

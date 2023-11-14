@@ -2,13 +2,18 @@ package lu.pcy113.l3.lexer;
 
 public enum TokenType {
 	
-	BYTE("byte"),
-	SHORT("short"),
-	INTEGER("int"),
-	LONG("long"),
-	BOOLEAN("bool"),
-	FLOAT("float"),
-	DOUBLE("double"),
+	VAR_1("var1"),
+	VAR_8("var8"),
+	VAR_16("var16"),
+	VAR_32("var32"),
+	VAR_64("var64"),
+	
+	VAR_8_S("var8s"),
+	VAR_16_S("var16s"),
+	VAR_32_S("var32s"),
+	VAR_64_S("var64s"),
+	
+	VOID("void"),
 	
 	NUM_LIT(),
 	DEC_NUM_LIT(),
@@ -17,6 +22,7 @@ public enum TokenType {
 	
 	IDENT(),
 	
+	COMMA(','),
 	SEMICOLON(';'),
 	
 	PAREN_OPEN('('),
@@ -26,15 +32,27 @@ public enum TokenType {
 	CURLY_OPEN('{'),
 	CURLY_CLOSE('}'),
 	
-	SINGLE_QUOTE('\''),
-	DOUBLE_QUOTE('\"'),
+	//SINGLE_QUOTE('\''),
+	//DOUBLE_QUOTE('\"'),
 	
 	STRING(),
 	
+	COMMENT("//"),
+	
+	TRUE("true"),
+	FALSE("false"),
+	
 	IF("if"),
 	ELSE("else"),
+	
+	SWITCH("switch"),
+	CASE("case"),
+	DEFAULT("default"),
+	
 	FOR("for"),
 	WHILE("while"),
+	BREAK("break"),
+	
 	RETURN("return"),
 	DO("do"),
 	FINALLY("finally"),

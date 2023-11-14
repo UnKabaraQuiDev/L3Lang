@@ -1,18 +1,36 @@
 package lu.pcy113.l3.parser;
 
 import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
+import static lu.pcy113.l3.lexer.TokenType.BIN_NUM_LIT;
+import static lu.pcy113.l3.lexer.TokenType.DEC_NUM_LIT;
+import static lu.pcy113.l3.lexer.TokenType.HEX_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.IDENT;
-import static lu.pcy113.l3.lexer.TokenType.INTEGER;
-import static lu.pcy113.l3.lexer.TokenType.MUL;
+import static lu.pcy113.l3.lexer.TokenType.NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
+import static lu.pcy113.l3.lexer.TokenType.VAR_1;
+import static lu.pcy113.l3.lexer.TokenType.VAR_16;
+import static lu.pcy113.l3.lexer.TokenType.VAR_16_S;
+import static lu.pcy113.l3.lexer.TokenType.VAR_32;
+import static lu.pcy113.l3.lexer.TokenType.VAR_32_S;
+import static lu.pcy113.l3.lexer.TokenType.VAR_64;
+import static lu.pcy113.l3.lexer.TokenType.VAR_64_S;
+import static lu.pcy113.l3.lexer.TokenType.VAR_8;
+import static lu.pcy113.l3.lexer.TokenType.VAR_8_S;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lu.pcy113.l3.lexer.IdentifierToken;
 import lu.pcy113.l3.lexer.L3Lexer;
-import lu.pcy113.l3.lexer.LiteralToken;
+import lu.pcy113.l3.lexer.NumericLiteralToken;
 import lu.pcy113.l3.lexer.Token;
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.parser.expressions.ExprContainer;
+import lu.pcy113.l3.parser.expressions.NumericLiteralExpr;
+import lu.pcy113.l3.parser.expressions.VariableAssignmentExpr;
+import lu.pcy113.l3.parser.expressions.VariableDeclarationExpr;
+import lu.pcy113.l3.utils.MemorySize;
 
 public class L3Parser {
 	
@@ -29,93 +47,117 @@ public class L3Parser {
 		this.input = tokens;
 	}
 	
+	private ExprContainer container;
+	
 	public void parse() throws ParserException {
+		container = new ExprContainer();
+		
 		while(hasNext()) {
 			
-			if(peek(INTEGER)) {
-				Token token = consume();
-				parseVariableDeclaration(token.getType());
+			if(peek(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S)) {
+				parseVariableDeclaration();
 			}
 			
 		}
 	}
 	
-	private ExpressionContainer container;
-	
-	private void parseVariableDeclaration(TokenType type) throws ParserException {
+	private void parseVariableDeclaration() throws ParserException {
+		TokenType tokenType = consume().getType();
 		IdentifierToken varName = (IdentifierToken) needs(IDENT);
-		Token assign;
-		//List<Token> value;
 		
-		if(peek(ASSIGN)) {
-			assign = needs(ASSIGN);
-			/*value = new ArrayList<Token>();
-			while(!peek(SEMICOLON)) {
-				value.add(consume());
-			}*/
-			parseNumericLiteralMath();
-			/*if(value.isEmpty())
-				throw new ParserException("Expected a value but got "+peek());*/
-		}
+		container.add(new VariableDeclarationExpr(new MemorySize(tokenType), varName.getIdentifier()));
 		
-		switch(type) {
-		case INTEGER:
-			container.add(new IntegerVariableAllocation(varName.getIdentifier()));
-			//if(value != null)
-			//	container.add(new VariableSet(varNameOPEN_PARENT.getIdentifier(), new IntegerLiteral(value.getValue())));
-			break;
+		if(peek(1, ASSIGN)) {
+			parseVariableAssignment();
+		}else {
+			consume();
+			consume(SEMICOLON);
 		}
 	}
 
-	private EvaluableExpression parseMath() {
-		EvaluableExpression expression = new EvaluableExpression();
+	private void parseVariableAssignment() throws ParserException {
+		IdentifierToken varName = (IdentifierToken) consume(IDENT);
+		Token assign = consume(ASSIGN);
 		
-		// TODO
+		if(peek(NUM_LIT, HEX_NUM_LIT, BIN_NUM_LIT, DEC_NUM_LIT)) {
+			 container.add(new VariableAssignmentExpr(varName.getIdentifier(), parseNumericLiteral()));
+		}// TODO
 		
-		do {
-			if(peek(MUL)) {
-				Token left = consume(-1);
-				Token right = consume(1);
-			}
-		}while(peek(SEMICOLON));
-		
-		return expression;
+		//consume();
+		consume(SEMICOLON);
 	}
 	
-	private LiteralToken needsLiteral() throws ParserException {
-		Token t = consume();
-		if(t instanceof LiteralToken) {
-			return (LiteralToken) t;
-		}
-		throw new ParserException("Expected a value but got "+t);
+	private NumericLiteralExpr parseNumericLiteral() throws ParserException {
+		NumericLiteralToken token = (NumericLiteralToken) consume();
+		return new NumericLiteralExpr(token.getValue().longValue());
 	}
+	/** 
+	 * Needs next
+	 */
 	private Token needs(TokenType ident) throws ParserException {
-		Token t = consume();
+		Token t = peek();
 		if(t.getType().equals(ident)) {
 			return t;
 		}
 		throw new ParserException("Expected "+ident+" but got "+t);
 	}
-
-	public boolean hasNext() {
+	
+	private boolean hasNext() {
 		return index < input.size();
 	}
-	public Token consume() {
+	private boolean hasNext(int x) {
+		return index+x < input.size();
+	}
+	
+	private Token consume() throws ParserException {
 		return consume(1);
 	}
-	public Token consume(int i) {
+	private Token consume(int i) throws ParserException {
+		end();
 		Token c = input.get(index);
 		index += i;
 		return c;
 	}
-	public Token peek() {
+	private Token consume(TokenType t) throws ParserException {
+		if(!hasNext())
+			throw new ParserException("Expected "+t+" but got end of input.");
+		
+		if(peek(t)) {
+			return consume();
+		}else {
+			throw new ParserException("Expected "+t+" but got "+peek());
+		}
+	}
+	
+	private void end() throws ParserException {
+		if(!hasNext())
+			throw new ParserException("Unexpected end of input.");
+	}
+	
+	private Token peek() {
 		return peek(0);
 	}
-	public Token peek(int i) {
+	private Token peek(int i) {
 		return input.get(index+i);
 	}
+	/*private Token getPeek(TokenType type) {
+		return peek().getType().equals(type) ? peek() : null;
+	}*/
 	private boolean peek(TokenType type) {
 		return peek().getType().equals(type);
 	}
+	private boolean peek(int x, TokenType type) {
+		return peek(x).getType().equals(type);
+	}
+	private boolean peek(TokenType... types) {
+		TokenType peek = peek().getType();
+		return Arrays.stream(types).map(peek::equals).collect(Collectors.reducing((a, b) -> a || b)).orElse(false);
+	}
+	private boolean peek(int x, TokenType... types) {
+		TokenType peek = peek(x).getType();
+		return Arrays.stream(types).map(peek::equals).collect(Collectors.reducing((a, b) -> a || b)).orElse(false);
+	}
+	
+	public ExprContainer getContainer() {return container;}
 	
 }
