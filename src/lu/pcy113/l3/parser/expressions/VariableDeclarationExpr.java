@@ -2,7 +2,7 @@ package lu.pcy113.l3.parser.expressions;
 
 import lu.pcy113.l3.utils.MemorySize;
 
-public class VariableDeclarationExpr extends VariableExpr {
+public class VariableDeclarationExpr extends Expr implements VariableExpr {
 	
 	private MemorySize memorySize;
 	private String identifier;

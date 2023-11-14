@@ -6,21 +6,21 @@ import java.util.stream.Collectors;
 
 import lu.pcy113.l3.lexer.tokens.Token;
 
-public class FunctionDeclarationExpr extends Expr {
+public class FunctionDeclarationExpr extends Expr implements FunctionExpr {
 	
 	private Token returnType;
 	private String identifier;
-	private VariableDeclarationExpr[] parameters;
+	private Expr[] parameters;
 	
-	public FunctionDeclarationExpr(Token returnType, String identifier, List<VariableDeclarationExpr> params) {
+	public FunctionDeclarationExpr(Token returnType, String identifier, List<Expr> params) {
 		this.returnType = returnType;
 		this.identifier = identifier;
-		this.parameters = params.toArray(new VariableDeclarationExpr[params.size()]);
+		this.parameters = params.toArray(new Expr[params.size()]);
 	}
 	
 	public Token getReturnType() {return returnType;}
 	public String getIdentifier() {return identifier;}
-	public VariableDeclarationExpr[] getParameters() {return parameters;}
+	public Expr[] getParameters() {return parameters;}
 	
 	@Override
 	public String toString() {

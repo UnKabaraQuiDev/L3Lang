@@ -26,6 +26,7 @@ import static lu.pcy113.l3.lexer.TokenType.VOID;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,10 +35,12 @@ import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
+import lu.pcy113.l3.parser.expressions.Expr;
 import lu.pcy113.l3.parser.expressions.FunctionDeclarationExpr;
 import lu.pcy113.l3.parser.expressions.NumericLiteralExpr;
 import lu.pcy113.l3.parser.expressions.VariableAssignmentExpr;
 import lu.pcy113.l3.parser.expressions.VariableDeclarationExpr;
+import lu.pcy113.l3.parser.expressions.VariableExpr;
 import lu.pcy113.l3.parser.expressions.containers.ExprContainer;
 import lu.pcy113.l3.parser.expressions.containers.FunctionBodyExprContainer;
 import lu.pcy113.l3.utils.MemorySize;
@@ -57,30 +60,26 @@ public class L3Parser {
 		this.input = tokens;
 	}
 	
-	private ExprContainer container;
-	
 	public void parse(ExprContainer container) throws ParserException {
-		this.container = container;
-		
 		while(hasNext()) {
 			
-			parseExpr();
+			parseExpr(container);
 			
 		}
 	}
 	
-	private void parseExpr() throws ParserException {
+	private void parseExpr(ExprContainer container) throws ParserException {
 		if(peek(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S) && peek(1, IDENT)) {
 			if(peek(2, SEMICOLON) || peek(2, ASSIGN))
-				parseVariableDeclaration();
+				container.addAll(parseVariableDeclaration());
 			else if(peek(2, PAREN_OPEN))
-				parseFunctionDeclaration();
+				container.addAll(parseFunctionDeclaration());
 			else
 				throw new ParserException(peek(2), SEMICOLON, ASSIGN, PAREN_OPEN);
 		}else if(peek(IDENT)) {
-			parseVariableAssignment();
+			container.add(parseVariableAssignment());
 		}else if(peek(VOID, IDENT) && peek(1, IDENT)) { // function
-			parseFunctionDeclaration();
+			container.addAll(parseFunctionDeclaration());
 		}else if(peek(COMMENT)) {
 			consume();
 		}else {
@@ -88,11 +87,13 @@ public class L3Parser {
 		}
 	}
 	
-	private void parseFunctionDeclaration() throws ParserException {
+	private Collection<Expr> parseFunctionDeclaration() throws ParserException {
+		Collection<Expr> fe = new ArrayList<>();
+		
 		Token returnType = consume();
 		IdentifierToken functionName = (IdentifierToken) consume(IDENT);
 		
-		List<VariableDeclarationExpr> params;
+		List<Expr> params;
 		
 		consume(PAREN_OPEN);
 		if(!peek(PAREN_CLOSE))
@@ -101,65 +102,77 @@ public class L3Parser {
 			params = new ArrayList<>();
 		consume(PAREN_CLOSE);
 		
+		fe.add(new FunctionDeclarationExpr(returnType, functionName.getIdentifier(), params));
+		
 		if(peek(SEMICOLON)) {
 			consume();
-			container.add(new FunctionDeclarationExpr(returnType, functionName.getIdentifier(), params));
-			return;
+			return fe;
 		}
 		
 		consume(CURLY_OPEN);
 		FunctionBodyExprContainer body = new FunctionBodyExprContainer(returnType, functionName.getIdentifier(), params);
-		container.add(body);
-		container = body;
+		fe.add(body);
 		while(!peek(CURLY_CLOSE))
-			parseExpr();
+			parseExpr(body);
 		consume(CURLY_CLOSE);
+		
+		return fe;
 	}
 	
-	private List<VariableDeclarationExpr> parseParameterList() throws ParserException {
-		List<VariableDeclarationExpr> params = new ArrayList<>();
-		do {
-			Token type = consume(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S, IDENT);
-			IdentifierToken varName = (IdentifierToken) consume(IDENT);
-			
-			params.add(new VariableDeclarationExpr(new MemorySize(type), varName.getIdentifier()));
+	private List<Expr> parseParameterList() throws ParserException {
+		List<Expr> params = new ArrayList<>();
+		while(true) {
+			params.addAll(parseVariableDeclaration());
 			
 			if(peek(COMMA))
 				consume();
 			else
 				break;
-		}while(true);
+		}
 		return params;
 	}
 	
-	private void parseVariableDeclaration() throws ParserException {
+	private Collection<Expr> parseVariableDeclaration() throws ParserException {
+		List<Expr> vas = new ArrayList<>();
+		
+		System.out.println("var dec");
 		TokenType tokenType = consume().getType();
 		IdentifierToken varName = (IdentifierToken) needs(IDENT);
 		
-		container.add(new VariableDeclarationExpr(new MemorySize(tokenType), varName.getIdentifier()));
+		vas.add(new VariableDeclarationExpr(new MemorySize(tokenType), varName.getIdentifier()));
 		
 		if(peek(1, ASSIGN)) {
-			parseVariableAssignment();
+			vas.add(parseVariableAssignment());
 		}else {
 			consume();
-			consume(SEMICOLON);
 		}
+		if(peek(SEMICOLON))
+			consume(SEMICOLON);
+			
+		return vas;
 	}
 
-	private void parseVariableAssignment() throws ParserException {
+	private VariableAssignmentExpr parseVariableAssignment() throws ParserException {
 		IdentifierToken varName = (IdentifierToken) consume(IDENT);
+		System.out.println("var assign "+varName.getIdentifier());
 		Token assign = consume(ASSIGN);
 		
 		if(peek(NUM_LIT, HEX_NUM_LIT, BIN_NUM_LIT, DEC_NUM_LIT)) {
-			 container.add(new VariableAssignmentExpr(varName.getIdentifier(), parseNumericLiteral()));
+			VariableAssignmentExpr varAssign = new VariableAssignmentExpr(varName.getIdentifier(), parseNumericLiteral());
+			if(peek(SEMICOLON))
+				consume(SEMICOLON);
+			return varAssign;
 		}// TODO
 		
 		//consume();
-		consume(SEMICOLON);
+		//consume(SEMICOLON);
+		
+		return null;
 	}
 	
 	private NumericLiteralExpr parseNumericLiteral() throws ParserException {
-		NumericLiteralToken token = (NumericLiteralToken) consume();
+		System.out.println("num");
+		NumericLiteralToken token = (NumericLiteralToken) consume(NUM_LIT, HEX_NUM_LIT, BIN_NUM_LIT, DEC_NUM_LIT);
 		return new NumericLiteralExpr(token.getValue().longValue());
 	}
 	/** 
@@ -204,7 +217,7 @@ public class L3Parser {
 		if(Arrays.stream(types).filter(peek.getType()::equals).collect(Collectors.counting()) > 0)
 			return consume();
 		else
-			throw new ParserException("Expected "+Arrays.toString(types)+" but got "+peek);
+			throw new ParserException(peek, types);
 	}
 	
 	private void end() throws ParserException {
@@ -235,7 +248,5 @@ public class L3Parser {
 		TokenType peek = peek(x).getType();
 		return Arrays.stream(types).map(peek::equals).collect(Collectors.reducing((a, b) -> a || b)).orElse(false);
 	}
-	
-	public ExprContainer getContainer() {return container;}
 	
 }

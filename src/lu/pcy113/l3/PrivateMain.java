@@ -14,7 +14,7 @@ import lu.pcy113.l3.parser.expressions.containers.FileContainer;
 
 public class PrivateMain {
 
-	public static void main(String[] args) throws FileNotFoundException, IOException, LexerException, ParserException {
+	public static void main(String[] args) throws FileNotFoundException, IOException, LexerException {
 		System.out.println(Arrays.toString(new File("./").list()));
 		
 		L3Lexer lexer = new L3Lexer(new FileReader(new File("./main.l3")));
@@ -23,9 +23,14 @@ public class PrivateMain {
 		lexer.getTokens().forEach(System.out::println);
 		
 		L3Parser parser = new L3Parser(lexer);
-		parser.parse(new FileContainer("main.l3"));
+		FileContainer fc = new FileContainer("main.l3");
+		try {
+			parser.parse(fc);
+		} catch (ParserException e) {
+			e.printStackTrace();
+		}
 		
-		parser.getContainer().getOriginalParent().print(0, System.out, 0);
+		fc.print(0, System.out, 0);
 	}
 
 }

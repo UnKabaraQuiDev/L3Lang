@@ -1,6 +1,6 @@
 package lu.pcy113.l3.parser.expressions;
 
-public class VariableAssignmentExpr extends VariableExpr {
+public class VariableAssignmentExpr extends Expr implements VariableExpr {
 	
 	private String identifier;
 	private NumericLiteralExpr value;

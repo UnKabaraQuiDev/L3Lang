@@ -2,6 +2,7 @@ package lu.pcy113.l3.parser.expressions.containers;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import lu.pcy113.l3.parser.expressions.Expr;
@@ -10,6 +11,9 @@ public class ExprContainer extends Expr {
 	
 	protected List<Expr> children = new ArrayList<>();
 	
+	public void addAll(Collection<Expr> collection) {
+		children.addAll(collection);
+	}
 	public void add(Expr expr) {
 		children.add(expr);
 		expr.setParent(this);
