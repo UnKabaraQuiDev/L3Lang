@@ -6,10 +6,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 
+import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.compiler.X86Compiler;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.parser.L3Parser;
 import lu.pcy113.l3.parser.ParserException;
+import lu.pcy113.l3.parser.expressions.containers.EnvContainer;
 import lu.pcy113.l3.parser.expressions.containers.FileContainer;
 
 public class PrivateMain {
@@ -23,14 +26,22 @@ public class PrivateMain {
 		lexer.getTokens().forEach(System.out::println);
 		
 		L3Parser parser = new L3Parser(lexer);
+		EnvContainer env = new EnvContainer();
 		FileContainer fc = new FileContainer("main.l3");
+		env.add(fc);
 		try {
 			parser.parse(fc);
 		} catch (ParserException e) {
 			e.printStackTrace();
 		}
-		
 		fc.print(0, System.out, 0);
+		
+		X86Compiler compiler = new X86Compiler(env, System.err);
+		try {
+			compiler.compile();
+		} catch (CompilerException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

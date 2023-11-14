@@ -135,7 +135,6 @@ public class L3Parser {
 	private Collection<Expr> parseVariableDeclaration() throws ParserException {
 		List<Expr> vas = new ArrayList<>();
 		
-		System.out.println("var dec");
 		TokenType tokenType = consume().getType();
 		IdentifierToken varName = (IdentifierToken) needs(IDENT);
 		
@@ -154,7 +153,6 @@ public class L3Parser {
 
 	private VariableAssignmentExpr parseVariableAssignment() throws ParserException {
 		IdentifierToken varName = (IdentifierToken) consume(IDENT);
-		System.out.println("var assign "+varName.getIdentifier());
 		Token assign = consume(ASSIGN);
 		
 		if(peek(NUM_LIT, HEX_NUM_LIT, BIN_NUM_LIT, DEC_NUM_LIT)) {
@@ -171,7 +169,6 @@ public class L3Parser {
 	}
 	
 	private NumericLiteralExpr parseNumericLiteral() throws ParserException {
-		System.out.println("num");
 		NumericLiteralToken token = (NumericLiteralToken) consume(NUM_LIT, HEX_NUM_LIT, BIN_NUM_LIT, DEC_NUM_LIT);
 		return new NumericLiteralExpr(token.getValue().longValue());
 	}
