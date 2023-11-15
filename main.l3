@@ -1,11 +1,24 @@
 import none;
 
+#def MAX_STRING_SIZE 0xFFFF
+
 struct String {
 	var16 size;
-	var8_p start;
-	define(var8_p start) (.start = start, .size = ) {
+	var8: start;
+	define(var8: start) (.start = start) {
+		size = stringSize(start);
 		
 	}
+}
+
+var16 stringSize(var8: start) {
+	var16 index = 0;
+	while(:(start+index) != '\0' && index < MAX_STRING_SIZE) {
+		index++;
+	}else if(index == MAX_STRING_SIZE-1) {
+		return -1;
+	}
+	return index;
 }
 
 var64_s main() {
