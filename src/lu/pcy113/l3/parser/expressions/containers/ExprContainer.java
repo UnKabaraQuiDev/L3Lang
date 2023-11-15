@@ -10,6 +10,7 @@ import lu.pcy113.l3.parser.expressions.Expr;
 
 public class ExprContainer extends Expr {
 	
+	protected int size;
 	protected List<Expr> children = new ArrayList<>();
 	
 	public void addAll(Collection<Expr> collection) {
@@ -46,5 +47,8 @@ public class ExprContainer extends Expr {
 		}
 		out.println(tab+"}");
 	}
+	
+	public void setSize(int size) {this.size = size;}
+	public int getSize() {return size;}
 	
 }

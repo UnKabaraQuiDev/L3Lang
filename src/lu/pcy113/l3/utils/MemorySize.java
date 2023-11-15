@@ -35,6 +35,11 @@ public class MemorySize {
 	public int getBytes() {return bytes;}
 	public String getCustomSizeIdent() {return customSizeIdent;}
 	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName()+"{bits="+bits+", bytes="+bytes+", customSizeIdent="+customSizeIdent+"}";
+	}
+	
 	/**
 	 * @returns number of bits needed
 	 */

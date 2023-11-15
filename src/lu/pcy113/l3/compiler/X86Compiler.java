@@ -1,11 +1,12 @@
 package lu.pcy113.l3.compiler;
 
 import java.io.PrintStream;
-import java.util.Stack;
 
 import lu.pcy113.l3.parser.expressions.Expr;
+import lu.pcy113.l3.parser.expressions.VariableDeclarationExpr;
 import lu.pcy113.l3.parser.expressions.containers.EnvContainer;
 import lu.pcy113.l3.parser.expressions.containers.ExprContainer;
+import lu.pcy113.l3.utils.MemorySize;
 
 public class X86Compiler extends L3Compiler {
 	
@@ -17,13 +18,25 @@ public class X86Compiler extends L3Compiler {
 
 	@Override
 	public void compile() throws CompilerException {
-		Stack<Integer> heap = new Stack<>();
-		
-		Expr expr;
-		
-		while((expr = next()) instanceof ExprContainer) {
-			// TODO
+		calcHeapSize(input);
+		System.out.println(input.getSize());
+	}
+
+	private int calcHeapSize(ExprContainer container) {
+		int size = 0;
+		for(Expr child : container.getChildren()) {
+			if(child instanceof ExprContainer)
+				size += calcHeapSize((ExprContainer) child);
+			else if(child instanceof VariableDeclarationExpr)
+				size += realiseSize(((VariableDeclarationExpr) child).getMemorySize());
 		}
+		container.setSize(size);
+		return size;
+	}
+
+	private int realiseSize(MemorySize memorySize) {
+		// TODO 
+		return memorySize.getBytes();
 	}
 	
 }

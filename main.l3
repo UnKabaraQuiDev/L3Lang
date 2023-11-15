@@ -1,15 +1,13 @@
-var32s xas;
-xas = 123;
-xas = 123;
-xas = 0b1010;
-xas = 0x123;
-xas = 123;
-// ex comment 
+import none;
 
-//void function1(var8s a = 12, var1 b);
+struct String {
+	var16 size;
+	var8_p start;
+	define(var8_p start) (.start = start, .size = ) {
+		
+	}
+}
 
-var64s function(var8s a = 12, var1 b) {
-	var1 x = 12;
-	x = 3;
-	a = 0x12;
+var64_s main() {
+	
 }
