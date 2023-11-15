@@ -1,19 +1,45 @@
 import none;
 
+// :IDENT -> value to pointer
+// &IDENT -> pointer to value
+// var: IDENT -> pointer variable
+// var IDENT -> value variable
+
 #def MAX_STRING_SIZE 0xFFFF
 
 struct String {
 	var16 size;
 	var8: start;
+	
 	define(var8: start) (.start = start) {
 		size = stringSize(start);
+	}
+	
+	operator +(String s2) {
+		String s3;
 		
+		var8: start3 = malloc(size+s2.size);
+		
+		for(var16 i1; i1 < .size; i1++) {
+			&(start3+i1) = &(.start+i1);
+		}
+		for(var16 i2; i2 < s2.size; i2++) {
+			&(start3+.size+i2) = &(s2.start+i2);
+		}
+		
+		mfree(start);
+		#destroy(.);
+		mfree(s2.start);
+		#destroy(s2);
+		
+		s3 = String {:start3};
+		return s3;
 	}
 }
 
 var16 stringSize(var8: start) {
 	var16 index = 0;
-	while(:(start+index) != '\0' && index < MAX_STRING_SIZE) {
+	while(&(start+index) != '\0' && index < MAX_STRING_SIZE) {
 		index++;
 	}else if(index == MAX_STRING_SIZE-1) {
 		return -1;
@@ -22,5 +48,6 @@ var16 stringSize(var8: start) {
 }
 
 var64_s main() {
-	
+	String string = String {:"Hello World!\0"};
+	return (var16->var64_s) string.size;
 }
