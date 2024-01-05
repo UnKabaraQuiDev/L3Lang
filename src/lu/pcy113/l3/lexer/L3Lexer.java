@@ -1,6 +1,7 @@
 package lu.pcy113.l3.lexer;
 
 import static lu.pcy113.l3.lexer.TokenType.AND;
+import static lu.pcy113.l3.lexer.TokenType.ARROW;
 import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIN_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_AND;
@@ -17,6 +18,7 @@ import static lu.pcy113.l3.lexer.TokenType.CURLY_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.DEC_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.DEFAULT;
 import static lu.pcy113.l3.lexer.TokenType.DIV;
+import static lu.pcy113.l3.lexer.TokenType.DOT;
 import static lu.pcy113.l3.lexer.TokenType.ELSE;
 import static lu.pcy113.l3.lexer.TokenType.EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.FALSE;
@@ -32,6 +34,7 @@ import static lu.pcy113.l3.lexer.TokenType.LOWER_EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.MINUS;
 import static lu.pcy113.l3.lexer.TokenType.MODULO;
 import static lu.pcy113.l3.lexer.TokenType.MUL;
+import static lu.pcy113.l3.lexer.TokenType.NEW;
 import static lu.pcy113.l3.lexer.TokenType.NOT;
 import static lu.pcy113.l3.lexer.TokenType.NOT_EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.NUM_LIT;
@@ -61,7 +64,6 @@ import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
-import lu.pcy113.l3.parser.ParserException;
 import lu.pcy113.l3.utils.StringUtils;
 
 public class L3Lexer {
@@ -79,15 +81,6 @@ public class L3Lexer {
 	private String strValue = "";
 	
 	public void lexe() throws LexerException {
-		/*TokenType[] fixedChars = (TokenType[]) Arrays.stream(TokenType.values())
-				.filter(t -> t.isFixed() && !t.isString())
-				.collect(Collectors.toList())
-				.toArray();
-		TokenType[] fixedStrings = (TokenType[]) Arrays.stream(TokenType.values())
-				.filter(t -> t.isFixed() && t.isString())
-				.collect(Collectors.toList())
-				.toArray();*/
-		
 		while(hasNext()) {
 			next: {
 				char current = consume();
@@ -106,7 +99,11 @@ public class L3Lexer {
 					flushToken();
 					break next;
 				case '-':
-					type = MINUS;
+					if(peek() == '>') {
+						type = ARROW;
+					}else {
+						type = MINUS;
+					}
 					flushToken();
 					break next;
 				case '*':
@@ -184,25 +181,35 @@ public class L3Lexer {
 					flushToken();
 					break next;
 					
+				case '.':
+					type = DOT;
+					flushToken();
+					break next;
+					
 				case 'v':
 					strValue = "v";
 					if(peek("ar")) {
 						strValue += "ar";
-						if(peek(2, "1")) {
-							consume(3);
-							type = VAR_1;
-						}else if(peek(2, "8")) {
+						if(peek(2, "8")) {
 							consume(3);
 							type = VAR_8;
+							strValue += "8";
 						}else if(peek(2, "16")) {
 							consume(4);
 							type = VAR_16;
+							strValue += "16";
 						}else if(peek(2, "32")) {
 							consume(4);
 							type = VAR_32;
+							strValue += "32";
 						}else if(peek(2, "64")) {
 							consume(4);
 							type = VAR_64;
+							strValue += "64";
+						}else if(peek(2, "1")) {
+							consume(3);
+							type = VAR_1;
+							strValue += "1";
 						}else {
 							throw new LexerException("Unknown variable type: "+strValue, line, column);
 						}
@@ -221,31 +228,6 @@ public class L3Lexer {
 					}
 					break;
 					
-				/*case 'i':
-					if(peek() == 'f') {
-						consume(1);
-						type = IF;
-						flushToken();
-						break next;
-					}
-					break;
-				case 'e':
-					if(peek("lse")) {
-						consume(3);
-						type = ELSE;
-						flushToken();
-						break next;
-					}
-					break;
-				case 'f':
-					if(peek("inally")) {
-						consume(6);
-						type = FINALLY;
-						flushToken();
-						break next;
-					}
-					break;*/
-				
 				case '|':
 					if(peek() == '|') {
 						consume();
@@ -391,25 +373,10 @@ public class L3Lexer {
 					case "false":
 						type = FALSE;
 						break;
+					case "new":
+						type = NEW;
+						break;
 					}
-					
-					/*if(strValue.toLowerCase().startsWith("var") && strValue.length() > 3) {
-						String sub = strValue.substring(3).toLowerCase();
-						if(sub.startsWith("1")) {
-							type = VAR_1;
-						}else if(sub.startsWith("8")) {
-							type = VAR_8;
-						}else if(sub.startsWith("16")) {
-							type = VAR_16;
-						}else if(sub.startsWith("32")) {
-							type = VAR_32;
-						}else if(sub.startsWith("64")) {
-							type = VAR_64;
-						}
-						if(sub.endsWith("s")) {
-							type = TokenType.valueOf(type.name()+"_S");
-						}
-					}*/
 					
 					flushToken();
 				}else if(type == null && Character.isDigit(current)) {
@@ -481,13 +448,17 @@ public class L3Lexer {
 		return b;
 	}
 	public boolean peek(int x, String s) {
+		System.out.println("peeking: "+s+"@"+x);
 		boolean b = true;
 		for(int i = 0; i < s.length(); i++) {
-			if(peek(i+x) == s.charAt(i))
+			System.out.println("peeking: waiting for "+s.charAt(i)+"@"+i+"=="+(char) peek(i+x));
+			if(peek(i+x) == s.charAt(i)) {
 				continue;
+			}
 			b = false;
 			break;
 		}
+		System.out.println("ret "+b);
 		return b;
 	}
 	public int peek(int i) {

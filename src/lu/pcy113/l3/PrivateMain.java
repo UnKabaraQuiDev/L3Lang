@@ -20,14 +20,16 @@ public class PrivateMain {
 	public static void main(String[] args) throws FileNotFoundException, IOException, LexerException {
 		System.out.println(Arrays.toString(new File("./").list()));
 		
-		L3Lexer lexer = new L3Lexer(new FileReader(new File("./main.l3")));
+		String file = "test.l3";
+		
+		L3Lexer lexer = new L3Lexer(new FileReader(new File(file)));
 		System.out.println("Input:\n"+lexer.getInput());
 		lexer.lexe();
 		lexer.getTokens().forEach(System.out::println);
 		
 		L3Parser parser = new L3Parser(lexer);
 		EnvContainer env = new EnvContainer();
-		FileContainer fc = new FileContainer("main.l3");
+		FileContainer fc = new FileContainer(file);
 		env.add(fc);
 		try {
 			parser.parse(fc);

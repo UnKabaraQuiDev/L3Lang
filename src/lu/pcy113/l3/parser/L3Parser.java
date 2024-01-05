@@ -3,12 +3,12 @@ package lu.pcy113.l3.parser;
 import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIN_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.COMMA;
-import static lu.pcy113.l3.lexer.TokenType.COMMENT;
 import static lu.pcy113.l3.lexer.TokenType.CURLY_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.CURLY_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.DEC_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.HEX_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.IDENT;
+import static lu.pcy113.l3.lexer.TokenType.NEW;
 import static lu.pcy113.l3.lexer.TokenType.NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.PAREN_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.PAREN_OPEN;
@@ -22,12 +22,12 @@ import static lu.pcy113.l3.lexer.TokenType.VAR_64;
 import static lu.pcy113.l3.lexer.TokenType.VAR_64_S;
 import static lu.pcy113.l3.lexer.TokenType.VAR_8;
 import static lu.pcy113.l3.lexer.TokenType.VAR_8_S;
-import static lu.pcy113.l3.lexer.TokenType.VOID;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import lu.pcy113.l3.lexer.L3Lexer;
@@ -38,12 +38,12 @@ import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.expressions.Expr;
 import lu.pcy113.l3.parser.expressions.FunctionDeclarationExpr;
 import lu.pcy113.l3.parser.expressions.NumericLiteralExpr;
+import lu.pcy113.l3.parser.expressions.ValueExpr;
+import lu.pcy113.l3.parser.expressions.VarAssignmentExpr;
+import lu.pcy113.l3.parser.expressions.VarExpr;
 import lu.pcy113.l3.parser.expressions.VariableAssignmentExpr;
-import lu.pcy113.l3.parser.expressions.VariableDeclarationExpr;
-import lu.pcy113.l3.parser.expressions.VariableExpr;
 import lu.pcy113.l3.parser.expressions.containers.ExprContainer;
 import lu.pcy113.l3.parser.expressions.containers.FunctionBodyExprContainer;
-import lu.pcy113.l3.utils.MemorySize;
 
 public class L3Parser {
 	
@@ -65,11 +65,45 @@ public class L3Parser {
 			
 			parseExpr(container);
 			
+			parseNumericalExpression(container);
+			
 		}
 	}
 	
 	private void parseExpr(ExprContainer container) throws ParserException {
-		if(peek(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S) && peek(1, IDENT)) {
+		if(peek(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S) &&
+				peek(1, IDENT) &&
+				(peek(2, SEMICOLON) || peek(2, ASSIGN))) { // primitive var declaration
+			container.add(parsePrimitiveVarDeclaration());
+		}
+	}
+	
+	private VarExpr parsePrimitiveVarDeclaration() throws ParserException {
+		Token var = consume(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S);
+		Token ident = consume(IDENT);
+		
+		if(peek(SEMICOLON)) {
+			return new VarAssignmentExpr(var, ident);
+		}else if(peek(2, ASSIGN)) {
+			return new VarAssignmentExpr(var, ident, parseValueExpression());
+		}
+		throw new ParserException(peek(2), SEMICOLON, ASSIGN);
+	}
+	
+	private ValueExpr parseValueExpression() throws ParserException {
+		if(peek(NEW)) {
+			// new instance
+		}else if(false) {
+			// function call on instance
+		}else {
+			// literal expression
+			// TODO multiplication superiority
+		}
+		return null;
+	}
+	
+	private void parseNumericalExpression(ExprContainer container) throws ParserException {
+		/*if(peek(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S) && peek(1, IDENT)) {
 			if(peek(2, SEMICOLON) || peek(2, ASSIGN))
 				container.addAll(parseVariableDeclaration());
 			else if(peek(2, PAREN_OPEN))
@@ -84,7 +118,7 @@ public class L3Parser {
 			consume();
 		}else {
 			throw new ParserException(peek(), VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S, IDENT, VOID, COMMENT);
-		}
+		}*/
 	}
 	
 	private Collection<Expr> parseFunctionDeclaration() throws ParserException {
@@ -112,8 +146,9 @@ public class L3Parser {
 		consume(CURLY_OPEN);
 		FunctionBodyExprContainer body = new FunctionBodyExprContainer(returnType, functionName.getIdentifier(), params);
 		fe.add(body);
-		while(!peek(CURLY_CLOSE))
+		while(!peek(CURLY_CLOSE)) {
 			parseExpr(body);
+		}
 		consume(CURLY_CLOSE);
 		
 		return fe;
@@ -132,25 +167,6 @@ public class L3Parser {
 		return params;
 	}
 	
-	private Collection<Expr> parseVariableDeclaration() throws ParserException {
-		List<Expr> vas = new ArrayList<>();
-		
-		TokenType tokenType = consume().getType();
-		IdentifierToken varName = (IdentifierToken) needs(IDENT);
-		
-		vas.add(new VariableDeclarationExpr(new MemorySize(tokenType), varName.getIdentifier()));
-		
-		if(peek(1, ASSIGN)) {
-			vas.add(parseVariableAssignment());
-		}else {
-			consume();
-		}
-		if(peek(SEMICOLON))
-			consume(SEMICOLON);
-			
-		return vas;
-	}
-
 	private VariableAssignmentExpr parseVariableAssignment() throws ParserException {
 		IdentifierToken varName = (IdentifierToken) consume(IDENT);
 		Token assign = consume(ASSIGN);

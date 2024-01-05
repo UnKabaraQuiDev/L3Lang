@@ -14,6 +14,7 @@ public enum TokenType {
 	VAR_64_S("var64s"),
 	
 	VOID("void"),
+	NEW("new"),
 	
 	NUM_LIT(),
 	DEC_NUM_LIT(),
@@ -23,7 +24,10 @@ public enum TokenType {
 	IDENT(),
 	
 	COMMA(','),
+	DOT('.'),
 	SEMICOLON(';'),
+	
+	ARROW("->"),
 	
 	PAREN_OPEN('('),
 	PAREN_CLOSE(')'),
@@ -31,9 +35,6 @@ public enum TokenType {
 	BRACKET_CLOSE(']'),
 	CURLY_OPEN('{'),
 	CURLY_CLOSE('}'),
-	
-	//SINGLE_QUOTE('\''),
-	//DOUBLE_QUOTE('\"'),
 	
 	STRING(),
 	
