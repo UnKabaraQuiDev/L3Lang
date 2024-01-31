@@ -12,8 +12,8 @@ import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.parser.L3Parser;
 import lu.pcy113.l3.parser.ParserException;
-import lu.pcy113.l3.parser.expressions.containers.EnvContainer;
-import lu.pcy113.l3.parser.expressions.containers.FileContainer;
+import lu.pcy113.l3.parser.ast.containers.EnvContainer;
+import lu.pcy113.l3.parser.ast.containers.FileContainer;
 
 public class PrivateMain {
 

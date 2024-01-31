@@ -1,54 +1,25 @@
 package lu.pcy113.l3.parser;
 
-import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
-import static lu.pcy113.l3.lexer.TokenType.BIN_NUM_LIT;
-import static lu.pcy113.l3.lexer.TokenType.COMMA;
-import static lu.pcy113.l3.lexer.TokenType.CURLY_CLOSE;
-import static lu.pcy113.l3.lexer.TokenType.CURLY_OPEN;
-import static lu.pcy113.l3.lexer.TokenType.DEC_NUM_LIT;
-import static lu.pcy113.l3.lexer.TokenType.HEX_NUM_LIT;
-import static lu.pcy113.l3.lexer.TokenType.IDENT;
-import static lu.pcy113.l3.lexer.TokenType.NEW;
-import static lu.pcy113.l3.lexer.TokenType.NUM_LIT;
-import static lu.pcy113.l3.lexer.TokenType.PAREN_CLOSE;
-import static lu.pcy113.l3.lexer.TokenType.PAREN_OPEN;
-import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
-import static lu.pcy113.l3.lexer.TokenType.VAR_1;
-import static lu.pcy113.l3.lexer.TokenType.VAR_16;
-import static lu.pcy113.l3.lexer.TokenType.VAR_16_S;
-import static lu.pcy113.l3.lexer.TokenType.VAR_32;
-import static lu.pcy113.l3.lexer.TokenType.VAR_32_S;
-import static lu.pcy113.l3.lexer.TokenType.VAR_64;
-import static lu.pcy113.l3.lexer.TokenType.VAR_64_S;
-import static lu.pcy113.l3.lexer.TokenType.VAR_8;
-import static lu.pcy113.l3.lexer.TokenType.VAR_8_S;
-
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Stack;
 import java.util.stream.Collectors;
+
+import javax.xml.ws.Dispatch;
 
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
-import lu.pcy113.l3.lexer.tokens.IdentifierToken;
-import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
-import lu.pcy113.l3.parser.expressions.Expr;
-import lu.pcy113.l3.parser.expressions.FunctionDeclarationExpr;
-import lu.pcy113.l3.parser.expressions.NumericLiteralExpr;
-import lu.pcy113.l3.parser.expressions.ValueExpr;
-import lu.pcy113.l3.parser.expressions.VarAssignmentExpr;
-import lu.pcy113.l3.parser.expressions.VarExpr;
-import lu.pcy113.l3.parser.expressions.VariableAssignmentExpr;
-import lu.pcy113.l3.parser.expressions.containers.ExprContainer;
-import lu.pcy113.l3.parser.expressions.containers.FunctionBodyExprContainer;
+import lu.pcy113.l3.parser.ast.Expr;
+import lu.pcy113.l3.parser.ast.Node;
+import lu.pcy113.l3.parser.ast.RuntimeNode;
 
 public class L3Parser {
 	
 	private int index;
 	private final List<Token> input;
+	
+	private Node root;
+	private Node current;
 	
 	public L3Parser(L3Lexer lexer) {
 		this(lexer.getTokens());
@@ -58,136 +29,137 @@ public class L3Parser {
 			throw new IllegalArgumentException("Tokens cannot be null or empty.");
 		
 		this.input = tokens;
+		
+		this.root = new RuntimeNode();
+		this.current = root;
 	}
 	
-	public void parse(ExprContainer container) throws ParserException {
+	public void parse(Node container) throws ParserException {
 		while(hasNext()) {
 			
 			parseExpr(container);
 			
-			parseNumericalExpression(container);
-			
 		}
 	}
 	
-	private void parseExpr(ExprContainer container) throws ParserException {
-		if(peek(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S) &&
-				peek(1, IDENT) &&
-				(peek(2, SEMICOLON) || peek(2, ASSIGN))) { // primitive var declaration
-			container.add(parsePrimitiveVarDeclaration());
-		}
-	}
 	
-	private VarExpr parsePrimitiveVarDeclaration() throws ParserException {
-		Token var = consume(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S);
-		Token ident = consume(IDENT);
+	
+	private void parseExpr() throws ParserException {
+		Token token = peek();
+		TokenType type = token.getType();
 		
-		if(peek(SEMICOLON)) {
-			return new VarAssignmentExpr(var, ident);
-		}else if(peek(2, ASSIGN)) {
-			return new VarAssignmentExpr(var, ident, parseValueExpression());
+		switch (type) {
+		case VAR_1:
+		case VAR_8:
+		case VAR_8_S:
+		case VAR_16:
+		case VAR_16_S:
+		case VAR_32:
+		case VAR_32_S:
+		case VAR_64:
+		case VAR_64_S:
+			parseVarDeclaration();
+			break;
+		default:
+			break;
 		}
-		throw new ParserException(peek(2), SEMICOLON, ASSIGN);
+	}
+	private void parseVarDeclaration() throws ParserException {
+		Token t = consume();
+		Token ident = consume(TokenType.IDENT);
+		Token equals = consume(TokenType.ASSIGN);
+		
+		parseNumericExpr();
 	}
 	
-	private ValueExpr parseValueExpression() throws ParserException {
-		if(peek(NEW)) {
-			// new instance
-		}else if(false) {
-			// function call on instance
-		}else {
-			// literal expression
-			// TODO multiplication superiority
+	private void parseNumericExpr() {
+		// FROM https://en.wikipedia.org/wiki/Operator-precedence_parser
+	}
+	
+	private Node parseNumericExpr_1(Node lhs, int minPrec) throws ParserException {
+		Token lookahead = peek();
+		TokenType lookaheadType = lookahead.getType();
+		while(isBinary(lookaheadType) && precedence(lookaheadType) >= minPrec) {
+			Token op = consume();
+			TokenType opType = op.getType();
+			Node rhs = parsePrimaryNumericExpr();
+			lookahead = peek();
+			lookaheadType = lookahead.getType();
+			while(isBinary(lookaheadType) && precedence(lookaheadType) > precedence(opType)) {
+				rhs = parseNumericExpr_1(rhs, precedence(opType)+(precedence(lookaheadType) > precedence(opType) ? 1 : 0));
+			}
+			lhs = 
 		}
+		return lhs;
+	}
+	
+	private Node parsePrimaryNumericExpr() {
 		return null;
 	}
 	
-	private void parseNumericalExpression(ExprContainer container) throws ParserException {
-		/*if(peek(VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S) && peek(1, IDENT)) {
-			if(peek(2, SEMICOLON) || peek(2, ASSIGN))
-				container.addAll(parseVariableDeclaration());
-			else if(peek(2, PAREN_OPEN))
-				container.addAll(parseFunctionDeclaration());
-			else
-				throw new ParserException(peek(2), SEMICOLON, ASSIGN, PAREN_OPEN);
-		}else if(peek(IDENT)) {
-			container.add(parseVariableAssignment());
-		}else if(peek(VOID, IDENT) && peek(1, IDENT)) { // function
-			container.addAll(parseFunctionDeclaration());
-		}else if(peek(COMMENT)) {
-			consume();
-		}else {
-			throw new ParserException(peek(), VAR_1, VAR_8, VAR_16, VAR_32, VAR_64, VAR_8_S, VAR_16_S, VAR_32_S, VAR_64_S, IDENT, VOID, COMMENT);
-		}*/
-	}
-	
-	private Collection<Expr> parseFunctionDeclaration() throws ParserException {
-		Collection<Expr> fe = new ArrayList<>();
-		
-		Token returnType = consume();
-		IdentifierToken functionName = (IdentifierToken) consume(IDENT);
-		
-		List<Expr> params;
-		
-		consume(PAREN_OPEN);
-		if(!peek(PAREN_CLOSE))
-			params = parseParameterList();
-		else
-			params = new ArrayList<>();
-		consume(PAREN_CLOSE);
-		
-		fe.add(new FunctionDeclarationExpr(returnType, functionName.getIdentifier(), params));
-		
-		if(peek(SEMICOLON)) {
-			consume();
-			return fe;
+	public static int precedence(TokenType type) throws ParserException {
+		switch(type) {
+		case ASSIGN:
+			return 10;
+		case PLUS:
+		case MINUS:
+			return 20;
+		case MUL:
+		case DIV:
+			return 30;
+		case NOT:
+			return 40;
+		default:
+			throw new ParserException("Invalid operator", type);
 		}
-		
-		consume(CURLY_OPEN);
-		FunctionBodyExprContainer body = new FunctionBodyExprContainer(returnType, functionName.getIdentifier(), params);
-		fe.add(body);
-		while(!peek(CURLY_CLOSE)) {
-			parseExpr(body);
+	}
+	public static int rightPrecedence(TokenType type) throws ParserException {
+		switch(type) {
+		case ASSIGN:
+			return 20;
+		case PLUS:
+		case MINUS:
+			return 21;
+		case MUL:
+		case DIV:
+			return 31;
+		case NOT:
+			return -1;
+		default:
+			throw new ParserException("Invalid operator", type);
 		}
-		consume(CURLY_CLOSE);
-		
-		return fe;
 	}
-	
-	private List<Expr> parseParameterList() throws ParserException {
-		List<Expr> params = new ArrayList<>();
-		while(true) {
-			params.addAll(parseVariableDeclaration());
-			
-			if(peek(COMMA))
-				consume();
-			else
-				break;
+	public static int nextPrecedence(TokenType type) throws ParserException {
+		switch(type) {
+		case ASSIGN:
+			return 9;
+		case PLUS:
+		case MINUS:
+			return 20;
+		case MUL:
+		case DIV:
+			return 30;
+		case NOT:
+			return 40;
+		default:
+			throw new ParserException("Invalid operator", type);
 		}
-		return params;
+	}
+	public static boolean isBinary(TokenType type) throws ParserException {
+		switch(type) {
+		case ASSIGN:
+		case PLUS:
+		case MINUS:
+		case MUL:
+		case DIV:
+			return true;
+		case NOT:
+			return false;
+		default:
+			throw new ParserException("Invalid operator", type);
+		}
 	}
 	
-	private VariableAssignmentExpr parseVariableAssignment() throws ParserException {
-		IdentifierToken varName = (IdentifierToken) consume(IDENT);
-		Token assign = consume(ASSIGN);
-		
-		if(peek(NUM_LIT, HEX_NUM_LIT, BIN_NUM_LIT, DEC_NUM_LIT)) {
-			VariableAssignmentExpr varAssign = new VariableAssignmentExpr(varName.getIdentifier(), parseNumericLiteral());
-			if(peek(SEMICOLON))
-				consume(SEMICOLON);
-			return varAssign;
-		}// TODO
-		
-		//consume();
-		//consume(SEMICOLON);
-		
-		return null;
-	}
-	
-	private NumericLiteralExpr parseNumericLiteral() throws ParserException {
-		NumericLiteralToken token = (NumericLiteralToken) consume(NUM_LIT, HEX_NUM_LIT, BIN_NUM_LIT, DEC_NUM_LIT);
-		return new NumericLiteralExpr(token.getValue().longValue());
-	}
 	/** 
 	 * Needs next
 	 */

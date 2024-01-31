@@ -1,4 +1,3 @@
 var16 x = 2;
-var16 y = 2 + 5;
-
-exit(x);
+var16 y = 2 + 5*3;
+var16_s b = x*y

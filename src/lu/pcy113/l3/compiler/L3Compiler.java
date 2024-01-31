@@ -2,7 +2,7 @@ package lu.pcy113.l3.compiler;
 
 import java.io.PrintStream;
 
-import lu.pcy113.l3.parser.expressions.containers.EnvContainer;
+import lu.pcy113.l3.parser.ast.containers.EnvContainer;
 
 public abstract class L3Compiler extends ExprIterator {
 	

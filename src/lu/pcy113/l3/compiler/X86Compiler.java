@@ -2,10 +2,10 @@ package lu.pcy113.l3.compiler;
 
 import java.io.PrintStream;
 
-import lu.pcy113.l3.parser.expressions.Expr;
-import lu.pcy113.l3.parser.expressions.VariableDeclarationExpr;
-import lu.pcy113.l3.parser.expressions.containers.EnvContainer;
-import lu.pcy113.l3.parser.expressions.containers.ExprContainer;
+import lu.pcy113.l3.parser.ast.Expr;
+import lu.pcy113.l3.parser.ast.VariableDeclarationExpr;
+import lu.pcy113.l3.parser.ast.containers.EnvContainer;
+import lu.pcy113.l3.parser.ast.containers.ExprContainer;
 import lu.pcy113.l3.utils.MemorySize;
 
 public class X86Compiler extends L3Compiler {

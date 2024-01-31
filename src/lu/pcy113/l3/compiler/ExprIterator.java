@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Stack;
 
-import lu.pcy113.l3.parser.expressions.Expr;
-import lu.pcy113.l3.parser.expressions.containers.ExprContainer;
+import lu.pcy113.l3.parser.ast.Expr;
+import lu.pcy113.l3.parser.ast.containers.ExprContainer;
 
 public class ExprIterator implements Iterator<Expr>, Iterable<Expr> {
 	
