@@ -73,29 +73,9 @@ public class L3Parser {
 	}
 	
 	private void parseNumericExpr() {
-		// FROM https://en.wikipedia.org/wiki/Operator-precedence_parser
+
 	}
 	
-	private Node parseNumericExpr_1(Node lhs, int minPrec) throws ParserException {
-		Token lookahead = peek();
-		TokenType lookaheadType = lookahead.getType();
-		while(isBinary(lookaheadType) && precedence(lookaheadType) >= minPrec) {
-			Token op = consume();
-			TokenType opType = op.getType();
-			Node rhs = parsePrimaryNumericExpr();
-			lookahead = peek();
-			lookaheadType = lookahead.getType();
-			while(isBinary(lookaheadType) && precedence(lookaheadType) > precedence(opType)) {
-				rhs = parseNumericExpr_1(rhs, precedence(opType)+(precedence(lookaheadType) > precedence(opType) ? 1 : 0));
-			}
-			lhs = 
-		}
-		return lhs;
-	}
-	
-	private Node parsePrimaryNumericExpr() {
-		return null;
-	}
 	
 	public static int precedence(TokenType type) throws ParserException {
 		switch(type) {
