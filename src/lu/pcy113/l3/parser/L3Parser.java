@@ -95,17 +95,12 @@ public class L3Parser {
 			return parseFunCall();
 		} else {
 			Node expr = parseExpression();
-			/*if(expr instanceof BinaryOpNode) {
-				expr = simplifyExpression((BinaryOpNode) expr);
-			}*/
 			return new FunArgNumLitValueNode(expr);
 		}
-		// throw new ParserException("We don't know what happened, but there was some kind of error");
 	}
 
 	private boolean canParseExpr() {
-		// (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN)
-		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN);
+		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN) || peek(TokenType.IDENT);
 	}
 
 	private Node parseVarDefExpr() throws ParserException {
@@ -118,18 +113,59 @@ public class L3Parser {
 			}
 			Token type = consume(TokenType.TYPE);
 			Token ident = consume(TokenType.IDENT);
+
+			boolean iArray = peek(TokenType.BRACKET_OPEN) && peek(1, TokenType.NUM_LIT) && peek(2, TokenType.BRACKET_CLOSE);
+			int arraySize = 0;
+			if (iArray) {
+				consume(TokenType.BRACKET_OPEN);
+
+				arraySize = (int) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
+
+				consume(TokenType.BRACKET_CLOSE);
+			}
+
 			Token assign = consume(TokenType.ASSIGN);
 
-			Node expr = parseExpression();
-			/*if(expr instanceof BinaryOpNode) {
-				expr = simplifyExpression((BinaryOpNode) expr);
-			}*/
+			LetTypeDefNode typeDefNode = new LetTypeDefNode(type, (IdentifierToken) ident, iStatic, iArray, arraySize);
 
-			return new LetTypeDefNode(type, (IdentifierToken) ident, expr, iStatic);
+			if (!iArray) {
+				typeDefNode.add(parseExpression());
+			} else {
+				if (peek(TokenType.CURLY_OPEN)) {
+					consume(TokenType.CURLY_OPEN);
+					parseArrayArgs().forEach(typeDefNode::add);
+					consume(TokenType.CURLY_CLOSE);
+				}
+			}
+			/*
+			 * if(expr instanceof BinaryOpNode) { expr = simplifyExpression((BinaryOpNode)
+			 * expr); }
+			 */
+
+			return typeDefNode;
 		} else if (peek(TokenType.LET) && peek(TokenType.IDENT)) {
 			assert false : "Defined typed not defined yet.";
 		}
 		throw new ParserException("Undefined Var def");
+	}
+
+	private List<Node> parseArrayArgs() throws ParserException {
+		List<Node> ln = new LinkedList<Node>();
+		while (!peek(TokenType.CURLY_CLOSE)) {
+			ln.add(parseArrayArgsValue());
+			if (peek(TokenType.COMMA)) {
+				consume();
+			}
+		}
+		return ln;
+	}
+
+	private Node parseArrayArgsValue() throws ParserException {
+		if (peek(TokenType.IDENT) && peek(1, TokenType.PAREN_OPEN)) {
+			return parseFunCall();
+		} else {
+			return new NumLitNode(parseExpression());
+		}
 	}
 
 	private Node simplifyExpression(Node node) {
@@ -165,6 +201,8 @@ public class L3Parser {
 			} else {
 				throw new ArithmeticException("Division by zero");
 			}
+		case MODULO:
+			return left % right;
 		default:
 			throw new IllegalArgumentException("Unsupported operator: " + operator);
 		}
@@ -173,12 +211,12 @@ public class L3Parser {
 	private Node parseExpression() throws ParserException {
 		Node left = parseTerm();
 
-		while (peek(TokenType.PLUS) || peek(TokenType.MINUS)) {
+		while (peek(TokenType.PLUS, TokenType.MINUS)) {
 			TokenType operator = consume(TokenType.PLUS, TokenType.MINUS).getType();
 			Node right = parseTerm();
 			left = new BinaryOpNode(left, operator, right);
 		}
-		
+
 		return left;
 	}
 
@@ -186,8 +224,8 @@ public class L3Parser {
 		if (canParseExpr()) {
 			Node left = parseFactor();
 
-			while (peek(TokenType.MUL) || peek(TokenType.DIV)) {
-				TokenType operator = consume(TokenType.MUL, TokenType.DIV).getType();
+			while (peek(TokenType.MUL, TokenType.DIV, TokenType.MODULO)) {
+				TokenType operator = consume(TokenType.MUL, TokenType.DIV, TokenType.MODULO).getType();
 				Node right = parseFactor();
 				left = new BinaryOpNode(left, operator, right);
 			}
@@ -221,16 +259,16 @@ public class L3Parser {
 	private Node parseNumLit() throws ParserException {
 		boolean negative = parseSign();
 		NumericLiteralToken nlt = (NumericLiteralToken) consume(TokenType.NUM_LIT);
-		if(ValueType.DECIMAL.equals(nlt.getValueType())) {
-			return new NumLitNode(Double.valueOf(nlt.getValue().doubleValue()*(negative ? -1 : 1)));
-		}else {
-			return new NumLitNode(Long.valueOf(nlt.getValue().longValue()*(negative ? -1 : 1)));
+		if (ValueType.DECIMAL.equals(nlt.getValueType())) {
+			return new NumLitNode(Double.valueOf(nlt.getValue().doubleValue() * (negative ? -1 : 1)));
+		} else {
+			return new NumLitNode(Long.valueOf(nlt.getValue().longValue() * (negative ? -1 : 1)));
 		}
 	}
 
 	private boolean parseSign() throws ParserException {
 		boolean negative = false;
-		while(peek(TokenType.MINUS)) {
+		while (peek(TokenType.MINUS)) {
 			consume(TokenType.MINUS);
 			negative = !negative;
 		}
@@ -239,9 +277,9 @@ public class L3Parser {
 
 	private Node parseVar() throws ParserException {
 		boolean negative = parseSign();
-		if(negative) {
+		if (negative) {
 			return new BinaryOpNode(new NumLitNode(0), TokenType.MINUS, new VarNumNode((IdentifierToken) consume(TokenType.IDENT)));
-		}else {
+		} else {
 			return new VarNumNode((IdentifierToken) consume(TokenType.IDENT));
 		}
 	}

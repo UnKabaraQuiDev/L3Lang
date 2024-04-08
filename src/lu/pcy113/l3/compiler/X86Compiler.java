@@ -98,7 +98,7 @@ public class X86Compiler extends L3Compiler {
 			}
 
 			writeinstln("; Setup static: " + sd.getCodeName() + " -> " + sd.getAsmName());
-			compileExprCompute(getMovTypeNameBySize(MemorySize.getBytes(node.getType().getType())) + " [" + sd.getAsmName() + "]", node.getValue());
+			compileExprCompute(getMovTypeNameBySize(MemorySize.getBytes(node.getType().getType())) + " [" + sd.getAsmName() + "]", node.getChildren().get(0));
 		}
 	}
 
@@ -121,7 +121,7 @@ public class X86Compiler extends L3Compiler {
 
 	private void compileExprCompute(String reg, Node node) throws CompilerException {
 		if (node instanceof BinaryOpNode) {
-			generateExprRecursive(reg, (BinaryOpNode) node);
+			generateExprRecursive(reg, node);
 			// writeinstln("mov " + reg + ", " + "ebx");
 		} else if (node instanceof NumLitNode) {
 			long val = (long) ((NumLitNode) node).getValue();
@@ -142,48 +142,59 @@ public class X86Compiler extends L3Compiler {
 		}
 	}
 
-	private void generateExprRecursive(String to, BinaryOpNode node) throws CompilerException {
+	private void generateExprRecursive(String to, Node node) throws CompilerException {
 		if (node instanceof BinaryOpNode) {
 			BinaryOpNode binaryNode = (BinaryOpNode) node;
 
 			Node left = binaryNode.getLeft();
 			Node right = binaryNode.getRight();
-			
-			System.out.println(left+" "+binaryNode.getOperator().getValue()+" "+right);
+
+			System.out.println(left + " " + binaryNode.getOperator().getValue() + " " + right);
 
 			if (right instanceof BinaryOpNode) {
 				generateExprRecursive("ebx", ((BinaryOpNode) right));
-			} else if (right instanceof NumLitNode) {
-				writeinstln("mov ebx, " + ((NumLitNode) right).getValue());
 			}
-
 			if (left instanceof BinaryOpNode) {
 				generateExprRecursive("eax", ((BinaryOpNode) left));
-			} else if (left instanceof NumLitNode) {
-				writeinstln("mov eax, " + ((NumLitNode) left).getValue());
+			}
+
+			if (left instanceof NumLitNode || left instanceof VarNumNode) {
+				load("eax", left);
+			}
+			if (right instanceof NumLitNode || right instanceof VarNumNode) {
+				load("ebx", right);
 			}
 
 			TokenType operator = binaryNode.getOperator();
 
 			switch (operator) {
 			case PLUS:
-				writeinstln("add eax, ebx");
+				writeinstln("add eax, ebx ; " + left + " " + binaryNode.getOperator().getValue() + " " + right + " -> " + to);
 				break;
 			case MINUS:
-				writeinstln("sub eax, ebx");
+				writeinstln("sub eax, ebx ; " + left + " " + binaryNode.getOperator().getValue() + " " + right + " -> " + to);
 				break;
+			case MODULO:
 			case DIV:
-				writeinstln("idiv eax, ebx");
+				writeinstln("idiv ebx ; " + left + " " + binaryNode.getOperator().getValue() + " " + right + " -> " + to);
 				break;
 			case MUL:
-				writeinstln("imul eax, ebx");
+				writeinstln("imul eax, ebx ; " + left + " " + binaryNode.getOperator().getValue() + " " + right + " -> " + to);
 				break;
 			default:
 				throw new CompilerException("Operation not supported: " + operator);
 			}
 
-			writeinstln("mov " + to + ", eax");
+			if (TokenType.MODULO.equals(operator)) {
+				writeinstln("mov " + to + ", edx\n");
+			} else if (to != "eax") {
+				writeinstln("mov " + to + ", eax\n");
+			}
 
+		} else if (node instanceof NumLitNode) {
+
+		} else {
+			throw new IllegalArgumentException("Unknown node type: " + node.getClass().getSimpleName());
 		}
 
 		/*
@@ -203,6 +214,27 @@ public class X86Compiler extends L3Compiler {
 		 * "]"); } else { throw new IllegalArgumentException("Unknown node type: " +
 		 * node.getClass().getSimpleName()); }
 		 */
+
+	}
+
+	private void load(String reg, Node node) throws CompilerException {
+		System.err.println("loading into: " + reg + " node: " + node);
+
+		if (node instanceof VarNumNode) {
+			VarNumNode numNode = (VarNumNode) node;
+			ArrayList<Pair<Integer, ScopeVarDefinition>> svd = getScopeVarDefinitions(numNode.getIdent().getIdentifier());
+			if (svd.isEmpty()) {
+				throw new CompilerException("Couldn't find: " + numNode.getIdent().getIdentifier() + " in current scope (" + numNode.getIdent().getLine() + ":" + numNode.getIdent().getColumn() + ")");
+			}
+
+			svd.sort((a, b) -> a.getKey() - b.getKey()); // 0 < 1
+
+			ScopeVarDefinition def = svd.get(0).getValue();
+
+			writeinstln("mov " + reg + ", " + getMovTypeNameBySize(def.getByteCount()) + " [" + def.getAsmName() + "]");
+		} else if (node instanceof NumLitNode) {
+			writeinstln("mov " + reg + ", " + ((NumLitNode) node).getValue());
+		}
 
 	}
 

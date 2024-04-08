@@ -7,14 +7,15 @@ public class LetTypeDefNode extends Node {
 
 	private Token type;
 	private IdentifierToken ident;
-	private Node value;
-	private boolean iStatic;
+	private boolean iStatic, iArray;
+	private int arraySize;
 
-	public LetTypeDefNode(Token type, IdentifierToken ident, Node value, boolean iStatic) {
+	public LetTypeDefNode(Token type, IdentifierToken ident, boolean iStatic, boolean iArray, int arraySize) {
 		this.type = type;
 		this.ident = ident;
-		this.value = value;
 		this.iStatic = iStatic;
+		this.iArray = iArray;
+		this.arraySize = arraySize;
 	}
 
 	public Token getType() {
@@ -25,17 +26,21 @@ public class LetTypeDefNode extends Node {
 		return ident;
 	}
 
-	public Node getValue() {
-		return value;
-	}
-	
 	public boolean isiStatic() {
 		return iStatic;
 	}
-	
+
+	public boolean isiArray() {
+		return iArray;
+	}
+
+	public int getArraySize() {
+		return arraySize;
+	}
+
 	@Override
 	public String toString() {
-		return super.toString()+"("+type.getType().getValue()+" "+ident.getIdentifier()+"="+value+")";
+		return super.toString() + "(" + type.getType().getValue() + " " + ident.getIdentifier() + ")";
 	}
 
 }
