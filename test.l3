@@ -1,4 +1,4 @@
-let static t16 t = 3-2*3;
+let static t16 t = 3+2*3*2;
 let static t16 fabrice = 2*t;
 
-exit#(2*fabrice);
+exit#(t);
