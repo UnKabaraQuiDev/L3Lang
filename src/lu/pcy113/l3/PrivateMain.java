@@ -12,12 +12,13 @@ import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.parser.L3Parser;
 import lu.pcy113.l3.parser.ParserException;
-import lu.pcy113.l3.parser.ast.containers.EnvContainer;
-import lu.pcy113.l3.parser.ast.containers.FileContainer;
+import lu.pcy113.pclib.GlobalLogger;
 
 public class PrivateMain {
 
-	public static void main(String[] args) throws FileNotFoundException, IOException, LexerException {
+	public static void main(String[] args) throws FileNotFoundException, IOException, LexerException, ParserException, CompilerException {
+		GlobalLogger.init(new File("./config/logs.properties"));
+		
 		System.out.println(Arrays.toString(new File("./").list()));
 		
 		String file = "test.l3";
@@ -28,22 +29,11 @@ public class PrivateMain {
 		lexer.getTokens().forEach(System.out::println);
 		
 		L3Parser parser = new L3Parser(lexer);
-		EnvContainer env = new EnvContainer();
-		FileContainer fc = new FileContainer(file);
-		env.add(fc);
-		try {
-			parser.parse(fc);
-		} catch (ParserException e) {
-			e.printStackTrace();
-		}
-		fc.print(0, System.out, 0);
+		parser.parse();
+		System.out.println(parser.getRoot().toString(0));
 		
-		X86Compiler compiler = new X86Compiler(env, System.err);
-		try {
-			compiler.compile();
-		} catch (CompilerException e) {
-			e.printStackTrace();
-		}
+		X86Compiler compiler = new X86Compiler(parser.getRoot(), file+"-out.asm");
+		compiler.compile();
 	}
 
 }

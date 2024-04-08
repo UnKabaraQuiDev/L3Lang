@@ -44,6 +44,7 @@ public class NumericLiteralToken extends LiteralToken<Number> {
 				throw new LexerException(e, "Invalid number format: "+e.getMessage(), line, column, literal);
 			}
 		}
+		System.err.println("value is long: "+value+" "+(value instanceof Long));
 		if(value instanceof Long) {
 			if((long) value <= Byte.MAX_VALUE) {
 				valueType = ValueType.BYTE;

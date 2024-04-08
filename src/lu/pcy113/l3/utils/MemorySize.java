@@ -45,23 +45,23 @@ public class MemorySize {
 	 */
 	public static int getBits(TokenType tokenType) {
 		switch (tokenType) {
-		case VAR_1:
+		case TYPE_1:
 			return 1;
-		case VAR_8:
+		case TYPE_8:
 			return 8;
-		case VAR_16:
+		case TYPE_16:
 			return 16;
-		case VAR_32:
+		case TYPE_32:
 			return 32;
-		case VAR_64:
+		case TYPE_64:
 			return 64;
-		case VAR_8_S:
+		case TYPE_8_S:
 			return 8;
-		case VAR_16_S:
+		case TYPE_16_S:
 			return 16;
-		case VAR_32_S:
+		case TYPE_32_S:
 			return 32;
-		case VAR_64_S:
+		case TYPE_64_S:
 			return 64;
 		}
 		return -1;
@@ -72,26 +72,27 @@ public class MemorySize {
 	 */
 	public static int getBytes(TokenType tokenType) {
 		switch (tokenType) {
-		case VAR_1:
+		case TYPE_1:
 			return 1;
-		case VAR_8:
+		case TYPE_8:
 			return 1;
-		case VAR_16:
+		case TYPE_16:
 			return 2;
-		case VAR_32:
+		case TYPE_32:
 			return 4;
-		case VAR_64:
+		case TYPE_64:
 			return 8;
-		case VAR_8_S:
+		case TYPE_8_S:
 			return 1;
-		case VAR_16_S:
+		case TYPE_16_S:
 			return 2;
-		case VAR_32_S:
+		case TYPE_32_S:
 			return 4;
-		case VAR_64_S:
+		case TYPE_64_S:
 			return 8;
+		default:
+			return -1;
 		}
-		return -1;
 	}
 
 }

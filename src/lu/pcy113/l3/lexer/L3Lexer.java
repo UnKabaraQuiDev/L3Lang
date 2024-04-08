@@ -1,10 +1,14 @@
 package lu.pcy113.l3.lexer;
 
+import static lu.pcy113.l3.lexer.TokenType.LET;
+import static lu.pcy113.l3.lexer.TokenType.FUN;
+import static lu.pcy113.l3.lexer.TokenType.STATIC;
 import static lu.pcy113.l3.lexer.TokenType.AND;
 import static lu.pcy113.l3.lexer.TokenType.ARROW;
 import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIN_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_AND;
+import static lu.pcy113.l3.lexer.TokenType.HASH;
 import static lu.pcy113.l3.lexer.TokenType.BIT_NOT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_OR;
 import static lu.pcy113.l3.lexer.TokenType.BIT_XOR;
@@ -23,6 +27,7 @@ import static lu.pcy113.l3.lexer.TokenType.ELSE;
 import static lu.pcy113.l3.lexer.TokenType.EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.FALSE;
 import static lu.pcy113.l3.lexer.TokenType.FINALLY;
+import static lu.pcy113.l3.lexer.TokenType.TYPE;
 import static lu.pcy113.l3.lexer.TokenType.FOR;
 import static lu.pcy113.l3.lexer.TokenType.GREATER;
 import static lu.pcy113.l3.lexer.TokenType.GREATER_EQUALS;
@@ -46,11 +51,11 @@ import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
 import static lu.pcy113.l3.lexer.TokenType.STRING;
 import static lu.pcy113.l3.lexer.TokenType.SWITCH;
 import static lu.pcy113.l3.lexer.TokenType.TRUE;
-import static lu.pcy113.l3.lexer.TokenType.VAR_1;
-import static lu.pcy113.l3.lexer.TokenType.VAR_16;
-import static lu.pcy113.l3.lexer.TokenType.VAR_32;
-import static lu.pcy113.l3.lexer.TokenType.VAR_64;
-import static lu.pcy113.l3.lexer.TokenType.VAR_8;
+import static lu.pcy113.l3.lexer.TokenType.TYPE_1;
+import static lu.pcy113.l3.lexer.TokenType.TYPE_16;
+import static lu.pcy113.l3.lexer.TokenType.TYPE_32;
+import static lu.pcy113.l3.lexer.TokenType.TYPE_64;
+import static lu.pcy113.l3.lexer.TokenType.TYPE_8;
 import static lu.pcy113.l3.lexer.TokenType.VOID;
 import static lu.pcy113.l3.lexer.TokenType.WHILE;
 
@@ -67,41 +72,35 @@ import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.utils.StringUtils;
 
 public class L3Lexer {
-	
+
 	private int index = 0, line = 0, column = 0;
 	private final String input;
 	private final List<Token> tokens;
-	
+
 	public L3Lexer(Reader reader) throws IOException {
 		this.input = StringUtils.readAll(reader);
 		this.tokens = new ArrayList<Token>();
 	}
-	
+
 	private TokenType type = null;
 	private String strValue = "";
-	
+
 	public void lexe() throws LexerException {
-		while(hasNext()) {
+		while (hasNext()) {
 			next: {
 				char current = consume();
-				//strValue = ""+current;
-				
-				System.out.println("Current: "+current+" type: "+type);
-				
-				/*if(DOUBLE_QUOTE.equals(type) && current != '\"') {
-					strValue += current;
-					continue;
-				}*/
-				
+
+				System.out.println("Current: " + current + " type: " + type);
+
 				switch (current) {
 				case '+':
 					type = PLUS;
 					flushToken();
 					break next;
 				case '-':
-					if(peek() == '>') {
+					if (peek() == '>') {
 						type = ARROW;
-					}else {
+					} else {
 						type = MINUS;
 					}
 					flushToken();
@@ -111,10 +110,10 @@ public class L3Lexer {
 					flushToken();
 					break next;
 				case '/':
-					if(peek() == '/') {
+					if (peek() == '/') {
 						type = COMMENT;
 						strValue = "/";
-						while(hasNext() && peek() != '\n') { // ignore ligne
+						while (hasNext() && peek() != '\n') { // ignore ligne
 							strValue += consume();
 						}
 						flushToken();
@@ -123,7 +122,7 @@ public class L3Lexer {
 					type = DIV;
 					flushToken();
 					break next;
-				
+
 				case '(':
 					type = PAREN_OPEN;
 					flushToken();
@@ -148,130 +147,124 @@ public class L3Lexer {
 					type = CURLY_CLOSE;
 					flushToken();
 					break next;
-				
+
 				case '\"':
-					/*if(DOUBLE_QUOTE.equals(type))
-						flushToken();*/
-					/*if(STRING.equals(type)) {
-						flushToken();
-						break next;
-					}else
-						type = STRING;*/
 					type = STRING;
 					strValue = "";
 					int cl = line, cc = column;
-					while(hasNext() && peek() != '\"') {
+					while (hasNext() && peek() != '\"') {
 						strValue += consume();
 					}
-					if(!hasNext())
-						throw new LexerException("Unterminated string, starting at: "+cl+":"+cc);
+					if (!hasNext())
+						throw new LexerException("Unterminated string, starting at: " + cl + ":" + cc);
 					consume();
 					flushToken();
 					break next;
-					
+
 				case ';':
-					/*if(type != null)
-						flushToken();*/
 					type = SEMICOLON;
 					flushToken();
 					break next;
-				
+
 				case ',':
 					type = COMMA;
 					flushToken();
 					break next;
-					
+
 				case '.':
 					type = DOT;
 					flushToken();
 					break next;
-					
-				case 'v':
-					strValue = "v";
-					if(peek("ar")) {
-						strValue += "ar";
-						if(peek(2, "8")) {
-							consume(3);
-							type = VAR_8;
-							strValue += "8";
-						}else if(peek(2, "16")) {
-							consume(4);
-							type = VAR_16;
-							strValue += "16";
-						}else if(peek(2, "32")) {
-							consume(4);
-							type = VAR_32;
-							strValue += "32";
-						}else if(peek(2, "64")) {
-							consume(4);
-							type = VAR_64;
-							strValue += "64";
-						}else if(peek(2, "1")) {
-							consume(3);
-							type = VAR_1;
-							strValue += "1";
-						}else {
-							throw new LexerException("Unknown variable type: "+strValue, line, column);
-						}
-						if(peek("s")) {
-							consume();
-							try {
-								type = TokenType.valueOf(type.name()+"_S");
-							}catch(IllegalArgumentException e) {
-								throw new LexerException(e, "Unknown variable type: "+strValue, line, column);
-							}
-						}
-						if(type != null) {
-							flushToken();
-							break next;
+
+				case 't':
+					strValue = "t";
+					if (peek("8")) {
+						consume(1);
+						type = TYPE_8;
+						strValue += "8";
+					} else if (peek("16")) {
+						consume(2);
+						type = TYPE_16;
+						strValue += "16";
+					} else if (peek("32")) {
+						consume(2);
+						type = TYPE_32;
+						strValue += "32";
+					} else if (peek("64")) {
+						consume(2);
+						type = TYPE_64;
+						strValue += "64";
+					} else if (peek("1")) {
+						consume(2);
+						type = TYPE_1;
+						strValue += "1";
+					} else {
+						checkOthers(current);
+						break next;
+					}
+					if (type != null && type.softEquals(TYPE) && peek("s")) {
+						consume();
+						try {
+							type = TokenType.valueOf(type.name() + "_S");
+						} catch (IllegalArgumentException e) {
+							throw new LexerException(e, "Unknown variable type: " + strValue, line, column);
 						}
 					}
+					if (type != null) {
+						flushToken();
+						break next;
+					}
 					break;
-					
+
 				case '|':
-					if(peek() == '|') {
+					if (peek() == '|') {
 						consume();
 						type = OR;
-					}else 
+					} else
 						type = BIT_OR;
 					flushToken();
 					break next;
-					
+
 				case '&':
-					if(peek() == '&') {
+					if (peek() == '&') {
 						consume();
 						type = AND;
-					}else
+					} else
 						type = BIT_AND;
 					flushToken();
 					break next;
-				
+
 				case '%':
 					type = MODULO;
 					flushToken();
 					break next;
-					
+
+				case '#':
+					type = HASH;
+					flushToken();
+					break next;
+
 				case '!':
-					if(peek() == '=') {
+					if (peek() == '=') {
 						consume();
 						type = NOT_EQUALS;
-					}else
+					} else
 						type = NOT;
 					flushToken();
 					break next;
-					
+
 				case '^':
 					type = BIT_XOR;
 					flushToken();
 					break next;
-					
+
 				case '~':
 					type = BIT_NOT;
 					flushToken();
 					break next;
-					
+
 				case '=':
-					if(peek() == '=') {
+					if (peek() == '=') {
 						consume();
 						type = EQUALS;
 					} else
@@ -279,7 +272,7 @@ public class L3Lexer {
 					flushToken();
 					break next;
 				case '<':
-					if(peek() == '=') {
+					if (peek() == '=') {
 						consume();
 						type = LOWER_EQUALS;
 					} else
@@ -287,186 +280,222 @@ public class L3Lexer {
 					flushToken();
 					break next;
 				case '>':
-					if(peek() == '=') {
+					if (peek() == '=') {
 						consume();
 						type = GREATER_EQUALS;
 					} else
 						type = GREATER;
 					flushToken();
 					break next;
-				
+
 				case ' ':
 				case '\t':
 				case '\n':
 				case '\r':
-					if(IDENT.equals(type) || NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type)) {
+					if (IDENT.equals(type) || NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type)) {
 						flushToken();
 						break next;
 					}
 					break;
-				
-				/*case '.':
-					if(NUM_LIT.equals(type)) {
-						type = DEC_NUM_LIT;
-					}
-					strValue += current;
-					break;*/
-				
+
 				case '0':
-					if(peek() == 'x') {
+					if (peek() == 'x') {
 						consume();
 						type = HEX_NUM_LIT;
 						do {
 							strValue += consume();
-						}while(Character.isLetterOrDigit(peek()) || peek() == '_');
+						} while (Character.isLetterOrDigit(peek()) || peek() == '_');
 						flushToken();
 						break next;
-					}else if(peek() == 'b') {
+					} else if (peek() == 'b') {
 						consume();
 						type = BIN_NUM_LIT;
 						do {
 							strValue += consume();
-						}while(peek() == '1' || peek() == '0' || peek() == '_');
+						} while (peek() == '1' || peek() == '0' || peek() == '_');
+						flushToken();
+						break next;
+					} else if (peek() == 'o') {
+						consume();
+						type = BIN_NUM_LIT;
+						do {
+							strValue += consume();
+						} while (isOctalDigit((char) peek()) || peek() == '_');
 						flushToken();
 						break next;
 					}
 				}
-				
-				if(type == null && Character.isLetter(current)) {
-					type = IDENT;
-					strValue = ""+current;
-					while(Character.isLetterOrDigit(peek())) {
-						strValue += consume();
-					}
-					
-					switch (strValue.toLowerCase()) {
-					case "if":
-						type = IF;
-						break;
-					case "else":
-						type = ELSE;
-						break;
-					case "finally":
-						type = FINALLY;
-						break;
-					case "for":
-						type = FOR;
-						break;
-					case "while":
-						type = WHILE;
-						break;
-					case "switch":
-						type = SWITCH;
-						break;
-					case "case":
-						type = CASE;
-						break;
-					case "default":
-						type = DEFAULT;
-						break;
-					case "void":
-						type = VOID;
-						break;
-					case "true":
-						type = TRUE;
-						break;
-					case "false":
-						type = FALSE;
-						break;
-					case "new":
-						type = NEW;
-						break;
-					}
-					
-					flushToken();
-				}else if(type == null && Character.isDigit(current)) {
-					type = NUM_LIT;
-					strValue = ""+current;
-					while(Character.isLetterOrDigit(peek()) || peek() == '_' || peek() == '.') {
-						strValue += consume();
-					}
-					if(strValue.contains("."))
-						type = DEC_NUM_LIT;
-					flushToken();
-				}
+
+				checkOthers(current);
 			}
 		}
-		//flushToken();
+		// flushToken();
 	}
-	
-	public void flushToken() throws LexerException {
-		System.out.println("flushed: "+strValue+" "+type);
-		if(type == null)
-			return;
-		
-		if(IDENT.equals(type)) {
-			tokens.add(new IdentifierToken(type, line, column-strValue.length(), strValue));
-		}else if(NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type)) {
-			tokens.add(new NumericLiteralToken(type, line, column-strValue.length(), strValue));
-		}else if(STRING.equals(type)) {
-			tokens.add(new StringLiteralToken(type, line, column-strValue.length(), strValue));
-		}else if(COMMENT.equals(type)) {
-			tokens.add(new CommentToken(type, line, column-strValue.length(), strValue));
-		}else {
-			tokens.add(new Token(type, line, column-strValue.length()));
+
+	private void checkOthers(char current) throws LexerException {
+		if (type == null && Character.isLetter(current)) {
+			type = IDENT;
+			strValue = "" + current;
+			while (Character.isLetterOrDigit(peek())) {
+				strValue += consume();
+			}
+
+			switch (strValue.toLowerCase()) {
+			case "if":
+				type = IF;
+				break;
+			case "else":
+				type = ELSE;
+				break;
+			case "finally":
+				type = FINALLY;
+				break;
+			case "for":
+				type = FOR;
+				break;
+			case "while":
+				type = WHILE;
+				break;
+			case "switch":
+				type = SWITCH;
+				break;
+			case "case":
+				type = CASE;
+				break;
+			case "default":
+				type = DEFAULT;
+				break;
+			case "void":
+				type = VOID;
+				break;
+			case "true":
+				type = TRUE;
+				break;
+			case "false":
+				type = FALSE;
+				break;
+			case "new":
+				type = NEW;
+				break;
+			case "let":
+				type = LET;
+				break;
+			case "fun":
+				type = FUN;
+				break;
+			case "static":
+				type = STATIC;
+				break;
+			}
+
+			flushToken();
+		} else if (type == null && Character.isDigit(current)) {
+			type = NUM_LIT;
+			strValue = "" + current;
+			while (Character.isLetterOrDigit(peek()) || peek() == '_' || peek() == '.') {
+				strValue += consume();
+			}
+			if (strValue.contains("."))
+				type = DEC_NUM_LIT;
+			flushToken();
 		}
-		
+	}
+
+	public void flushToken() throws LexerException {
+		System.out.println("flushed: " + strValue + " " + type);
+		if (type == null)
+			return;
+
+		if (IDENT.equals(type)) {
+			tokens.add(new IdentifierToken(type, line, column - strValue.length(), strValue));
+		} else if (NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type)) {
+			tokens.add(new NumericLiteralToken(type, line, column - strValue.length(), strValue));
+		} else if (STRING.equals(type)) {
+			tokens.add(new StringLiteralToken(type, line, column - strValue.length(), strValue));
+		} else if (COMMENT.equals(type)) {
+			tokens.add(new CommentToken(type, line, column - strValue.length(), strValue));
+		} else {
+			tokens.add(new Token(type, line, column - strValue.length()));
+		}
+
 		type = null;
 		strValue = "";
 	}
-	
+
 	public boolean hasNext() {
 		return index < input.length();
 	}
+
 	public boolean hasNext(int i) {
-		return index+1 < input.length();
+		return index + 1 < input.length();
 	}
+
 	public char consume() {
 		return consume(1);
 	}
+
 	public char consume(int i) {
 		char c = input.charAt(index);
 		index += i;
 		column++;
-		if(c == '\n') {
+		if (c == '\n') {
 			line++;
 			column = 0;
 		}
 		return c;
 	}
+
 	public int peek() {
 		return peek(0);
 	}
+
+	public void reverse() {
+		index--;
+	}
+
 	public boolean peek(String s) {
 		boolean b = true;
-		for(int i = 0; i < s.length(); i++) {
-			if(peek(i) == s.charAt(i))
+		for (int i = 0; i < s.length(); i++) {
+			if (peek(i) == s.charAt(i))
 				continue;
 			b = false;
 			break;
 		}
 		return b;
 	}
+
 	public boolean peek(int x, String s) {
-		System.out.println("peeking: "+s+"@"+x);
 		boolean b = true;
-		for(int i = 0; i < s.length(); i++) {
-			System.out.println("peeking: waiting for "+s.charAt(i)+"@"+i+"=="+(char) peek(i+x));
-			if(peek(i+x) == s.charAt(i)) {
+		for (int i = 0; i < s.length(); i++) {
+			System.out.println("peeking: waiting for " + s.charAt(i) + "@" + i + "==" + (char) peek(i + x));
+			if (peek(i + x) == s.charAt(i)) {
 				continue;
 			}
 			b = false;
 			break;
 		}
-		System.out.println("ret "+b);
 		return b;
 	}
+
 	public int peek(int i) {
-		return input.charAt(index+i);
+		return input.charAt(index + i);
 	}
-	
-	//public int getIndex() {return index;}
-	public String getInput() {return input;}
-	public List<Token> getTokens() {return tokens;}
+
+	// public int getIndex() {return index;}
+	public String getInput() {
+		return input;
+	}
+
+	public List<Token> getTokens() {
+		return tokens;
+	}
+
+	public static boolean isOctalDigit(char digit) {
+		if (Character.isDigit(digit)) {
+			int numericValue = Character.getNumericValue(digit);
+			return numericValue >= 0 && numericValue <= 7;
+		}
+		return false;
+	}
 
 }

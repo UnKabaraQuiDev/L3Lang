@@ -1,3 +1,3 @@
-var16 x = 2;
-var16 y = 2 + 5*3;
-var16_s b = x*y
+let static t16 t = -(-5-2)*test;
+
+exit#(12);
