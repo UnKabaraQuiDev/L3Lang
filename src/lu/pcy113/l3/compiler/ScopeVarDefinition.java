@@ -7,12 +7,14 @@ public class ScopeVarDefinition {
 	private LetTypeDefNode node;
 	private boolean iStatic = false;
 	private String asmName, codeName;
+	private int byteCount;
 
-	public ScopeVarDefinition(LetTypeDefNode _node, String _codeName, String _asmName, boolean _iStatic) {
+	public ScopeVarDefinition(LetTypeDefNode _node, String _codeName, String _asmName, boolean _iStatic, int byteCount) {
 		this.node = _node;
 		this.asmName = _asmName;
 		this.iStatic = _iStatic;
 		this.codeName = _codeName;
+		this.byteCount = byteCount;
 	}
 
 	public String getCodeName() {
@@ -29,6 +31,10 @@ public class ScopeVarDefinition {
 
 	public LetTypeDefNode getNode() {
 		return node;
+	}
+
+	public int getByteCount() {
+		return byteCount;
 	}
 
 }

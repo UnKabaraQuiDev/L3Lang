@@ -90,8 +90,6 @@ public class L3Lexer {
 			next: {
 				char current = consume();
 
-				System.out.println("Current: " + current + " type: " + type);
-
 				switch (current) {
 				case '+':
 					type = PLUS;
@@ -402,7 +400,6 @@ public class L3Lexer {
 	}
 
 	public void flushToken() throws LexerException {
-		System.out.println("flushed: " + strValue + " " + type);
 		if (type == null)
 			return;
 
@@ -467,7 +464,6 @@ public class L3Lexer {
 	public boolean peek(int x, String s) {
 		boolean b = true;
 		for (int i = 0; i < s.length(); i++) {
-			System.out.println("peeking: waiting for " + s.charAt(i) + "@" + i + "==" + (char) peek(i + x));
 			if (peek(i + x) == s.charAt(i)) {
 				continue;
 			}

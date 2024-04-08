@@ -11,4 +11,10 @@ public class FunArgNumLitValueNode extends Node {
 	public Node getValue() {
 		return value;
 	}
+	
+	@Override
+	public String toString() {
+		return super.toString()+"("+value+")";
+	}
+	
 }

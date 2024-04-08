@@ -42,6 +42,12 @@ public abstract class L3Compiler {
 		while ((line = reader.readLine()) != null) {
 			System.out.println(line);
 		}
+		reader.close();
+		
+		reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+		while ((line = reader.readLine()) != null) {
+			System.err.println(line);
+		}
 
 		int exitCode = process.waitFor();
 		System.out.println("--- Process exited with code: " + exitCode);
@@ -65,7 +71,7 @@ public abstract class L3Compiler {
 
 	protected void appendData() throws CompilerException {
 		try {
-			fw.write("section .data:\n");
+			fw.write("section .data\n");
 			fw.write(dataBuilder.toString());
 		} catch (IOException e) {
 			throw new CompilerException("Could not append data section to output writer: " + outFile, e);

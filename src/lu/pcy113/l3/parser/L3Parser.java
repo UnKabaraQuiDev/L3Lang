@@ -12,14 +12,12 @@ import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.FunArgNumLitValueNode;
-import lu.pcy113.l3.parser.ast.FunArgVarValueNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.RuntimeNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
-import lu.pcy113.pclib.GlobalLogger;
 
 public class L3Parser {
 
@@ -95,16 +93,23 @@ public class L3Parser {
 	private Node parseFunArgsValue() throws ParserException {
 		if (peek(TokenType.IDENT) && peek(1, TokenType.PAREN_OPEN)) {
 			return parseFunCall();
-		} else if (peek(TokenType.IDENT)) {
-			return new FunArgVarValueNode(consume(TokenType.IDENT));
-		} else if ((peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN)) {
-			return new FunArgNumLitValueNode(parseExpression());
+		} else {
+			Node expr = parseExpression();
+			/*if(expr instanceof BinaryOpNode) {
+				expr = simplifyExpression((BinaryOpNode) expr);
+			}*/
+			return new FunArgNumLitValueNode(expr);
 		}
-		throw new ParserException("We don't know what happened, but there was some kind of error");
+		// throw new ParserException("We don't know what happened, but there was some kind of error");
+	}
+
+	private boolean canParseExpr() {
+		// (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN)
+		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN);
 	}
 
 	private Node parseVarDefExpr() throws ParserException {
-		if (peek(TokenType.LET) && (peek(1, TokenType.STATIC, TokenType.TYPE) || peek(1, TokenType.TYPE))) {
+		if ((peek(TokenType.LET) && (peek(1, TokenType.STATIC, TokenType.TYPE)) || peek(1, TokenType.TYPE))) {
 			// generic type
 			Token let = consume(TokenType.LET);
 			boolean iStatic = peek(TokenType.STATIC);
@@ -116,7 +121,9 @@ public class L3Parser {
 			Token assign = consume(TokenType.ASSIGN);
 
 			Node expr = parseExpression();
-			expr = simplifyExpression((BinaryOpNode) expr);
+			/*if(expr instanceof BinaryOpNode) {
+				expr = simplifyExpression((BinaryOpNode) expr);
+			}*/
 
 			return new LetTypeDefNode(type, (IdentifierToken) ident, expr, iStatic);
 		} else if (peek(TokenType.LET) && peek(TokenType.IDENT)) {
@@ -131,7 +138,6 @@ public class L3Parser {
 			Node left = simplifyExpression(binaryOpNode.getLeft());
 			Node right = simplifyExpression(binaryOpNode.getRight());
 			if (left instanceof NumLitNode && right instanceof NumLitNode) {
-				System.err.println("types: "+((NumLitNode) left).getValue()+" and "+((NumLitNode) right).getValue());
 				long result = performOperation((long) ((NumLitNode) left).getValue(), binaryOpNode.getOperator(), (long) ((NumLitNode) right).getValue());
 				return new NumLitNode(result);
 			} else {
@@ -172,12 +178,12 @@ public class L3Parser {
 			Node right = parseTerm();
 			left = new BinaryOpNode(left, operator, right);
 		}
-
+		
 		return left;
 	}
 
 	private Node parseTerm() throws ParserException {
-		if ((peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN)) {
+		if (canParseExpr()) {
 			Node left = parseFactor();
 
 			while (peek(TokenType.MUL) || peek(TokenType.DIV)) {
@@ -260,9 +266,6 @@ public class L3Parser {
 	}
 
 	private Token consume(TokenType t) throws ParserException {
-		GlobalLogger.log();
-		GlobalLogger.log("We are at: " + peek());
-
 		if (!hasNext())
 			throw new ParserException("Expected %s but got end of input.", t);
 
@@ -287,8 +290,6 @@ public class L3Parser {
 	}
 
 	private Token peek() {
-		// GlobalLogger.log();
-		// GlobalLogger.log("trying peek: "+peek(0));
 		return peek(0);
 	}
 
