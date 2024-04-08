@@ -4,21 +4,20 @@ import lu.pcy113.l3.lexer.TokenType;
 
 public class BinaryOpNode extends Node {
 
-	private Node left, right;
 	private TokenType operator;
 
 	public BinaryOpNode(Node left, TokenType operator, Node right) {
-		this.left = left;
-		this.right = right;
+		add(left);
+		add(right);
 		this.operator = operator;
 	}
 
 	public Node getLeft() {
-		return left;
+		return children.get(0);
 	}
 
 	public Node getRight() {
-		return right;
+		return children.get(1);
 	}
 
 	public TokenType getOperator() {
@@ -26,11 +25,11 @@ public class BinaryOpNode extends Node {
 	}
 
 	public void setLeft(Node left) {
-		this.left = left;
+		children.set(0, left);
 	}
 
 	public void setRight(Node right) {
-		this.right = right;
+		children.set(1, right);
 	}
 
 	public void setOperator(TokenType operator) {
@@ -39,7 +38,7 @@ public class BinaryOpNode extends Node {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + left + operator.getValue() + right + ")";
+		return super.toString() + "(" + operator.getValue() + ")";
 	}
 
 }

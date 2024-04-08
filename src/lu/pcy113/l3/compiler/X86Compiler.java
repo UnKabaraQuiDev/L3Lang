@@ -2,8 +2,6 @@ package lu.pcy113.l3.compiler;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
@@ -13,11 +11,11 @@ import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 import lu.pcy113.l3.utils.FileUtils;
 import lu.pcy113.l3.utils.MemorySize;
-import lu.pcy113.pclib.Pair;
-import lu.pcy113.pclib.Pairs;
 
 public class X86Compiler extends L3Compiler {
 
@@ -52,19 +50,6 @@ public class X86Compiler extends L3Compiler {
 		}
 	}
 
-	private ArrayList<Pair<Integer, ScopeVarDefinition>> scopeVarDefinitions = new ArrayList<>();
-	private int scopeLevel = 0;
-
-	private ArrayList<Pair<Integer, ScopeVarDefinition>> getScopeVarDefinitions(String codeName) {
-		ArrayList<Pair<Integer, ScopeVarDefinition>> ll = new ArrayList<Pair<Integer, ScopeVarDefinition>>();
-		for (Pair<Integer, ScopeVarDefinition> isvd : scopeVarDefinitions) {
-			if (isvd.getValue().getCodeName().equals(codeName)) {
-				ll.add(isvd);
-			}
-		}
-		return ll;
-	}
-
 	private void compile(Node node) throws CompilerException {
 		if (node instanceof RuntimeNode) {
 			for (Node n : node.getChildren()) {
@@ -79,26 +64,24 @@ public class X86Compiler extends L3Compiler {
 
 	private void compileLetTypeDefNode(LetTypeDefNode node) throws CompilerException {
 		if (node.isiStatic()) {
-			List<Pair<Integer, ScopeVarDefinition>> svd = getScopeVarDefinitions(node.getIdent().getIdentifier());
-			for (Pair<Integer, ScopeVarDefinition> isvd : svd) {
-				if (isvd.getValue().getCodeName().equals(node.getIdent().getIdentifier())) {
-					throw new CompilerException("Variable: " + node.getIdent().getIdentifier() + ", already defined: " + isvd.getValue().getNode().getIdent());
-				}
-			}
+			String ident = node.getIdent().getIdentifier();
 
-			ScopeVarDefinition sd = new ScopeVarDefinition(node, node.getIdent().getIdentifier(), newVar(), true, MemorySize.getBytes(node.getType().getType()));
-			scopeVarDefinitions.add(Pairs.pair(scopeLevel, sd));
+			ScopeContainer container = node.getContainer();
+			LetScopeDescriptor descr = (LetScopeDescriptor) node.getContainer().getClosestDescriptor(ident);
+			/*if (descr != null) {
+				throw new CompilerException("Variable: " + node.getIdent().getIdentifier() + ", already defined: " + descr.getIdent());
+			}*/
 
 			if (node.getType().getType().softEquals(TokenType.TYPE)) { // generic type
 				String typeSize = getDataTypeNameBySize(MemorySize.getBytes(node.getType().getType()));
 				if (typeSize == null) {
 					throw new CompilerException("Cannot declare static, generic variable of type: " + node.getType());
 				}
-				writedataln(sd.getAsmName() + " " + typeSize + " 0  ; " + node.getType().getType().getStringValue() + " " + node.getIdent().getIdentifier() + " at " + node.getIdent().getLine() + ":" + node.getIdent().getColumn());
+				writedataln(descr.getAsmName() + " " + typeSize + " 0  ; " + node.getType().getType().getStringValue() + " " + ident + " at " + node.getIdent().getLine() + ":" + node.getIdent().getColumn());
 			}
 
-			writeinstln("; Setup static: " + sd.getCodeName() + " -> " + sd.getAsmName());
-			compileExprCompute(getMovTypeNameBySize(MemorySize.getBytes(node.getType().getType())) + " [" + sd.getAsmName() + "]", node.getChildren().get(0));
+			writeinstln("; Setup static: " + ident + " -> " + descr.getAsmName());
+			compileExprCompute(getMovTypeNameBySize(MemorySize.getBytes(node.getType().getType())) + " [" + descr.getAsmName() + "]", node.getChildren().get(0));
 		}
 	}
 
@@ -128,15 +111,14 @@ public class X86Compiler extends L3Compiler {
 			writeinstln("mov " + reg + ", " + val);
 		} else if (node instanceof VarNumNode) {
 			VarNumNode numNode = (VarNumNode) node;
-			ArrayList<Pair<Integer, ScopeVarDefinition>> svd = getScopeVarDefinitions(numNode.getIdent().getIdentifier());
-			if (svd.isEmpty()) {
+			String ident = numNode.getIdent().getIdentifier();
+
+			if (node.getContainer().containsDescriptor(ident)) {
 				throw new CompilerException("Couldn't find: " + numNode.getIdent().getIdentifier() + " in current scope (" + numNode.getIdent().getLine() + ":" + numNode.getIdent().getColumn() + ")");
 			}
 
-			svd.sort((a, b) -> a.getKey() - b.getKey()); // 0 < 1
-
-			ScopeVarDefinition def = svd.get(0).getValue();
-			writeinstln("mov " + reg + ", " + getMovTypeNameBySize(def.getByteCount()) + " [" + def.getAsmName() + "]");
+			LetScopeDescriptor def = (LetScopeDescriptor) node.getContainer().getClosestDescriptor(ident);
+			writeinstln("mov " + reg + ", " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getType())) + " [" + def.getAsmName() + "]");
 		} else {
 			throw new CompilerException("Expression not implemented.");
 		}
@@ -197,41 +179,20 @@ public class X86Compiler extends L3Compiler {
 			throw new IllegalArgumentException("Unknown node type: " + node.getClass().getSimpleName());
 		}
 
-		/*
-		 * else if (node instanceof NumLitNode) { NumLitNode numNode = (NumLitNode)
-		 * node; writeinstln("mov " + to + ", " + ((long) numNode.getValue())); } else
-		 * if (node instanceof VarNumNode) { VarNumNode numNode = (VarNumNode) node;
-		 * ArrayList<Pair<Integer, ScopeVarDefinition>> svd =
-		 * getScopeVarDefinitions(numNode.getIdent().getIdentifier()); if
-		 * (svd.isEmpty()) { throw new CompilerException("Couldn't find: " +
-		 * numNode.getIdent().getIdentifier() + " in current scope (" +
-		 * numNode.getIdent().getLine() + ":" + numNode.getIdent().getColumn() + ")"); }
-		 * 
-		 * svd.sort((a, b) -> a.getKey() - b.getKey()); // 0 < 1
-		 * 
-		 * ScopeVarDefinition def = svd.get(0).getValue(); writeinstln("mov " + to +
-		 * ", " + getMovTypeNameBySize(def.getByteCount()) + " [" + def.getAsmName() +
-		 * "]"); } else { throw new IllegalArgumentException("Unknown node type: " +
-		 * node.getClass().getSimpleName()); }
-		 */
-
 	}
 
 	private void load(String reg, Node node) throws CompilerException {
-		System.err.println("loading into: " + reg + " node: " + node);
-
 		if (node instanceof VarNumNode) {
 			VarNumNode numNode = (VarNumNode) node;
-			ArrayList<Pair<Integer, ScopeVarDefinition>> svd = getScopeVarDefinitions(numNode.getIdent().getIdentifier());
-			if (svd.isEmpty()) {
-				throw new CompilerException("Couldn't find: " + numNode.getIdent().getIdentifier() + " in current scope (" + numNode.getIdent().getLine() + ":" + numNode.getIdent().getColumn() + ")");
+			String ident = numNode.getIdent().getIdentifier();
+			
+			if (!node.getContainer().containsDescriptor(ident)) {
+				throw new CompilerException("Couldn't find: " + numNode.getIdent().getIdentifier() + " in scope: "+node.getContainer()+" (" + numNode.getIdent().getLine() + ":" + numNode.getIdent().getColumn() + ")");
 			}
 
-			svd.sort((a, b) -> a.getKey() - b.getKey()); // 0 < 1
+			LetScopeDescriptor def = (LetScopeDescriptor) node.getContainer().getClosestDescriptor(ident);
 
-			ScopeVarDefinition def = svd.get(0).getValue();
-
-			writeinstln("mov " + reg + ", " + getMovTypeNameBySize(def.getByteCount()) + " [" + def.getAsmName() + "]");
+			writeinstln("mov " + reg + ", " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getType())) + " [" + def.getAsmName() + "]");
 		} else if (node instanceof NumLitNode) {
 			writeinstln("mov " + reg + ", " + ((NumLitNode) node).getValue());
 		}

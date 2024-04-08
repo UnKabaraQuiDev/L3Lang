@@ -14,13 +14,10 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 			return true;
 		}
 		
-		Node parent = this;
-		while(!(parent.getParent() instanceof ScopeContainerNode)) {
-			parent = parent.getParent();
-			if(parent == null) {
-				return false;
-			}
-		}
+		ScopeContainerNode parent = this.getContainer();
+		
+		if(parent == null)
+			return false;
 		
 		return ((ScopeContainerNode) parent).containsDescriptor(name);
 	}
@@ -31,11 +28,16 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public ScopeDescriptor getDescriptor(String name) {
+	public ScopeDescriptor getLocalDescriptor(String name) {
+		return descriptors.get(name);
+	}
+	
+	@Override
+	public ScopeDescriptor getClosestDescriptor(String name) {
 		if(localContainsDescriptor(name)) {
 			return descriptors.get(name);
 		}
-		return getContainer(name).getDescriptor(name);
+		return getContainer(name).getClosestDescriptor(name);
 	}
 
 	@Override
@@ -44,13 +46,7 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 			return this;
 		}
 		
-		Node parent = this;
-		while(!(parent.getParent() instanceof ScopeContainerNode)) {
-			parent = parent.getParent();
-			if(parent == null) {
-				return null;
-			}
-		}
+		Node parent = this.getContainer();
 		
 		if(((ScopeContainerNode) parent).containsDescriptor(name)) {
 			return (ScopeContainer) parent;

@@ -1,7 +1,7 @@
 let static t16 t = (3+2*3*2+3);
 let static t16 fabrice = t % 4;
 
-fun void tete(let t8 input) {
+fun void FUINCTION(let t8 input) {
 	exit#(13%4);
 }
 

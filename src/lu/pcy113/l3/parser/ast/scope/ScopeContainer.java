@@ -10,7 +10,8 @@ public interface ScopeContainer {
 	HashMap<String, ScopeDescriptor> getLocalDescriptors(); 
 	HashMap<String, ScopeDescriptor> getDescriptors(); 
 	
-	ScopeDescriptor getDescriptor(String name);
+	ScopeDescriptor getLocalDescriptor(String name);
+	ScopeDescriptor getClosestDescriptor(String name);
 	
 	ScopeContainer getContainer(String name);
 	

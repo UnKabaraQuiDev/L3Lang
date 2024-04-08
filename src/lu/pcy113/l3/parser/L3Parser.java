@@ -59,7 +59,7 @@ public class L3Parser {
 			if (container.containsDescriptor(ltdn.getIdent().getIdentifier())) {
 				throw new ParserException("let " + ltdn.getIdent().getIdentifier() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
-			container.addDescriptor(ltdn.getIdent().getIdentifier(), new LetScopeDescriptor(ltdn.getIdent()));
+			container.addDescriptor(ltdn.getIdent().getIdentifier(), new LetScopeDescriptor(ltdn.getIdent(), ltdn));
 			container.add(ltdn);
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))) { // function call
@@ -80,13 +80,13 @@ public class L3Parser {
 	private boolean canParseFun() {
 		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.IDENT, TokenType.VOID) && peek(2, TokenType.IDENT) && (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(2, TokenType.PAREN_OPEN));
 	}
-	
+
 	private boolean canParseGenericTypeFun() {
 		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.VOID) && peek(2, TokenType.IDENT) && (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(2, TokenType.PAREN_OPEN));
 	}
 
 	private FunDefNode parseFunDefExpr() throws ParserException {
-		if(canParseGenericTypeFun()) {
+		if (canParseGenericTypeFun()) {
 			// generic return type
 			Token fun = consume(TokenType.FUN);
 			Token returnType = consume(TokenType.TYPE, TokenType.VOID);
@@ -95,26 +95,28 @@ public class L3Parser {
 			if (preset) {
 				consume(TokenType.HASH);
 			}
-			
+
 			FunDefNode fdn = new FunDefNode(returnType, ident);
-			
+
 			consume(TokenType.PAREN_OPEN);
 			FunDefArgsNode argsNode = new FunDefArgsNode();
 			List<Node> nodes = parseFunArgsDef();
 			nodes.forEach(argsNode::add);
 			nodes.forEach(node -> {
-				fdn.addDescriptor(((LetTypeDefNode) node).getIdent().getIdentifier(), new LetScopeDescriptor(((LetTypeDefNode) node).getIdent()));
+				if (node instanceof LetTypeDefNode) {
+					fdn.addDescriptor(((LetTypeDefNode) node).getIdent().getIdentifier(), new LetScopeDescriptor(((LetTypeDefNode) node).getIdent(), (LetTypeDefNode) node));
+				}
 			});
 			consume(TokenType.PAREN_CLOSE);
-			
+
 			consume(TokenType.CURLY_OPEN);
-			while(!peek(TokenType.CURLY_CLOSE)) {
+			while (!peek(TokenType.CURLY_CLOSE)) {
 				parseLineExpr(fdn);
 			}
 			consume(TokenType.CURLY_CLOSE);
-			
+
 			return fdn;
-		}else {
+		} else {
 			assert false : "Defined typed not defined yet.";
 		}
 		throw new ParserException("Undefined Fun def");
@@ -178,7 +180,7 @@ public class L3Parser {
 	}
 
 	private LetTypeDefNode parseVarDefExpr() throws ParserException {
-		System.err.println(peek()+" -> "+peek(1));
+		System.err.println(peek() + " -> " + peek(1));
 		if ((peek(TokenType.LET) && (peek(1, TokenType.STATIC, TokenType.TYPE)) || peek(1, TokenType.TYPE))) {
 			// generic type
 			Token let = consume(TokenType.LET);
@@ -198,12 +200,12 @@ public class L3Parser {
 
 				consume(TokenType.BRACKET_CLOSE);
 			}
-			
+
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(type, (IdentifierToken) ident, iStatic, iArray, arraySize);
-			
-			if(!peek(TokenType.ASSIGN))
+
+			if (!peek(TokenType.ASSIGN))
 				return typeDefNode;
-			
+
 			Token assign = consume(TokenType.ASSIGN);
 
 			if (!iArray) {
