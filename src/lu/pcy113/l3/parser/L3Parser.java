@@ -12,11 +12,13 @@ import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.FunArgNumLitValueNode;
+import lu.pcy113.l3.parser.ast.FunArgTypeDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.FunDefArgsNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
+import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
@@ -70,11 +72,24 @@ public class L3Parser {
 			if (container.containsDescriptor(ltdn.getIdent().getIdentifier())) {
 				throw new ParserException("fun " + ltdn.getIdent().getIdentifier() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
-			container.addDescriptor(ltdn.getIdent().getIdentifier(), new FunScopeDescriptor(ltdn.getIdent()));
+			container.addDescriptor(ltdn.getIdent().getIdentifier(), new FunScopeDescriptor(ltdn.getIdent(), ltdn));
 			container.add(ltdn);
+		} else if(container instanceof FunDefNode && peek(TokenType.RETURN)) {
+			ReturnNode rtn = parseReturnExpr();
+			container.add(rtn);
+			consume(TokenType.SEMICOLON);
+		} else if(peek(TokenType.COMMENT)) {
+			consume(TokenType.COMMENT);
+			// ignore
 		} else {
 			throw new ParserException("Expression not implemented: " + peek() + "->" + peek(1) + "->" + peek(2));
 		}
+	}
+
+	private ReturnNode parseReturnExpr() throws ParserException {
+		consume(TokenType.RETURN);
+		Node expr = parseExpression();
+		return new ReturnNode(expr);
 	}
 
 	private boolean canParseFun() {
@@ -82,10 +97,11 @@ public class L3Parser {
 	}
 
 	private boolean canParseGenericTypeFun() {
-		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.VOID) && peek(2, TokenType.IDENT) && (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(2, TokenType.PAREN_OPEN));
+		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.VOID) && peek(2, TokenType.IDENT) && (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(4, TokenType.PAREN_OPEN));
 	}
 
 	private FunDefNode parseFunDefExpr() throws ParserException {
+		System.out.println(peek()+" -> "+peek(1)+" -> "+peek(2)+" -> "+peek(3)+" -> "+peek(4));
 		if (canParseGenericTypeFun()) {
 			// generic return type
 			Token fun = consume(TokenType.FUN);
@@ -103,8 +119,8 @@ public class L3Parser {
 			List<Node> nodes = parseFunArgsDef();
 			nodes.forEach(argsNode::add);
 			nodes.forEach(node -> {
-				if (node instanceof LetTypeDefNode) {
-					fdn.addDescriptor(((LetTypeDefNode) node).getIdent().getIdentifier(), new LetScopeDescriptor(((LetTypeDefNode) node).getIdent(), (LetTypeDefNode) node));
+				if (node instanceof FunArgTypeDefNode) {
+					fdn.addDescriptor(((FunArgTypeDefNode) node).getIdent().getIdentifier(), new LetScopeDescriptor(((FunArgTypeDefNode) node).getIdent(), node));
 				}
 			});
 			consume(TokenType.PAREN_CLOSE);
@@ -144,8 +160,9 @@ public class L3Parser {
 
 	private List<Node> parseFunArgsDef() throws ParserException {
 		List<Node> ln = new LinkedList<Node>();
+		int index = 0;
 		while (!peek(TokenType.PAREN_CLOSE)) {
-			ln.add(parseVarDefExpr());
+			ln.add(parseFunArgTypeDef(index++));
 			if (peek(TokenType.COMMA)) {
 				consume();
 			}
@@ -155,10 +172,10 @@ public class L3Parser {
 
 	private List<Node> parseFunArgsValues() throws ParserException {
 		GlobalLogger.log();
-		System.err.println(peek());
 		List<Node> ln = new LinkedList<Node>();
+		int index = 0;
 		while (!peek(TokenType.PAREN_CLOSE)) {
-			ln.add(parseFunArgsValue());
+			ln.add(parseFunArgsValue(index++));
 			if (peek(TokenType.COMMA)) {
 				consume();
 			}
@@ -166,12 +183,12 @@ public class L3Parser {
 		return ln;
 	}
 
-	private Node parseFunArgsValue() throws ParserException {
+	private Node parseFunArgsValue(int index) throws ParserException {
 		if (peek(TokenType.IDENT) && peek(1, TokenType.PAREN_OPEN)) {
 			return parseFunCall();
 		} else {
 			Node expr = parseExpression();
-			return new FunArgNumLitValueNode(expr);
+			return new FunArgNumLitValueNode(index, expr);
 		}
 	}
 
@@ -179,8 +196,32 @@ public class L3Parser {
 		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN) || peek(TokenType.IDENT);
 	}
 
+	private FunArgTypeDefNode parseFunArgTypeDef(int index) throws ParserException {
+		if ((peek(TokenType.TYPE) && peek(1, TokenType.IDENT))) {
+			// generic type
+			Token type = consume(TokenType.TYPE);
+			Token ident = consume(TokenType.IDENT);
+
+			boolean iArray = peek(TokenType.BRACKET_OPEN) && peek(1, TokenType.NUM_LIT) && peek(2, TokenType.BRACKET_CLOSE);
+			int arraySize = 0;
+			if (iArray) {
+				consume(TokenType.BRACKET_OPEN);
+
+				arraySize = (int) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
+
+				consume(TokenType.BRACKET_CLOSE);
+			}
+
+			FunArgTypeDefNode typeDefNode = new FunArgTypeDefNode(index, type, (IdentifierToken) ident, iArray, arraySize);
+
+			return typeDefNode;
+		} else if (peek(TokenType.LET) && peek(TokenType.IDENT)) {
+			assert false : "Defined typed not defined yet.";
+		}
+		throw new ParserException("Undefined Var def");
+	}
+	
 	private LetTypeDefNode parseVarDefExpr() throws ParserException {
-		System.err.println(peek() + " -> " + peek(1));
 		if ((peek(TokenType.LET) && (peek(1, TokenType.STATIC, TokenType.TYPE)) || peek(1, TokenType.TYPE))) {
 			// generic type
 			Token let = consume(TokenType.LET);
@@ -392,7 +433,7 @@ public class L3Parser {
 
 	private Token consume(TokenType... types) throws ParserException {
 		Token peek = peek();
-		if (Arrays.stream(types).filter(peek.getType()::equals).collect(Collectors.counting()) > 0)
+		if (Arrays.stream(types).filter(peek.getType()::softEquals).collect(Collectors.counting()) > 0)
 			return consume();
 		else
 			throw new ParserException(peek, types);

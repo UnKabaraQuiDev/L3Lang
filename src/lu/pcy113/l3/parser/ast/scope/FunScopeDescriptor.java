@@ -4,8 +4,15 @@ import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 
 public class FunScopeDescriptor extends ScopeDescriptor {
 
-	public FunScopeDescriptor(IdentifierToken ident) {
+	private FunDefNode node;
+
+	public FunScopeDescriptor(IdentifierToken ident, FunDefNode node) {
 		super(ident);
+		this.node = node;
+	}
+
+	public FunDefNode getNode() {
+		return node;
 	}
 
 }

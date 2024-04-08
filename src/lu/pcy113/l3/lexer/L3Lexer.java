@@ -1,14 +1,10 @@
 package lu.pcy113.l3.lexer;
 
-import static lu.pcy113.l3.lexer.TokenType.LET;
-import static lu.pcy113.l3.lexer.TokenType.FUN;
-import static lu.pcy113.l3.lexer.TokenType.STATIC;
 import static lu.pcy113.l3.lexer.TokenType.AND;
 import static lu.pcy113.l3.lexer.TokenType.ARROW;
 import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIN_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_AND;
-import static lu.pcy113.l3.lexer.TokenType.HASH;
 import static lu.pcy113.l3.lexer.TokenType.BIT_NOT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_OR;
 import static lu.pcy113.l3.lexer.TokenType.BIT_XOR;
@@ -27,13 +23,21 @@ import static lu.pcy113.l3.lexer.TokenType.ELSE;
 import static lu.pcy113.l3.lexer.TokenType.EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.FALSE;
 import static lu.pcy113.l3.lexer.TokenType.FINALLY;
-import static lu.pcy113.l3.lexer.TokenType.TYPE;
 import static lu.pcy113.l3.lexer.TokenType.FOR;
+import static lu.pcy113.l3.lexer.TokenType.FUN;
 import static lu.pcy113.l3.lexer.TokenType.GREATER;
 import static lu.pcy113.l3.lexer.TokenType.GREATER_EQUALS;
+import static lu.pcy113.l3.lexer.TokenType.HASH;
 import static lu.pcy113.l3.lexer.TokenType.HEX_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.IDENT;
 import static lu.pcy113.l3.lexer.TokenType.IF;
+import static lu.pcy113.l3.lexer.TokenType.INT;
+import static lu.pcy113.l3.lexer.TokenType.INT_1;
+import static lu.pcy113.l3.lexer.TokenType.INT_16;
+import static lu.pcy113.l3.lexer.TokenType.INT_32;
+import static lu.pcy113.l3.lexer.TokenType.INT_64;
+import static lu.pcy113.l3.lexer.TokenType.INT_8;
+import static lu.pcy113.l3.lexer.TokenType.LET;
 import static lu.pcy113.l3.lexer.TokenType.LOWER;
 import static lu.pcy113.l3.lexer.TokenType.LOWER_EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.MINUS;
@@ -47,15 +51,13 @@ import static lu.pcy113.l3.lexer.TokenType.OR;
 import static lu.pcy113.l3.lexer.TokenType.PAREN_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.PAREN_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.PLUS;
+import static lu.pcy113.l3.lexer.TokenType.RETURN;
 import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
+import static lu.pcy113.l3.lexer.TokenType.STATIC;
 import static lu.pcy113.l3.lexer.TokenType.STRING;
 import static lu.pcy113.l3.lexer.TokenType.SWITCH;
 import static lu.pcy113.l3.lexer.TokenType.TRUE;
-import static lu.pcy113.l3.lexer.TokenType.TYPE_1;
-import static lu.pcy113.l3.lexer.TokenType.TYPE_16;
-import static lu.pcy113.l3.lexer.TokenType.TYPE_32;
-import static lu.pcy113.l3.lexer.TokenType.TYPE_64;
-import static lu.pcy113.l3.lexer.TokenType.TYPE_8;
+import static lu.pcy113.l3.lexer.TokenType.TYPE;
 import static lu.pcy113.l3.lexer.TokenType.VOID;
 import static lu.pcy113.l3.lexer.TokenType.WHILE;
 
@@ -174,28 +176,34 @@ public class L3Lexer {
 					flushToken();
 					break next;
 
-				case 't':
-					strValue = "t";
+				case 'i':
+					strValue = "i";
+					if (peek("nt")) {
+						consume(2);
+						strValue += "nt";
+					}
 					if (peek("8")) {
 						consume(1);
-						type = TYPE_8;
+						type = INT_8;
 						strValue += "8";
 					} else if (peek("16")) {
 						consume(2);
-						type = TYPE_16;
+						type = INT_16;
 						strValue += "16";
 					} else if (peek("32")) {
 						consume(2);
-						type = TYPE_32;
+						type = INT_32;
 						strValue += "32";
 					} else if (peek("64")) {
 						consume(2);
-						type = TYPE_64;
+						type = INT_64;
 						strValue += "64";
 					} else if (peek("1")) {
 						consume(2);
-						type = TYPE_1;
+						type = INT_1;
 						strValue += "1";
+					} else if (strValue.equals("int")) {
+						type = INT;
 					} else {
 						checkOthers(current);
 						break next;
@@ -384,6 +392,9 @@ public class L3Lexer {
 			case "static":
 				type = STATIC;
 				break;
+			case "return":
+				type = RETURN;
+				break;
 			}
 
 			flushToken();
@@ -405,7 +416,8 @@ public class L3Lexer {
 
 		if (IDENT.equals(type)) {
 			tokens.add(new IdentifierToken(type, line, column - strValue.length(), strValue));
-		} else if (NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type)) {
+		} else if (NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type)
+				|| BIN_NUM_LIT.equals(type)) {
 			tokens.add(new NumericLiteralToken(type, line, column - strValue.length(), strValue));
 		} else if (STRING.equals(type)) {
 			tokens.add(new StringLiteralToken(type, line, column - strValue.length(), strValue));

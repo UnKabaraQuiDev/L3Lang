@@ -2,19 +2,20 @@ package lu.pcy113.l3.parser.ast;
 
 public class FunArgNumLitValueNode extends Node {
 
-	private Node value;
+	private int index;
 	
-	public FunArgNumLitValueNode(Node node) {
-		this.value = node;
+	public FunArgNumLitValueNode(int index, Node node) {
+		add(node);
+		this.index = index;
 	}
 	
-	public Node getValue() {
-		return value;
+	public Node getNode() {
+		return children.get(0);
 	}
 	
 	@Override
 	public String toString() {
-		return super.toString()+"("+value+")";
+		return super.toString()+"("+index+")";
 	}
 	
 }

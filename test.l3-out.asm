@@ -21,14 +21,27 @@ _start:
 	div ebx ; VarNumNode(t) % NumLitNode(4) -> dword [sd_1]
 	mov dword [sd_1], edx
 
+	call sd_4  ; main
+
 	; Exit program
-	mov eax, 18
-	mov ebx, 4
-	div ebx ; NumLitNode(18) % NumLitNode(4) -> ebx
-	mov ebx, edx
+	mov ebx, eax
+	mov eax, 1 ; Syscall exit
+	int 0x80   ; Syscall call
+sd_4:  ; main
+	mov eax, 13
+	push eax
+	call sd_3  ; FUINCTION
+	mov eax, 12
+	ret
+sd_3:  ; FUINCTION
+	; Exit program
+	mov eax, dword [esp + 4]
+	mov ebx, dword [sd_1]
+	add eax, ebx ; VarNumNode(input) + VarNumNode(fabrice) -> ebx
+	mov ebx, eax
 
 	mov eax, 1 ; Syscall exit
 	int 0x80   ; Syscall call
 section .data
-	sd_0 dd 0  ; t16 t at 0:14
-	sd_1 dd 0  ; t16 fabrice at 1:14
+	sd_0 dd 0  ; int16 t at 0:15
+	sd_1 dd 0  ; int16 fabrice at 1:15

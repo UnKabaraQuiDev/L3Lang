@@ -1,8 +1,11 @@
-let static t16 t = (3+2*3*2+3);
-let static t16 fabrice = t % 4;
+let static int16 t = (3+2*3*2+3);
+let static int16 fabrice = t % 4; // 18 M 4 = 2
 
-fun void FUINCTION(let t8 input) {
-	exit#(13%4);
+fun void FUINCTION(int8 input) {
+	exit#(input+fabrice);
 }
 
-exit#(18%4);
+fun int main() {
+	FUINCTION(13);
+	return 12;
+}

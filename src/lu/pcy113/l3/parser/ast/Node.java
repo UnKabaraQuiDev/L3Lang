@@ -49,12 +49,19 @@ public class Node {
 		return children == null || children.isEmpty();
 	}
 
-	public ScopeContainerNode getContainer() {
+	public ScopeContainerNode getParentContainer() {
 		Node parent = this.getParent();
 		while (parent != null && !(parent instanceof ScopeContainerNode)) {
 			parent = parent.getParent();
 		}
 		return (ScopeContainerNode) parent;
+	}
+	
+	public ScopeContainerNode getClosestContainer() {
+		if(this instanceof ScopeContainerNode) {
+			return (ScopeContainerNode) this;
+		}
+		return getParentContainer();
 	}
 
 	public String toString(int indent) {

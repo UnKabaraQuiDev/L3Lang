@@ -14,7 +14,7 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 			return true;
 		}
 		
-		ScopeContainerNode parent = this.getContainer();
+		ScopeContainerNode parent = this.getParentContainer();
 		
 		if(parent == null)
 			return false;
@@ -46,7 +46,7 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 			return this;
 		}
 		
-		Node parent = this.getContainer();
+		Node parent = this.getParentContainer();
 		
 		if(((ScopeContainerNode) parent).containsDescriptor(name)) {
 			return (ScopeContainer) parent;

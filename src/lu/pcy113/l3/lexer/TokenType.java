@@ -4,9 +4,11 @@ public enum TokenType {
 
 	LET("let"), FUN("fun"),
 
-	TYPE(), TYPE_1(TYPE, "t1"), TYPE_8(TYPE, "t8"), TYPE_16(TYPE, "t16"), TYPE_32(TYPE, "t32"), TYPE_64(TYPE, "t64"),
+	TYPE(), INT(TYPE, "int"),
+	
+	INT_1(INT, "int1"), INT_8(INT, "int8"), INT_16(INT, "int16"), INT_32(TYPE, "int32"), INT_64(TYPE, "int64"),
 
-	TYPE_8_S(TYPE, "t8s"), TYPE_16_S(TYPE, "t16s"), TYPE_32_S(TYPE, "t32s"), TYPE_64_S(TYPE, "t64s"),
+	INT_8_S(INT, "int8s"), INT_16_S(INT, "int16s"), INT_32_S(INT, "int32s"), INT_64_S(INT, "int64s"),
 
 	VOID("void"), NEW("new"),
 
