@@ -13,11 +13,17 @@ import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.FunArgNumLitValueNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
+import lu.pcy113.l3.parser.ast.FunDefArgsNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
-import lu.pcy113.l3.parser.ast.RuntimeNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.scope.FunDefNode;
+import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
+import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
+import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
+import lu.pcy113.pclib.GlobalLogger;
 
 public class L3Parser {
 
@@ -47,16 +53,71 @@ public class L3Parser {
 		}
 	}
 
-	private void parseLineExpr(Node container) throws ParserException {
+	private void parseLineExpr(ScopeContainerNode container) throws ParserException {
 		if (peek(TokenType.LET)) { // var declaration
-			container.add(parseVarDefExpr());
+			LetTypeDefNode ltdn = parseVarDefExpr();
+			if (container.containsDescriptor(ltdn.getIdent().getIdentifier())) {
+				throw new ParserException("let " + ltdn.getIdent().getIdentifier() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
+			}
+			container.addDescriptor(ltdn.getIdent().getIdentifier(), new LetScopeDescriptor(ltdn.getIdent()));
+			container.add(ltdn);
 			consume(TokenType.SEMICOLON);
-		} else if (peek(TokenType.IDENT) && peek(1, TokenType.PAREN_OPEN, TokenType.HASH)) { // function call
+		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))) { // function call
 			container.add(parseFunCall());
 			consume(TokenType.SEMICOLON);
+		} else if (canParseFun()) {
+			FunDefNode ltdn = parseFunDefExpr();
+			if (container.containsDescriptor(ltdn.getIdent().getIdentifier())) {
+				throw new ParserException("fun " + ltdn.getIdent().getIdentifier() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
+			}
+			container.addDescriptor(ltdn.getIdent().getIdentifier(), new FunScopeDescriptor(ltdn.getIdent()));
+			container.add(ltdn);
 		} else {
 			throw new ParserException("Expression not implemented: " + peek() + "->" + peek(1) + "->" + peek(2));
 		}
+	}
+
+	private boolean canParseFun() {
+		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.IDENT, TokenType.VOID) && peek(2, TokenType.IDENT) && (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(2, TokenType.PAREN_OPEN));
+	}
+	
+	private boolean canParseGenericTypeFun() {
+		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.VOID) && peek(2, TokenType.IDENT) && (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(2, TokenType.PAREN_OPEN));
+	}
+
+	private FunDefNode parseFunDefExpr() throws ParserException {
+		if(canParseGenericTypeFun()) {
+			// generic return type
+			Token fun = consume(TokenType.FUN);
+			Token returnType = consume(TokenType.TYPE, TokenType.VOID);
+			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
+			boolean preset = peek(TokenType.HASH);
+			if (preset) {
+				consume(TokenType.HASH);
+			}
+			
+			FunDefNode fdn = new FunDefNode(returnType, ident);
+			
+			consume(TokenType.PAREN_OPEN);
+			FunDefArgsNode argsNode = new FunDefArgsNode();
+			List<Node> nodes = parseFunArgsDef();
+			nodes.forEach(argsNode::add);
+			nodes.forEach(node -> {
+				fdn.addDescriptor(((LetTypeDefNode) node).getIdent().getIdentifier(), new LetScopeDescriptor(((LetTypeDefNode) node).getIdent()));
+			});
+			consume(TokenType.PAREN_CLOSE);
+			
+			consume(TokenType.CURLY_OPEN);
+			while(!peek(TokenType.CURLY_CLOSE)) {
+				parseLineExpr(fdn);
+			}
+			consume(TokenType.CURLY_CLOSE);
+			
+			return fdn;
+		}else {
+			assert false : "Defined typed not defined yet.";
+		}
+		throw new ParserException("Undefined Fun def");
 	}
 
 	private Node parseFunCall() throws ParserException {
@@ -69,7 +130,7 @@ public class L3Parser {
 			Token parenOpen = consume(TokenType.PAREN_OPEN);
 
 			FunCallNode fcn = new FunCallNode((IdentifierToken) ident, preset);
-			parseFunArgs().forEach(fcn::add);
+			parseFunArgsValues().forEach(fcn::add);
 
 			Token parenClosed = consume(TokenType.PAREN_CLOSE);
 
@@ -79,7 +140,20 @@ public class L3Parser {
 		}
 	}
 
-	private List<Node> parseFunArgs() throws ParserException {
+	private List<Node> parseFunArgsDef() throws ParserException {
+		List<Node> ln = new LinkedList<Node>();
+		while (!peek(TokenType.PAREN_CLOSE)) {
+			ln.add(parseVarDefExpr());
+			if (peek(TokenType.COMMA)) {
+				consume();
+			}
+		}
+		return ln;
+	}
+
+	private List<Node> parseFunArgsValues() throws ParserException {
+		GlobalLogger.log();
+		System.err.println(peek());
 		List<Node> ln = new LinkedList<Node>();
 		while (!peek(TokenType.PAREN_CLOSE)) {
 			ln.add(parseFunArgsValue());
@@ -103,7 +177,8 @@ public class L3Parser {
 		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN) || peek(TokenType.IDENT);
 	}
 
-	private Node parseVarDefExpr() throws ParserException {
+	private LetTypeDefNode parseVarDefExpr() throws ParserException {
+		System.err.println(peek()+" -> "+peek(1));
 		if ((peek(TokenType.LET) && (peek(1, TokenType.STATIC, TokenType.TYPE)) || peek(1, TokenType.TYPE))) {
 			// generic type
 			Token let = consume(TokenType.LET);
@@ -123,10 +198,13 @@ public class L3Parser {
 
 				consume(TokenType.BRACKET_CLOSE);
 			}
-
-			Token assign = consume(TokenType.ASSIGN);
-
+			
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(type, (IdentifierToken) ident, iStatic, iArray, arraySize);
+			
+			if(!peek(TokenType.ASSIGN))
+				return typeDefNode;
+			
+			Token assign = consume(TokenType.ASSIGN);
 
 			if (!iArray) {
 				typeDefNode.add(parseExpression());
@@ -137,10 +215,6 @@ public class L3Parser {
 					consume(TokenType.CURLY_CLOSE);
 				}
 			}
-			/*
-			 * if(expr instanceof BinaryOpNode) { expr = simplifyExpression((BinaryOpNode)
-			 * expr); }
-			 */
 
 			return typeDefNode;
 		} else if (peek(TokenType.LET) && peek(TokenType.IDENT)) {

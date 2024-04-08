@@ -6,7 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import lu.pcy113.l3.parser.ast.RuntimeNode;
+import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 
 public abstract class L3Compiler {
 

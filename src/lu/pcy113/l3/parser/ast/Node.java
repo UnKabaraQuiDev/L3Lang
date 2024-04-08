@@ -5,12 +5,13 @@ import java.util.stream.Collectors;
 
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.L3Compiler;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 import lu.pcy113.l3.utils.StringUtils;
 
 public class Node {
 
-	private Node parent;
-	private LinkedList<Node> children;
+	protected Node parent;
+	protected LinkedList<Node> children;
 
 	public Node() {
 	}
@@ -23,7 +24,7 @@ public class Node {
 	public void visit(L3Compiler compiler) throws CompilerException {
 		// do nothing
 	}
-	
+
 	public Node add(Node child) {
 		if (child == null)
 			return null;
@@ -51,13 +52,15 @@ public class Node {
 
 	public String toString(int indent) {
 		String tab = StringUtils.repeat("\t", indent);
-		String ret = tab + toString() + (!isLeaf() ? "[\n" + (children.stream().map(c -> c.toString(indent + 1)).collect(Collectors.joining(",\n"))) + "\n" + tab + "]" : "");
+		String ret = tab + toString() + 
+				(this instanceof ScopeContainerNode ? "{\n" + ((ScopeContainerNode) this).getLocalDescriptors().entrySet().stream().map(e -> StringUtils.repeat("\t", indent+1)+e.getKey()+" = "+e.getValue()).collect(Collectors.joining(", \n")) + "}" : "") +
+				(!isLeaf() ? "[\n" + (children.stream().map(c -> c.toString(indent + 1)).collect(Collectors.joining(",\n"))) +"\n" + tab + "]" : "");
 		return ret;
 	}
 
 	@Override
 	public String toString() {
-		return "Node@" + this.getClass().getSimpleName();
+		return this.getClass().getSimpleName();
 	}
 
 }

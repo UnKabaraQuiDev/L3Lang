@@ -12,8 +12,8 @@ import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
-import lu.pcy113.l3.parser.ast.RuntimeNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 import lu.pcy113.l3.utils.FileUtils;
 import lu.pcy113.l3.utils.MemorySize;
 import lu.pcy113.pclib.Pair;
@@ -176,7 +176,7 @@ public class X86Compiler extends L3Compiler {
 				break;
 			case MODULO:
 			case DIV:
-				writeinstln("idiv ebx ; " + left + " " + binaryNode.getOperator().getValue() + " " + right + " -> " + to);
+				writeinstln("div ebx ; " + left + " " + binaryNode.getOperator().getValue() + " " + right + " -> " + to);
 				break;
 			case MUL:
 				writeinstln("imul eax, ebx ; " + left + " " + binaryNode.getOperator().getValue() + " " + right + " -> " + to);
