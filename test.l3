@@ -1,5 +1,6 @@
 let static int16 t = 2;
 let static int16 fabrice = 2; // 18 M 4 = 2
+let static int16 text = "Heloo world";
 
 fun void exit(int8 code) {
 	asm#("; Exit program");
@@ -9,20 +10,17 @@ fun void exit(int8 code) {
 	// exit#(input);
 }
 
-fun void printout() {
-	data#("buffer db \"Hello, World!\", 0 ; Null terminated string buffer");
-	data#("buffer_len equ $ - buffer      ; Calculate the length of the buffer");
-	
-	asm#("; Prepare the arguments for the write system call");
-	asm#("mov eax, 4           ; System call number for write (syscall number)");
-	asm#("mov ebx, 1           ; File descriptor 1: stdout");
-	asm#("mov ecx, buffer      ; Pointer to the buffer to be printed");
-	asm#("mov edx, buffer_len  ; Length of the buffer in bytes");
-	asm#("int 0x80             ; Invoke the kernel");
-}
+//fun void printout(int16 text) {
+//	asm#("; Prepare the arguments for the write system call");
+//	asm#("mov eax, 4           ; System call number for write (syscall number)");
+//	asm#("mov ebx, 1           ; File descriptor 1: stdout");
+//	asm#("mov ecx, buffer      ; Pointer to the buffer to be printed");
+//	asm#("mov edx, buffer_len  ; Length of the buffer in bytes");
+//	asm#("int 0x80             ; Invoke the kernel");
+//}
 
 fun int main() {
-	printout();
+	printout#(text);
 	exit(69);
 	return 12;
 }

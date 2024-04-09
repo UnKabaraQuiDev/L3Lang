@@ -13,5 +13,10 @@ public class StringLitNode extends Node {
 	public StringLiteralToken getString() {
 		return string;
 	}
+	
+	@Override
+	public String toString() {
+		return super.toString()+"("+string.getValue()+")";
+	}
 
 }
