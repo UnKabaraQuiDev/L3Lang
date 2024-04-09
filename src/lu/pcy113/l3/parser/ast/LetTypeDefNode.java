@@ -6,10 +6,11 @@ public class LetTypeDefNode extends Node {
 
 	private IdentifierToken ident;
 	private boolean iStatic, iArray;
-	private int arraySize;
+	private int arraySize, letIndex;
 
-	public LetTypeDefNode(TypeNode type, IdentifierToken ident, boolean iStatic, boolean iArray, int arraySize) {
+	public LetTypeDefNode(int letIndex, TypeNode type, IdentifierToken ident, boolean iStatic, boolean iArray, int arraySize) {
 		add(type);
+		this.letIndex = letIndex;
 		this.ident = ident;
 		this.iStatic = iStatic;
 		this.iArray = iArray;
@@ -19,7 +20,7 @@ public class LetTypeDefNode extends Node {
 	public TypeNode getType() {
 		return (TypeNode) children.get(0);
 	}
-	
+
 	public Node getExpr() {
 		return children.get(1);
 	}
@@ -38,6 +39,10 @@ public class LetTypeDefNode extends Node {
 
 	public int getArraySize() {
 		return arraySize;
+	}
+
+	public int getLetIndex() {
+		return letIndex;
 	}
 
 	@Override

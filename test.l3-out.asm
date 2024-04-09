@@ -2,44 +2,45 @@ section .text
 	global _start
 _start:
 	; Setup static: t -> sd_0
-	mov eax, 2
-	mov ebx, 3
-	imul eax, ebx ; NumLitNode(2) * NumLitNode(3) -> eax
-	mov ebx, 2
-	imul eax, ebx ; BinaryOpNode(*) * NumLitNode(2) -> ebx
-	mov ebx, eax
-
-	mov eax, 3
-	add eax, ebx ; NumLitNode(3) + BinaryOpNode(*) -> eax
-	mov ebx, 3
-	add eax, ebx ; BinaryOpNode(+) + NumLitNode(3) -> dword [sd_0]
-	mov dword [sd_0], eax
-
+	mov dword [sd_0], 2  ; compileExprCompute 2
 	; Setup static: fabrice -> sd_1
-	mov eax, dword [sd_0]
-	mov ebx, 4
-	div ebx ; VarNumNode(t) % NumLitNode(4) -> dword [sd_1]
-	mov dword [sd_1], edx
-
+	mov dword [sd_1], 2  ; compileExprCompute 2
 	call sd_5  ; main
 
 	; Exit program
 	mov ebx, eax
 	mov eax, 1 ; Syscall exit
 	int 0x80   ; Syscall call
-sd_5:  ; main, is leaf: false
-	mov eax, 13
-	push eax
-	call sd_3  ; FUINCTION
-	mov eax, 12
+sd_5:  ; main
+	mov eax, dword [sd_1]  ; load static LetScopeDescriptor(fabrice 1:15) = NumLitNode(2)
+	mov ebx, dword [sd_0]  ; load static LetScopeDescriptor(t 0:15) = NumLitNode(2)
+	add eax, ebx  ; VarNumNode(fabrice) + VarNumNode(t) -> eax
+	mov ebx, 12
+	add eax, ebx  ; BinaryOpNode(+) + NumLitNode(12) -> eax
+	
+	mov dword [sd_0], eax ; load static LetScopeDescriptor(t 0:15) = NumLitNode(2)
+	; Call: FUINCTION
+	mov eax, 1000  ; compileExprCompute 1000
+	push eax ; adding arg: test
+	mov eax, dword [sd_0]  ; load static LetScopeDescriptor(t 0:15) = NumLitNode(2)
+	push eax ; adding arg: input
+	call sd_4  ; FUINCTION
+	pop eax  ; removing arg: input
+	pop eax  ; removing arg: test
+	; Return
+	mov eax, 12  ; compileExprCompute 12
 	ret
-sd_3:  ; FUINCTION, is leaf: false
+sd_4:  ; FUINCTION
+	; Call: FUINCTION
+	mov eax, dword [esp + 8]  ; load arg LetScopeDescriptor(test 3:34) = stack index 1
+	push eax ; adding arg: test
+	mov eax, 1  ; compileExprCompute 1
+	push eax ; adding arg: input
+	call sd_4  ; FUINCTION
+	pop eax  ; removing arg: input
+	pop eax  ; removing arg: test
 	; Exit program
-	mov eax, dword [esp + 4]
-	mov ebx, dword [sd_1]
-	add eax, ebx ; VarNumNode(input) + VarNumNode(fabrice) -> ebx
-	mov ebx, eax
-
+	mov ebx, dword [esp + 4]  ; load arg LetScopeDescriptor(input 3:23) = stack index 0
 	mov eax, 1 ; Syscall exit
 	int 0x80   ; Syscall call
 section .data
