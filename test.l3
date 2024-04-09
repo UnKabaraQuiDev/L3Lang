@@ -19,13 +19,12 @@ fun int main() {
 	printout#(text);
 	
 	let int16: arr = new int16[3];
-	let int deuxieme;
 	arr[1] = 2;
-	arr[0] = double(arr[1]);
+	arr[0] = 4;
 	
 	NOOOOT[1] = 12;
 	
-	exit(arr[1]);
+	exit(arr[0]);
 	
 	return int 3;
 }
