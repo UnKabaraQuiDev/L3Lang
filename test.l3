@@ -25,7 +25,7 @@ fun int main() {
 	
 	NOOOOT[1] = 12;
 	
-	exit(NOOOOT[1]);
+	exit(arr[1]);
 	
 	return int 3;
 }

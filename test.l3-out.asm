@@ -44,7 +44,7 @@ sd_10:  ; main
 	; Call: exit
 	mov ecx, 1  ; compileExprCompute 1
 	lea ebx, [esp + ecx]
-	mov eax, dword [sd_3]  ; load static LetScopeDescriptor(NOOOOT -> sd_3 3:15) = ArrayInitNode(4, true)
+	mov eax, dword [esp + 0]  ; load local LetScopeDescriptor(arr -> sd_8 20:10) = ArrayInitNode(3, true)
 	push eax ; adding arg: code
 	call sd_5  ; exit
 	add esp, 4  ; removing 1 arg(s)
@@ -69,7 +69,7 @@ sd_7:  ; double
 	; Return
 	mov eax, 2
 	mov ebx, dword [esp + 4]  ; load arg LetScopeDescriptor(d -> sd_6 12:18) = stack index 0
-	imul eax, ebx  ; NumLitNode(2) * VarNumNode(d) -> eax
+	imul eax, ebx  ; NumLitNode(2) * VarNumNode(d, false) -> eax
 	
 	jmp sd_7_cln
 	; Cleanup & Return
