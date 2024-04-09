@@ -12,7 +12,6 @@ import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
-import lu.pcy113.l3.parser.ast.FunArgDefNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsDefNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
@@ -169,7 +168,7 @@ public class L3Parser {
 
 		int index = 0;
 		while (!peek(TokenType.PAREN_CLOSE)) {
-			FunArgDefNode arg = parseFunArgDef(index++);
+			LetTypeDefNode arg = parseFunArgDef(index++);
 			argsNode.add(arg);
 			fdn.addDescriptor(arg.getIdent().getIdentifier(), new LetScopeDescriptor(arg.getIdent(), arg));
 			if (peek(TokenType.COMMA)) {
@@ -190,8 +189,17 @@ public class L3Parser {
 		while (!peek(TokenType.CURLY_CLOSE)) {
 			parseLineExpr(fdb);
 		}
+		
+		if(!(fdb.getChildren().getLast() instanceof ReturnNode)) {
+			if(fdn.getReturnType().isVoid()) {
+				fdb.add(new ReturnNode(fdn.getReturnType(), null));
+			}else {
+				throw new ParserException("Missing final return statement: "+peek());
+			}
+		}
+		
 		consume(TokenType.CURLY_CLOSE);
-
+		
 		return fdb;
 	}
 
@@ -238,13 +246,13 @@ public class L3Parser {
 		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN) || peek(TokenType.IDENT);
 	}
 
-	private FunArgDefNode parseFunArgDef(int index) throws ParserException {
+	private LetTypeDefNode parseFunArgDef(int index) throws ParserException {
 		if ((peek(TokenType.TYPE) && peek(1, TokenType.IDENT))) {
 			// generic type
 			TypeNode typeNode = parseType();
 			Token ident = consume(TokenType.IDENT);
 
-			FunArgDefNode typeDefNode = new FunArgDefNode(index, typeNode, (IdentifierToken) ident);
+			LetTypeDefNode typeDefNode = new LetTypeDefNode(index, typeNode, (IdentifierToken) ident, false); // TODO: Array
 
 			return typeDefNode;
 		} else if (peek(TokenType.LET) && peek(TokenType.IDENT)) {
@@ -257,7 +265,19 @@ public class L3Parser {
 		if (peek(TokenType.IDENT)) {
 			return new TypeNode(false, consume(TokenType.IDENT));
 		} else if (peek(TokenType.TYPE)) {
-			return new TypeNode(true, consume(TokenType.TYPE));
+			Token type = consume(TokenType.TYPE);
+			
+			boolean iArray = peek(TokenType.BRACKET_OPEN) && peek(1, TokenType.NUM_LIT) && peek(2, TokenType.BRACKET_CLOSE);
+			int arraySize = 0;
+			if (iArray) {
+				consume(TokenType.BRACKET_OPEN);
+
+				arraySize = (int) (long) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
+
+				consume(TokenType.BRACKET_CLOSE);
+			}
+			
+			return new TypeNode(true, type, iArray, arraySize);
 		} else if (peek(TokenType.VOID)) {
 			return new TypeNode(true, consume(TokenType.VOID));
 		} else {
@@ -274,37 +294,28 @@ public class L3Parser {
 				consume(TokenType.STATIC);
 			}
 			TypeNode type = parseType();
+			
 			Token ident = consume(TokenType.IDENT);
-
-			boolean iArray = peek(TokenType.BRACKET_OPEN) && peek(1, TokenType.NUM_LIT) && peek(2, TokenType.BRACKET_CLOSE);
-			int arraySize = 0;
-			if (iArray) {
-				consume(TokenType.BRACKET_OPEN);
-
-				arraySize = (int) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
-
-				consume(TokenType.BRACKET_CLOSE);
-			}
 
 			int nonStaticLetIndex = (int) (long) container.getLocalDescriptors().values().stream().map((ScopeDescriptor i) -> {
 				if (i instanceof LetScopeDescriptor) {
 					if (((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) {
 						return ((LetTypeDefNode) ((LetScopeDescriptor) i).getNode()).isiStatic() ? 0 : 1;
-					} else if (((LetScopeDescriptor) i).getNode() instanceof FunArgDefNode) {
+					} else if (((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) {
 						return 1;
 					}
 				}
 				return 0;
-			}).collect(Collectors.counting());
+			}).reduce(0, (a, b) -> a+b);
 
-			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, (IdentifierToken) ident, iStatic, iArray, arraySize);
+			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, (IdentifierToken) ident, iStatic);
 
 			if (!peek(TokenType.ASSIGN))
 				return typeDefNode;
 
 			Token assign = consume(TokenType.ASSIGN);
 
-			if (!iArray) {
+			if (!type.isArray()) {
 				typeDefNode.add(parseExpression());
 			} else {
 				if (peek(TokenType.CURLY_OPEN)) {

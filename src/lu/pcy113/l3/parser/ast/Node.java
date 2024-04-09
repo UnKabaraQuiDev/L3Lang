@@ -3,6 +3,7 @@ package lu.pcy113.l3.parser.ast;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
+import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 import lu.pcy113.l3.utils.StringUtils;
 
@@ -33,6 +34,19 @@ public class Node {
 
 	public Node getParent() {
 		return parent;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <T> T getParent(Class<T> clazz) {
+		System.err.println("CHECKING: "+clazz);
+		Node paren = this;
+		do {
+			System.out.println("PARENT: "+paren);
+			paren = paren.getParent();
+			if(paren == null)
+				return null;
+		}while(!clazz.isInstance(paren));
+		return (T) paren;
 	}
 
 	public LinkedList<Node> getChildren() {
