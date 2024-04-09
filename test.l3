@@ -1,25 +1,31 @@
 let static int16 t = 2;
 let static int16 fabrice = 2; // 18 M 4 = 2
 let static int text = "Heloo world";
-let static int NOOOOT;
+let static int: NOOOOT = new int[4];
 
 fun void exit(int8 code) {
 	asm#("; Exit program");
 	asm#("mov ebx, [esp + 4]");
 	asm#("mov eax, 1 ; Syscall exit");
 	asm#("int 0x80   ; Syscall call");
-	// exit#(input);
 }
 
 fun int16 double(int d) {
-	return int16 4*d;
+	return int16 2*d;
 }
 
 fun int main() {
 	t = double(2);
 	printout#(text);
 	
-	let int16[3] arr;
+	let int16: arr = new int16[3];
+	let int deuxieme;
+	arr[1] = 2;
+	arr[0] = double(arr[1]);
 	
-	return int t;
+	NOOOOT[1] = 12;
+	
+	exit(NOOOOT[1]);
+	
+	return int 3;
 }

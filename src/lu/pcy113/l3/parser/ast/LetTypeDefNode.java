@@ -22,7 +22,7 @@ public class LetTypeDefNode extends Node {
 	public boolean hasExpr() {
 		return children.size() >= 2;
 	}
-	
+
 	public Node getExpr() {
 		return children.get(1);
 	}
@@ -41,7 +41,7 @@ public class LetTypeDefNode extends Node {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + getType().toString() + " " + ident.getIdentifier() + ")";
+		return super.toString() + "(" + getType().toString() + " " + ident.getIdentifier() + " " + letIndex + ")";
 	}
 
 }

@@ -23,7 +23,7 @@ public class ScopeDescriptor {
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "(" + ident.getIdentifier() + " " + ident.getLine() + ":" + ident.getColumn() + ")";
+		return this.getClass().getSimpleName() + "(" + ident.getIdentifier() + " -> " + getAsmName() + " " + ident.getLine() + ":" + ident.getColumn() + ")";
 	}
 
 }

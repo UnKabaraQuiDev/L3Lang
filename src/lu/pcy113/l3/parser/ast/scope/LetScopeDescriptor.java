@@ -15,5 +15,5 @@ public class LetScopeDescriptor extends ScopeDescriptor {
 	public Node getNode() {
 		return node;
 	}
-
+	
 }

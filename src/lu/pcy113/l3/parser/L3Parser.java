@@ -11,6 +11,7 @@ import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
+import lu.pcy113.l3.parser.ast.ArrayInitNode;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsDefNode;
@@ -89,11 +90,11 @@ public class L3Parser {
 		} else if (peek(TokenType.COMMENT)) {
 			consume(TokenType.COMMENT);
 			// ignore
-		} else if (peek(TokenType.IDENT) && peek(1, TokenType.ASSIGN)) {
+		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN) || peek(1, TokenType.BRACKET_OPEN))) {
 			LetTypeSetNode set = parseLetTypeSet();
 			parent.add(set);
 			consume(TokenType.SEMICOLON);
-		} else if(peek(TokenType.SEMICOLON)) {
+		} else if (peek(TokenType.SEMICOLON)) {
 			consume(TokenType.SEMICOLON);
 		} else {
 			throw new ParserException("Expression not implemented: (" + parent.getClass().getSimpleName() + ") " + peek() + "->" + peek(1) + "->" + peek(2));
@@ -101,29 +102,42 @@ public class L3Parser {
 	}
 
 	private LetTypeSetNode parseLetTypeSet() throws ParserException {
-		if ((peek(TokenType.IDENT) && peek(1, TokenType.ASSIGN))) {
+		if ((peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN) || peek(1, TokenType.BRACKET_OPEN)))) {
 			// generic type
-			Token ident = consume(TokenType.IDENT);
-			Token assign = consume(TokenType.ASSIGN);
+			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 			
+			boolean array = peek(TokenType.BRACKET_OPEN);
+			Node arrayIndex = null;
+			Node val = null;
+			if (array) {
+				consume(TokenType.BRACKET_OPEN);
+				arrayIndex = parseExpression();
+				consume(TokenType.BRACKET_CLOSE);
+
+				val = new VarNumNode(ident, arrayIndex);
+			}else {
+				val = new VarNumNode(ident);
+			}
+			
+			Token assign = consume(TokenType.ASSIGN);
+
 			Node newValue = parseExpression();
 			// TODO array parsing
-			
-			LetTypeSetNode typeDefNode = new LetTypeSetNode((IdentifierToken) ident);
-			typeDefNode.add(newValue);
+
+			LetTypeSetNode typeDefNode = new LetTypeSetNode(val, newValue);
 
 			return typeDefNode;
-		} 
+		}
 		throw new ParserException("Undefined Var def");
 	}
 
 	private ReturnNode parseReturnExpr() throws ParserException {
 		consume(TokenType.RETURN);
-		
+
 		TypeNode type = parseType();
-		if(peek(TokenType.SEMICOLON))
+		if (peek(TokenType.SEMICOLON))
 			return new ReturnNode(type, null);
-		
+
 		Node expr = parseExpression();
 		return new ReturnNode(type, expr);
 	}
@@ -189,17 +203,17 @@ public class L3Parser {
 		while (!peek(TokenType.CURLY_CLOSE)) {
 			parseLineExpr(fdb);
 		}
-		
-		if(!(fdb.getChildren().getLast() instanceof ReturnNode)) {
-			if(fdn.getReturnType().isVoid()) {
+
+		if (!(fdb.getChildren().getLast() instanceof ReturnNode)) {
+			if (fdn.getReturnType().isVoid()) {
 				fdb.add(new ReturnNode(fdn.getReturnType(), null));
-			}else {
-				throw new ParserException("Missing final return statement: "+peek());
+			} else {
+				throw new ParserException("Missing final return statement: " + peek());
 			}
 		}
-		
+
 		consume(TokenType.CURLY_CLOSE);
-		
+
 		return fdb;
 	}
 
@@ -263,25 +277,25 @@ public class L3Parser {
 
 	private TypeNode parseType() throws ParserException {
 		if (peek(TokenType.IDENT)) {
-			return new TypeNode(false, consume(TokenType.IDENT));
+			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
+			boolean pointer = peek(TokenType.COLON);
+			if (pointer)
+				consume(TokenType.COLON);
+			return new TypeNode(false, ident, pointer);
+
 		} else if (peek(TokenType.TYPE)) {
 			Token type = consume(TokenType.TYPE);
-			
-			boolean iArray = peek(TokenType.BRACKET_OPEN) && peek(1, TokenType.NUM_LIT) && peek(2, TokenType.BRACKET_CLOSE);
-			int arraySize = 0;
-			if (iArray) {
-				consume(TokenType.BRACKET_OPEN);
+			boolean pointer = peek(TokenType.COLON);
+			if (pointer)
+				consume(TokenType.COLON);
+			return new TypeNode(true, type, pointer);
 
-				arraySize = (int) (long) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
-
-				consume(TokenType.BRACKET_CLOSE);
-			}
-			
-			return new TypeNode(true, type, iArray, arraySize);
 		} else if (peek(TokenType.VOID)) {
 			return new TypeNode(true, consume(TokenType.VOID));
+
 		} else {
 			throw new ParserException("Unsupported type: " + peek());
+
 		}
 	}
 
@@ -294,19 +308,29 @@ public class L3Parser {
 				consume(TokenType.STATIC);
 			}
 			TypeNode type = parseType();
-			
+
 			Token ident = consume(TokenType.IDENT);
+
+			/*
+			 * int nonStaticLetIndex = (int) (long)
+			 * container.getLocalDescriptors().values().stream().map((ScopeDescriptor i) ->
+			 * { if (i instanceof LetScopeDescriptor) { if (((LetScopeDescriptor)
+			 * i).getNode() instanceof LetTypeDefNode) { return ((LetTypeDefNode)
+			 * ((LetScopeDescriptor) i).getNode()).isiStatic() ? 0 : 1; } else if
+			 * (((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) { return 1; }
+			 * } return 0; }).reduce(0, (a, b) -> a + b);
+			 */
 
 			int nonStaticLetIndex = (int) (long) container.getLocalDescriptors().values().stream().map((ScopeDescriptor i) -> {
 				if (i instanceof LetScopeDescriptor) {
-					if (((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) {
-						return ((LetTypeDefNode) ((LetScopeDescriptor) i).getNode()).isiStatic() ? 0 : 1;
-					} else if (((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) {
-						return 1;
+					LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
+					if (letDesc.getNode() instanceof LetTypeDefNode) {
+						LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();
+						return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize() : 1);
 					}
 				}
 				return 0;
-			}).reduce(0, (a, b) -> a+b);
+			}).reduce(0, (a, b) -> a + b);
 
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, (IdentifierToken) ident, iStatic);
 
@@ -315,14 +339,14 @@ public class L3Parser {
 
 			Token assign = consume(TokenType.ASSIGN);
 
-			if (!type.isArray()) {
-				typeDefNode.add(parseExpression());
-			} else {
+			if (type.isPointer() && peek(TokenType.CURLY_OPEN)) {
 				if (peek(TokenType.CURLY_OPEN)) {
 					consume(TokenType.CURLY_OPEN);
 					parseArrayArgs().forEach(typeDefNode::add);
 					consume(TokenType.CURLY_CLOSE);
 				}
+			} else {
+				typeDefNode.add(parseExpression());
 			}
 
 			return typeDefNode;
@@ -392,10 +416,14 @@ public class L3Parser {
 	}
 
 	private Node parseExpression() throws ParserException {
-		if(peek(TokenType.STRING)) {
+		if (canParseArrayInit()) {
+			return parseArrayInit();
+		}
+
+		if (peek(TokenType.STRING)) {
 			return new StringLitNode((StringLiteralToken) consume(TokenType.STRING));
 		}
-		
+
 		Node left = parseTerm();
 
 		while (peek(TokenType.PLUS, TokenType.MINUS)) {
@@ -405,6 +433,19 @@ public class L3Parser {
 		}
 
 		return left;
+	}
+
+	private ArrayInitNode parseArrayInit() throws ParserException {
+		consume(TokenType.NEW);
+		TypeNode type = parseType();
+		consume(TokenType.BRACKET_OPEN);
+		int arraySize = (int) (long) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
+		consume(TokenType.BRACKET_CLOSE);
+		return new ArrayInitNode(type, arraySize);
+	}
+
+	private boolean canParseArrayInit() {
+		return peek(TokenType.NEW) && peek(1, TokenType.TYPE, TokenType.IDENT) && peek(2, TokenType.BRACKET_OPEN) && peek(3, TokenType.NUM_LIT) && peek(4, TokenType.BRACKET_CLOSE);
 	}
 
 	private Node parseTerm() throws ParserException {
@@ -464,10 +505,24 @@ public class L3Parser {
 
 	private Node parseVar() throws ParserException {
 		boolean negative = parseSign();
-		if (negative) {
-			return new BinaryOpNode(new NumLitNode(0), TokenType.MINUS, new VarNumNode((IdentifierToken) consume(TokenType.IDENT)));
+		boolean array = peek(1, TokenType.BRACKET_OPEN);
+		Node arrayIndex = null;
+		Node val = null;
+		if (array) {
+			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
+
+			consume(TokenType.BRACKET_OPEN);
+			arrayIndex = parseExpression();
+			consume(TokenType.BRACKET_CLOSE);
+
+			val = new VarNumNode(ident, arrayIndex);
 		} else {
-			return new VarNumNode((IdentifierToken) consume(TokenType.IDENT));
+			val = new VarNumNode((IdentifierToken) consume(TokenType.IDENT));
+		}
+		if (negative) {
+			return new BinaryOpNode(new NumLitNode(0), TokenType.MINUS, val);
+		} else {
+			return val;
 		}
 	}
 

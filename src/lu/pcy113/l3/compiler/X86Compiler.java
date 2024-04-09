@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.parser.ast.ArrayInitNode;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
@@ -83,7 +84,7 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private void compileLetTypeSetNode(LetTypeSetNode node) throws CompilerException {
-		String ident = node.getIdent().getIdentifier();
+		String ident = node.getLet().getIdent().getIdentifier();
 		ScopeContainer container = node.getParentContainer();
 		LetScopeDescriptor def = (LetScopeDescriptor) node.getParentContainer().getClosestDescriptor(ident);
 
@@ -196,14 +197,14 @@ public class X86Compiler extends L3Compiler {
 					LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();
 					if (node.getArgs().getChildren().contains(letNode))
 						return 0; // ignore bc argument and not local variable
-					return letNode.isiStatic() ? 0 : (letNode.getType().isArray() ? letNode.getType().getArraySize() : 1);
+					return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize() : 1);
 				}
 			}
 			return 0;
 		}).reduce(0, (a, b) -> a + b);
 
 		if (localVarCount != 0) {
-			writeinstln("add esp, " + (localVarCount * 4)+"  ; Removing: "+localVarCount+" var(s)");
+			writeinstln("add esp, " + (localVarCount * 4) + "  ; Removing: " + localVarCount + " var(s)");
 		}
 		writeinstln("ret");
 
@@ -246,24 +247,34 @@ public class X86Compiler extends L3Compiler {
 							+ node.getIdent().getLine() + ":" + node.getIdent().getColumn());
 					writedataln(descr.getAsmName() + "_len equ $ - " + descr.getAsmName() + " ; " + node.getType().getIdent().getType().getStringValue() + " length " + ident + " at " + node.getIdent().getLine() + ":" + node.getIdent().getColumn());
 				} else { // int type
-					// declare in data
-					writedataln(descr.getAsmName() + " " + typeSize + " 0  ; " + node.getType().getIdent().getType().getStringValue() + " " + ident + " at " + node.getIdent().getLine() + ":" + node.getIdent().getColumn());
-
-					if (node.hasExpr()) {
-						// setup in _start
+					if(node.hasExpr()) {
 						writeinstln("; Setup static: " + ident + " -> " + descr.getAsmName());
-						compileExprCompute(getMovTypeNameBySize(MemorySize.getBytes(node.getType().getIdent().getType())) + " [" + descr.getAsmName() + "]", node.getExpr());
+						
+						if(node.getExpr() instanceof ArrayInitNode && ((ArrayInitNode) node.getExpr()).isEmpty()) {
+							// declare in data
+							writedataln(descr.getAsmName() + " " + typeSize + " "+((ArrayInitNode) node.getExpr()).getArraySize()+" dup (0)  ; " + node.getType().getIdent().getType().getStringValue() + " " + ident + " at " + node.getIdent().getLine() + ":" + node.getIdent().getColumn());
+						}else {
+							// declare in data
+							writedataln(descr.getAsmName() + " " + typeSize + " 0  ; " + node.getType().getIdent().getType().getStringValue() + " " + ident + " at " + node.getIdent().getLine() + ":" + node.getIdent().getColumn());
+							// setup in _start
+							compileExprCompute(getMovTypeNameBySize(MemorySize.getBytes(node.getType().getIdent().getType())) + " [" + descr.getAsmName() + "]", node.getExpr());
+						}
 					}
 				}
 			}
 		} else { // local variable
 			if (node.getType().getIdent().getType().softEquals(TokenType.TYPE)) { // generic type
-				if (node.getType().isArray()) {
-					if (node.hasExpr()) { // alloc space and init
-						assert false : "Init array";
-					} else { // alloc space
-						writeinstln("; Setup local: " + ident);
-						writeinstln("sub esp, " + (4 * node.getType().getArraySize()));
+				if (node.getType().isPointer()) {
+					if (node.hasExpr() && node.getExpr() instanceof ArrayInitNode) { // array
+						ArrayInitNode arrInit = (ArrayInitNode) node.getExpr();
+						if (arrInit.isEmpty()) { // alloc space
+							writeinstln("; Setup local: " + ident);
+							writeinstln("sub esp, " + (4 * arrInit.getArraySize()));
+						} else { // alloc space & set
+							assert false : "//TODO: Set array values";
+						}
+					} else {
+						assert false : "//TODO: Set pointer value & not array";
 					}
 				} else {
 					if (node.hasExpr()) { // alloc space and init
@@ -363,7 +374,7 @@ public class X86Compiler extends L3Compiler {
 		} else if (node instanceof FunCallNode) {
 			FunCallNode funCall = (FunCallNode) node;
 			compileFunCallNode(funCall);
-		} else {
+		} else { 
 			throw new CompilerException("Expression not implemented: " + node);
 		}
 	}
@@ -440,17 +451,39 @@ public class X86Compiler extends L3Compiler {
 
 			LetScopeDescriptor def = (LetScopeDescriptor) node.getParentContainer().getClosestDescriptor(ident);
 
-			if (def.getNode() instanceof LetTypeDefNode && ((LetTypeDefNode) def.getNode()).hasExpr()) { // let
-				System.out.println("load: " + def.getClass().getSimpleName() + " and node: " + def.getNode().getClass().getSimpleName());
-				if (((LetTypeDefNode) def.getNode()).isiStatic()) {
-					writeinstln("mov " + reg + ", " + getMovTypeNameBySize(MemorySize.getBytes(((LetTypeDefNode) def.getNode()).getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; load static " + def + " = "
-							+ ((LetTypeDefNode) def.getNode()).getExpr());
-				} else {
-					writeinstln("mov " + reg + ", dword [esp + " + (((LetTypeDefNode) def.getNode()).getLetIndex()) * 4 + "]  ; load local " + def + " = " + ((LetTypeDefNode) def.getNode()).getExpr());
+			if (numNode.hasOffset()) { // is array var
+				
+				compileExprCompute("ecx", numNode.getOffset());
+				writeinstln("lea ebx, [esp + ecx]");
+				
+				if (def.getNode() instanceof LetTypeDefNode && ((LetTypeDefNode) def.getNode()).hasExpr()) { // let
+					System.out.println("load: " + def.getClass().getSimpleName() + " and node: " + def.getNode().getClass().getSimpleName());
+					if (((LetTypeDefNode) def.getNode()).isiStatic()) {
+						writeinstln("mov " + reg + ", " + getMovTypeNameBySize(MemorySize.getBytes(((LetTypeDefNode) def.getNode()).getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; load static " + def + " = "
+								+ ((LetTypeDefNode) def.getNode()).getExpr());
+					} else {
+						writeinstln("mov " + reg + ", dword [esp + " + (((LetTypeDefNode) def.getNode()).getLetIndex()) * 4 + "]  ; load local " + def + " = " + ((LetTypeDefNode) def.getNode()).getExpr());
+					}
+				} else if (def.getNode() instanceof LetTypeDefNode && !((LetTypeDefNode) def.getNode()).hasExpr()) { // arg
+					writeinstln("mov " + reg + ", dword [esp + " + (((LetTypeDefNode) def.getNode()).getLetIndex() + 1) * 4 + "]  ; load arg " + def + " = stack index " + ((LetTypeDefNode) def.getNode()).getLetIndex());
 				}
-			} else if (def.getNode() instanceof LetTypeDefNode && !((LetTypeDefNode) def.getNode()).hasExpr()) { // arg
-				writeinstln("mov " + reg + ", dword [esp + " + (((LetTypeDefNode) def.getNode()).getLetIndex() + 1) * 4 + "]  ; load arg " + def + " = stack index " + ((LetTypeDefNode) def.getNode()).getLetIndex()); // TODO: calculate offset by arg
-																																																						// index + size
+				
+			} else { // is direct var
+				
+				if (def.getNode() instanceof LetTypeDefNode && ((LetTypeDefNode) def.getNode()).hasExpr()) { // let
+					System.out.println("load: " + def.getClass().getSimpleName() + " and node: " + def.getNode().getClass().getSimpleName());
+					if (((LetTypeDefNode) def.getNode()).isiStatic()) {
+						writeinstln("mov " + reg + ", " + getMovTypeNameBySize(MemorySize.getBytes(((LetTypeDefNode) def.getNode()).getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; load static " + def + " = "
+								+ ((LetTypeDefNode) def.getNode()).getExpr());
+					} else {
+						writeinstln("mov " + reg + ", dword [esp + " + (((LetTypeDefNode) def.getNode()).getLetIndex()) * 4 + "]  ; load local " + def + " = " + ((LetTypeDefNode) def.getNode()).getExpr());
+					}
+				} else if (def.getNode() instanceof LetTypeDefNode && !((LetTypeDefNode) def.getNode()).hasExpr()) { // arg
+					writeinstln("mov " + reg + ", dword [esp + " + (((LetTypeDefNode) def.getNode()).getLetIndex() + 1) * 4 + "]  ; load arg " + def + " = stack index " + ((LetTypeDefNode) def.getNode()).getLetIndex()); // TODO: calculate offset by
+																																																							// arg
+																																																							// index + size
+				}
+				
 			}
 		} else if (node instanceof NumLitNode) {
 			writeinstln("mov " + reg + ", " + ((NumLitNode) node).getValue());

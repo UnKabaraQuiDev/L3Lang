@@ -11,6 +11,7 @@ import static lu.pcy113.l3.lexer.TokenType.BIT_XOR;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.CASE;
+import static lu.pcy113.l3.lexer.TokenType.COLON;
 import static lu.pcy113.l3.lexer.TokenType.COMMA;
 import static lu.pcy113.l3.lexer.TokenType.COMMENT;
 import static lu.pcy113.l3.lexer.TokenType.CURLY_CLOSE;
@@ -153,7 +154,7 @@ public class L3Lexer {
 					strValue = "";
 					int cl = line, cc = column;
 					while (hasNext() && peek() != '\"') {
-						if(peek("\\")) {
+						if (peek("\\")) {
 							consume();
 						}
 						strValue += consume();
@@ -161,6 +162,11 @@ public class L3Lexer {
 					if (!hasNext())
 						throw new LexerException("Unterminated string, starting at: " + cl + ":" + cc);
 					consume();
+					flushToken();
+					break next;
+
+				case ':':
+					type = COLON;
 					flushToken();
 					break next;
 
@@ -419,8 +425,7 @@ public class L3Lexer {
 
 		if (IDENT.equals(type)) {
 			tokens.add(new IdentifierToken(type, line, column - strValue.length(), strValue));
-		} else if (NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type)
-				|| BIN_NUM_LIT.equals(type)) {
+		} else if (NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type)) {
 			tokens.add(new NumericLiteralToken(type, line, column - strValue.length(), strValue));
 		} else if (STRING.equals(type)) {
 			tokens.add(new StringLiteralToken(type, line, column - strValue.length(), strValue));

@@ -16,7 +16,7 @@ public enum TokenType {
 
 	IDENT(),
 
-	COMMA(','), DOT('.'), SEMICOLON(';'),
+	COMMA(','), DOT('.'), COLON(':'), SEMICOLON(';'),
 
 	ARROW("->"),
 
