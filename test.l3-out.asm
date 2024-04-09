@@ -5,26 +5,27 @@ _start:
 	mov dword [sd_0], 2  ; compileExprCompute 2
 	; Setup static: fabrice -> sd_1
 	mov dword [sd_1], 2  ; compileExprCompute 2
-	call sd_5  ; main
+	call sd_7  ; main
 
 	; Exit program
 	mov ebx, eax
 	mov eax, 1 ; Syscall exit
 	int 0x80   ; Syscall call
-sd_5:  ; main
+sd_7:  ; main
+	; Call: double
+	mov eax, 2  ; compileExprCompute 2
+	push eax ; adding arg: d
+	call sd_6  ; double
+	add esp, 4  ; removing 1 arg(s)
+	mov dword [sd_0], eax ; load static LetScopeDescriptor(t 0:15) = NumLitNode(2)
 	;  Printout
 	mov eax, 4
 	mov ebx, 1
 	mov ecx, sd_2
 	mov edx, sd_2_len
 	int 0x80
-	; Call: exit
-	mov eax, 69  ; compileExprCompute 69
-	push eax ; adding arg: code
-	call sd_4  ; exit
-	pop eax  ; removing arg: code
 	; Return
-	mov eax, 12  ; compileExprCompute 12
+	mov eax, dword [sd_0]  ; load static LetScopeDescriptor(t 0:15) = NumLitNode(2)
 	ret
 sd_4:  ; exit
 	; Exit program
@@ -32,6 +33,13 @@ sd_4:  ; exit
 	mov eax, 1 ; Syscall exit
 	int 0x80   ; Syscall call
 	ret  ; Default return
+sd_6:  ; double
+	; Return
+	mov eax, 3
+	mov ebx, dword [esp + 4]  ; load arg LetScopeDescriptor(d 21:18) = stack index 0
+	imul eax, ebx  ; NumLitNode(3) * VarNumNode(d) -> eax
+	
+	ret
 section .data
 	sd_0 dd 0  ; int16 t at 0:15
 	sd_1 dd 0  ; int16 fabrice at 1:15

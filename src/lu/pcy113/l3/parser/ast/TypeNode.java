@@ -19,5 +19,10 @@ public class TypeNode extends Node {
 	public Token getIdent() {
 		return token;
 	}
+	
+	@Override
+	public String toString() {
+		return super.toString()+"("+generic+", "+token.getType()+")";
+	}
 
 }

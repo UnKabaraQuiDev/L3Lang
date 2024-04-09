@@ -120,8 +120,13 @@ public class L3Parser {
 
 	private ReturnNode parseReturnExpr() throws ParserException {
 		consume(TokenType.RETURN);
+		
+		TypeNode type = parseType();
+		if(peek(TokenType.SEMICOLON))
+			return new ReturnNode(type, null);
+		
 		Node expr = parseExpression();
-		return new ReturnNode(expr);
+		return new ReturnNode(type, expr);
 	}
 
 	private boolean canParseFun() {
@@ -137,7 +142,7 @@ public class L3Parser {
 		if (canParseGenericTypeFun()) {
 			// generic return type
 			Token fun = consume(TokenType.FUN);
-			Token returnType = consume(TokenType.TYPE, TokenType.VOID);
+			TypeNode returnType = parseType();
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 			boolean preset = peek(TokenType.HASH);
 			if (preset) {
@@ -253,6 +258,8 @@ public class L3Parser {
 			return new TypeNode(false, consume(TokenType.IDENT));
 		} else if (peek(TokenType.TYPE)) {
 			return new TypeNode(true, consume(TokenType.TYPE));
+		} else if (peek(TokenType.VOID)) {
+			return new TypeNode(true, consume(TokenType.VOID));
 		} else {
 			throw new ParserException("Unsupported type: " + peek());
 		}

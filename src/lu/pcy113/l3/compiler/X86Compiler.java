@@ -15,6 +15,7 @@ import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.StringLitNode;
+import lu.pcy113.l3.parser.ast.TypeNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
@@ -85,10 +86,21 @@ public class X86Compiler extends L3Compiler {
 		ScopeContainer container = node.getParentContainer();
 		LetScopeDescriptor def = (LetScopeDescriptor) node.getParentContainer().getClosestDescriptor(ident);
 
-		// System.out.println("let: "+def.getClass().getSimpleName() + " and from: " +
-		// def.getNode().getClass().getSimpleName()+" new:
-		// "+node.getExpr().getClass().getSimpleName());
-
+		System.out.println("let: " + def.getClass().getSimpleName() + " and from: " + def.getNode().getClass().getSimpleName() + " new: " + node.getExpr().getClass().getSimpleName());
+		
+		if(node.getExpr() instanceof FunCallNode) {
+			String funName = ((FunCallNode) node.getExpr()).getName().getIdentifier();
+			if(!node.getParentContainer().containsDescriptor(funName)) {
+				throw new CompilerException("Function: "+funName+", not found in scope.");
+			}
+			FunScopeDescriptor fun = (FunScopeDescriptor) node.getParentContainer().getClosestDescriptor(funName);
+			if(def.getNode() instanceof LetTypeDefNode) {
+				checkReturnTypeMatch(fun.getNode(), ((LetTypeDefNode) def.getNode()).getType());
+			} else if(def.getNode() instanceof FunArgDefNode) {
+				checkReturnTypeMatch(fun.getNode(), ((FunArgDefNode) def.getNode()).getType());
+			}
+		}
+		
 		compileExprCompute("eax", node.getExpr());
 
 		if (def.getNode() instanceof LetTypeDefNode) {
@@ -134,7 +146,9 @@ public class X86Compiler extends L3Compiler {
 
 	private void compileReturnNode(ReturnNode node) throws CompilerException {
 		writeinstln("; Return");
-		compileExprCompute("eax", node.getExpr());
+		if (!node.returnsVoid()) {
+			compileExprCompute("eax", node.getExpr());
+		}
 		writeinstln("ret");
 	}
 
@@ -151,11 +165,25 @@ public class X86Compiler extends L3Compiler {
 		}
 
 		for (Node n : node.getBody().getChildren()) {
+			if (n instanceof ReturnNode) {
+				ReturnNode rn = (ReturnNode) n;
+				checkReturnTypeMatch(node, rn.getReturnType());
+			}
 			compile(n);
 		}
 
 		if (!(node.getBody().getChildren().getLast() instanceof ReturnNode)) {
 			writeinstln("ret  ; Default return");
+		}
+	}
+
+	private void checkReturnTypeMatch(FunDefNode node, TypeNode rn) throws CompilerException {
+		if (node.getReturnType().isGeneric() && node.getReturnType().getIdent().getType().softEquals(rn.getIdent().getType())) {
+			// generic type and matches
+		} else if (!node.getReturnType().isGeneric()) {
+			assert false : "Not generic return type";
+		} else {
+			throw new CompilerException("Function return type doesn't match with return return type: " + node.getReturnType() + " and " + rn);
 		}
 	}
 
@@ -174,8 +202,8 @@ public class X86Compiler extends L3Compiler {
 
 				if (node.getExpr() instanceof StringLitNode) { // string type
 					// declare in data
-					writedataln(descr.getAsmName()+ " " + typeSize + " \"" + ((StringLitNode) node.getExpr()).getString().getValue() + "\", 0  ; " + node.getType().getIdent().getType().getStringValue() + " " + ident + " at " + node.getIdent().getLine() + ":"
-							+ node.getIdent().getColumn());
+					writedataln(descr.getAsmName() + " " + typeSize + " \"" + ((StringLitNode) node.getExpr()).getString().getValue() + "\", 0  ; " + node.getType().getIdent().getType().getStringValue() + " " + ident + " at "
+							+ node.getIdent().getLine() + ":" + node.getIdent().getColumn());
 					writedataln(descr.getAsmName() + "_len equ $ - " + descr.getAsmName() + " ; " + node.getType().getIdent().getType().getStringValue() + " length " + ident + " at " + node.getIdent().getLine() + ":" + node.getIdent().getColumn());
 				} else { // int type
 					// declare in data
@@ -196,8 +224,10 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private void compileFunCallNode(FunCallNode node) throws CompilerException {
+		String funName = node.getName().getIdentifier();
+
 		if (node.isPreset()) {
-			if (node.getName().getIdentifier().equals("exit")) {
+			if (funName.equals("exit")) {
 				writeinstln("; Exit program");
 				Node arg0 = node.getArgs().getChildren().get(0);
 				if (arg0 instanceof FunArgValNode) {
@@ -208,34 +238,39 @@ public class X86Compiler extends L3Compiler {
 				}
 				writeinstln("mov eax, 1 ; Syscall exit");
 				writeinstln("int 0x80   ; Syscall call");
-			} else if (node.getName().getIdentifier().equals("asm")) {
+			} else if (funName.equals("asm")) {
 				StringLitNode arg0 = (StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpression();
 				writeinstln(arg0.getString().getValue());
-			} else if (node.getName().getIdentifier().equals("data")) {
+			} else if (funName.equals("data")) {
 				StringLitNode arg0 = (StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpression();
 				writedataln(arg0.getString().getValue());
-			} else if (node.getName().getIdentifier().equals("printout")) {
+			} else if (funName.equals("printout")) {
 				String arg0 = ((VarNumNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpression()).getIdent().getIdentifier();
-				if(!node.getClosestContainer().containsDescriptor(arg0)) {
-					throw new CompilerException("String buffer "+arg0+" not defined");
+				if (!node.getClosestContainer().containsDescriptor(arg0)) {
+					throw new CompilerException("String buffer " + arg0 + " not defined");
 				}
 				LetScopeDescriptor def = (LetScopeDescriptor) node.getClosestContainer().getClosestDescriptor(arg0);
 				writeinstln(";  Printout");
 				writeinstln("mov eax, 4");
 				writeinstln("mov ebx, 1");
-				writeinstln("mov ecx, "+def.getAsmName());
-				writeinstln("mov edx, "+def.getAsmName()+"_len");
+				writeinstln("mov ecx, " + def.getAsmName());
+				writeinstln("mov edx, " + def.getAsmName() + "_len");
 				writeinstln("int 0x80");
 			}
 		} else {
-			FunDefNode fun = ((FunScopeDescriptor) node.getParentContainer().getClosestDescriptor(node.getName().getIdentifier())).getNode();
+
+			if (!node.getParentContainer().containsDescriptor(funName)) {
+				throw new CompilerException("Function: " + funName + ", not found in scope.");
+			}
+
+			FunDefNode fun = ((FunScopeDescriptor) node.getParentContainer().getClosestDescriptor(funName)).getNode();
 			int wantedArgCount = fun.getLocalDescriptors().size();
 
 			FunArgsValNode args = node.getArgs();
 			int gotArgCount = args.getChildren().size();
 
 			if (wantedArgCount != gotArgCount) {
-				throw new CompilerException("Function: " + node.getName().getIdentifier() + " expected " + wantedArgCount + " arguments, got " + gotArgCount);
+				throw new CompilerException("Function: " + funName + " expected " + wantedArgCount + " arguments, got " + gotArgCount);
 			}
 
 			writeinstln("; Call: " + fun.getIdent().getIdentifier());
@@ -245,11 +280,15 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("push eax ; adding arg: " + ((FunArgDefNode) fun.getArgs().getChildren().get(i)).getIdent().getIdentifier());
 			}
 
-			writeinstln("call " + node.getParentContainer().getClosestDescriptor(node.getName().getIdentifier()).getAsmName() + "  ; " + node.getName().getIdentifier());
+			writeinstln("call " + node.getParentContainer().getClosestDescriptor(funName).getAsmName() + "  ; " + funName);
 
-			for (int i = 0; i < wantedArgCount; i++) {
-				writeinstln("pop eax  ; removing arg: " + ((FunArgDefNode) fun.getArgs().getChildren().get(i)).getIdent().getIdentifier());
-			}
+			/*
+			 * for (int i = 0; i < wantedArgCount; i++) {
+			 * writeinstln("add esp, 4  ; removing arg: " + ((FunArgDefNode)
+			 * fun.getArgs().getChildren().get(i)).getIdent().getIdentifier()); }
+			 */
+
+			writeinstln("add esp, " + (4 * wantedArgCount) + "  ; removing " + wantedArgCount + " arg(s)");
 		}
 	}
 
@@ -264,6 +303,9 @@ public class X86Compiler extends L3Compiler {
 		} else if (node instanceof VarNumNode) {
 			VarNumNode numNode = (VarNumNode) node;
 			load(reg, node);
+		} else if (node instanceof FunCallNode) {
+			FunCallNode funCall = (FunCallNode) node;
+			compileFunCallNode(funCall);
 		} else {
 			throw new CompilerException("Expression not implemented: " + node);
 		}

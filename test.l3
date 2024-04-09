@@ -19,8 +19,13 @@ fun void exit(int8 code) {
 //	asm#("int 0x80             ; Invoke the kernel");
 //}
 
+fun int16 double(int d) {
+	return int16 3*d;
+}
+
 fun int main() {
+	t = double(2);
 	printout#(text);
-	exit(69);
-	return 12;
+	// exit(t);
+	return int t;
 }
