@@ -153,6 +153,9 @@ public class L3Lexer {
 					strValue = "";
 					int cl = line, cc = column;
 					while (hasNext() && peek() != '\"') {
+						if(peek("\\")) {
+							consume();
+						}
 						strValue += consume();
 					}
 					if (!hasNext())

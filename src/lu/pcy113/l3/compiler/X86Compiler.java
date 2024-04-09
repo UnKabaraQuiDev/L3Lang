@@ -14,6 +14,7 @@ import lu.pcy113.l3.parser.ast.LetTypeSetNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
+import lu.pcy113.l3.parser.ast.StringLitNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
@@ -150,6 +151,10 @@ public class X86Compiler extends L3Compiler {
 		for (Node n : node.getBody().getChildren()) {
 			compile(n);
 		}
+		
+		if(!(node.getBody().getChildren().getLast() instanceof ReturnNode)) {
+			writeinstln("ret  ; Default return");
+		}
 	}
 
 	private void compileLetTypeDefNode(LetTypeDefNode node) throws CompilerException {
@@ -190,6 +195,12 @@ public class X86Compiler extends L3Compiler {
 				}
 				writeinstln("mov eax, 1 ; Syscall exit");
 				writeinstln("int 0x80   ; Syscall call");
+			}else if(node.getName().getIdentifier().equals("asm")) {
+				StringLitNode arg0 = (StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpression();
+				writeinstln(arg0.getString().getValue());
+			}else if(node.getName().getIdentifier().equals("data")) {
+				StringLitNode arg0 = (StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpression();
+				writedataln(arg0.getString().getValue());
 			}
 		} else {
 			FunDefNode fun = ((FunScopeDescriptor) node.getParentContainer().getClosestDescriptor(node.getName().getIdentifier())).getNode();

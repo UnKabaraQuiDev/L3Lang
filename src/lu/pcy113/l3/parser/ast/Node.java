@@ -9,7 +9,7 @@ import lu.pcy113.l3.utils.StringUtils;
 public class Node {
 
 	protected Node parent;
-	protected LinkedList<Node> children;
+	protected LinkedList<Node> children = new LinkedList<>();
 
 	public Node() {
 	}
@@ -22,8 +22,6 @@ public class Node {
 	public Node add(Node child) {
 		if (child == null)
 			return null;
-		if (children == null)
-			children = new LinkedList<>();
 		child.register(this);
 		children.add(child);
 		return child;

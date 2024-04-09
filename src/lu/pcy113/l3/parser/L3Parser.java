@@ -9,6 +9,7 @@ import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
+import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.FunArgDefNode;
@@ -22,6 +23,7 @@ import lu.pcy113.l3.parser.ast.LetTypeSetNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
+import lu.pcy113.l3.parser.ast.StringLitNode;
 import lu.pcy113.l3.parser.ast.TypeNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
@@ -237,17 +239,6 @@ public class L3Parser {
 			TypeNode typeNode = parseType();
 			Token ident = consume(TokenType.IDENT);
 
-			/*
-			 * boolean iArray = peek(TokenType.BRACKET_OPEN) && peek(1, TokenType.NUM_LIT)
-			 * && peek(2, TokenType.BRACKET_CLOSE); int arraySize = 0; if (iArray) {
-			 * consume(TokenType.BRACKET_OPEN);
-			 * 
-			 * arraySize = (int) ((NumericLiteralToken)
-			 * consume(TokenType.NUM_LIT)).getValue();
-			 * 
-			 * consume(TokenType.BRACKET_CLOSE); }
-			 */
-
 			FunArgDefNode typeDefNode = new FunArgDefNode(index, typeNode, (IdentifierToken) ident);
 
 			return typeDefNode;
@@ -383,6 +374,10 @@ public class L3Parser {
 	}
 
 	private Node parseExpression() throws ParserException {
+		if(peek(TokenType.STRING)) {
+			return new StringLitNode((StringLiteralToken) consume(TokenType.STRING));
+		}
+		
 		Node left = parseTerm();
 
 		while (peek(TokenType.PLUS, TokenType.MINUS)) {

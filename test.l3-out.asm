@@ -12,37 +12,32 @@ _start:
 	mov eax, 1 ; Syscall exit
 	int 0x80   ; Syscall call
 sd_5:  ; main
-	mov eax, dword [sd_1]  ; load static LetScopeDescriptor(fabrice 1:15) = NumLitNode(2)
-	mov ebx, dword [sd_0]  ; load static LetScopeDescriptor(t 0:15) = NumLitNode(2)
-	add eax, ebx  ; VarNumNode(fabrice) + VarNumNode(t) -> eax
-	mov ebx, 12
-	add eax, ebx  ; BinaryOpNode(+) + NumLitNode(12) -> eax
-	
-	mov dword [sd_0], eax ; load static LetScopeDescriptor(t 0:15) = NumLitNode(2)
-	; Call: FUINCTION
-	mov eax, 1000  ; compileExprCompute 1000
-	push eax ; adding arg: test
-	mov eax, dword [sd_0]  ; load static LetScopeDescriptor(t 0:15) = NumLitNode(2)
-	push eax ; adding arg: input
-	call sd_4  ; FUINCTION
-	pop eax  ; removing arg: input
-	pop eax  ; removing arg: test
+	; Call: printout
+	call sd_4  ; printout
+	; Call: exit
+	mov eax, 69  ; compileExprCompute 69
+	push eax ; adding arg: code
+	call sd_3  ; exit
+	pop eax  ; removing arg: code
 	; Return
 	mov eax, 12  ; compileExprCompute 12
 	ret
-sd_4:  ; FUINCTION
-	; Call: FUINCTION
-	mov eax, dword [esp + 8]  ; load arg LetScopeDescriptor(test 3:34) = stack index 1
-	push eax ; adding arg: test
-	mov eax, 1  ; compileExprCompute 1
-	push eax ; adding arg: input
-	call sd_4  ; FUINCTION
-	pop eax  ; removing arg: input
-	pop eax  ; removing arg: test
+sd_3:  ; exit
 	; Exit program
-	mov ebx, dword [esp + 4]  ; load arg LetScopeDescriptor(input 3:23) = stack index 0
+	mov ebx, [esp + 4]
 	mov eax, 1 ; Syscall exit
 	int 0x80   ; Syscall call
+	ret  ; Default return
+sd_4:  ; printout
+	; Prepare the arguments for the write system call
+	mov eax, 4           ; System call number for write (syscall number)
+	mov ebx, 1           ; File descriptor 1: stdout
+	mov ecx, buffer      ; Pointer to the buffer to be printed
+	mov edx, buffer_len  ; Length of the buffer in bytes
+	int 0x80             ; Invoke the kernel
+	ret  ; Default return
 section .data
 	sd_0 dd 0  ; int16 t at 0:15
 	sd_1 dd 0  ; int16 fabrice at 1:15
+	buffer db "Hello, World!", 0 ; Null terminated string buffer
+	buffer_len equ $ - buffer      ; Calculate the length of the buffer
