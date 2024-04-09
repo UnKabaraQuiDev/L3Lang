@@ -28,7 +28,7 @@ public class VarNumNode extends Node {
 	
 	@Override
 	public String toString() {
-		return super.toString()+"("+ident.getIdentifier()+")";
+		return super.toString()+"("+ident.getIdentifier()+", "+hasOffset()+")";
 	}
 
 }
