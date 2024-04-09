@@ -21,19 +21,19 @@ _start:
 	div ebx ; VarNumNode(t) % NumLitNode(4) -> dword [sd_1]
 	mov dword [sd_1], edx
 
-	call sd_4  ; main
+	call sd_5  ; main
 
 	; Exit program
 	mov ebx, eax
 	mov eax, 1 ; Syscall exit
 	int 0x80   ; Syscall call
-sd_4:  ; main
+sd_5:  ; main, is leaf: false
 	mov eax, 13
 	push eax
 	call sd_3  ; FUINCTION
 	mov eax, 12
 	ret
-sd_3:  ; FUINCTION
+sd_3:  ; FUINCTION, is leaf: false
 	; Exit program
 	mov eax, dword [esp + 4]
 	mov ebx, dword [sd_1]

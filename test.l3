@@ -6,6 +6,7 @@ fun void FUINCTION(int8 input) {
 }
 
 fun int main() {
+	let int16 y = 12;
 	FUINCTION(13);
 	return 12;
 }

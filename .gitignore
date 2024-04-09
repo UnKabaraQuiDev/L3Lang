@@ -22,7 +22,6 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
-<<<<<<< HEAD
 
 .metadata
 bin/
@@ -96,7 +95,3 @@ test/
 /target/*
 /logs/*
 /target/
-
-pom.xml
-=======
->>>>>>> branch 'main' of git@github.com:Poucy113/L3Lang.git

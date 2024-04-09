@@ -20,6 +20,10 @@ public class FunCallNode extends Node {
 		return preset;
 	}
 	
+	public FunArgsValNode getArgs() {
+		return (FunArgsValNode) children.get(0);
+	}
+	
 	@Override
 	public String toString() {
 		return super.toString()+"("+name.getIdentifier()+", "+(preset ? "preset" : "def")+")";
