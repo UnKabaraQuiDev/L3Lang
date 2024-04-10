@@ -324,7 +324,7 @@ public class L3Parser {
 					LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
 					if (letDesc.getNode() instanceof LetTypeDefNode) {
 						LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();
-						return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize() : 1);
+						return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize()+1 : 1);
 					}
 				}
 				return 0;
