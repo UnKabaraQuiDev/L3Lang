@@ -1,3 +1,5 @@
+let static int16: ststarr = new int16[2];
+
 fun int16 double(int16 t) {
 	t = t+1;
 	return int16 t;
@@ -10,5 +12,8 @@ fun int main() {
 	arr[double(0)] = 69;
 	arr[double(1)] = 70;
 	
-	return int arr[0];
+	ststarr[1] = 155;
+	ststarr[2] = ststarr[1]-156;
+	
+	return int ststarr[2];
 }

@@ -88,8 +88,6 @@ public class X86Compiler extends L3Compiler {
 		ScopeContainer container = node.getParentContainer();
 		LetScopeDescriptor def = (LetScopeDescriptor) node.getParentContainer().getClosestDescriptor(ident);
 
-		System.out.println("let: " + def.getClass().getSimpleName() + " and from: " + def.getNode().getClass().getSimpleName() + " new: " + node.getExpr().getClass().getSimpleName());
-
 		if (node.getExpr() instanceof FunCallNode) {
 			String funName = ((FunCallNode) node.getExpr()).getName().getIdentifier();
 			if (!node.getParentContainer().containsDescriptor(funName)) {
@@ -118,7 +116,7 @@ public class X86Compiler extends L3Compiler {
 			compileCalcOffset(node.getLet().getOffset());
 
 			if (def.getNode().isiStatic()) {
-				writeinstln("add ebx, " + def.getAsmName() + "  ; Adding offset for arr");
+				writeinstln("add ebx, " + def.getAsmName() + "  ; Adding offset for arr (static)");
 				writeinstln("mov " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [ebx], eax ; load static " + def + " = " + node.getExpr());
 			} else {
 				writeinstln("add ebx, esp  ; Adding offset for arr");
@@ -484,11 +482,17 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("push eax  ; Pushing to stack in case offset calc uses eax");
 				compileCalcOffset(numNode.getOffset());
 				writeinstln("pop eax  ; Poping from stack to get value back");
-				writeinstln("add ebx, esp  ; Add pointer to offset ebx");
+				if(def.getNode().isiStatic()) {
+					writeinstln("lea ecx, "+getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName()+"]  ; Load static address");
+					writeinstln("add ebx, ecx  ; Add static address to offset ebx");
+				}else {
+					writeinstln("add ebx, esp  ; Add pointer to offset ebx");
+				}
 
 				if (def.getNode().hasExpr()) { // let
 					if (def.getNode().isiStatic()) {
-						writeinstln("mov " + reg + ", " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; load static " + def + " = " + def.getNode().getExpr());
+						System.err.println("iz still static: "+node);
+						writeinstln("mov " + reg + ", [ebx]  ; load static " + def + " = " + def.getNode().getExpr());
 					} else {
 						writeinstln("mov " + reg + ", [ebx + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load local 1 " + def + " = " + def.getNode().getExpr());
 					}
@@ -499,11 +503,9 @@ public class X86Compiler extends L3Compiler {
 			} else { // is direct var
 
 				if (def.getNode().hasExpr()) { // let
-					System.out.println("load: " + def.getClass().getSimpleName() + " and node: " + def.getNode().getClass().getSimpleName());
 					if (def.getNode().isiStatic()) {
 						writeinstln("mov " + reg + ", " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; load static " + def + " = " + def.getNode().getExpr());
 					} else {
-						System.out.println("we're here");
 						writeinstln("mov " + reg + ", dword [esp + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load local 2 " + def + " = " + def.getNode().getExpr());
 					}
 				} else if (def.getNode() instanceof LetTypeDefNode && !def.getNode().hasExpr()) { // arg // TODO

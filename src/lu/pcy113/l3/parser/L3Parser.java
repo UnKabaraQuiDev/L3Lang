@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
@@ -345,7 +346,7 @@ public class L3Parser {
 
 			return typeDefNode;
 		} else if (peek(TokenType.LET) && peek(TokenType.IDENT)) {
-			assert false : "Defined typed not defined yet.";
+			throw new ParserException("Defined typed not defined yet.");
 		}
 		throw new ParserException("Undefined Var def");
 	}
