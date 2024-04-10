@@ -11,6 +11,7 @@ import lu.pcy113.l3.parser.ast.FunArgsValNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
+import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
@@ -86,6 +87,9 @@ public class X86Compiler extends L3Compiler {
 	private void compileLetTypeSetNode(LetTypeSetNode node) throws CompilerException {
 		String ident = node.getLet().getIdent().getIdentifier();
 		ScopeContainer container = node.getParentContainer();
+		if (!node.getParentContainer().containsDescriptor(ident)) {
+			throw new CompilerException("Couldn't find: " + ident + " in scope: " + node.getParentContainer() + " (" + node.getLet().getIdent().getLine() + ":" + node.getLet().getIdent().getColumn() + ")");
+		}
 		LetScopeDescriptor def = (LetScopeDescriptor) node.getParentContainer().getClosestDescriptor(ident);
 
 		if (node.getExpr() instanceof FunCallNode) {
@@ -128,13 +132,43 @@ public class X86Compiler extends L3Compiler {
 			if (!def.getNode().getType().isPointer()) {
 				throw new CompilerException("Var with offset is not a pointer.");
 			}
-			
+
 			if (def.getNode().isiStatic()) {
 				writeinstln("mov " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [esp], eax ; load static pointer " + def + " = " + node.getExpr());
 			} else {
 				writeinstln("mov dword [esp + " + (localVarCount - def.getNode().getLetIndex()) * 4 + "], eax ; load local pointer " + def + " = " + node.getExpr());
 			}
 		} else { // just set
+			if(node.getExpr() instanceof LocalizingNode) { // localize var address and then set
+				LocalizingNode locNode = (LocalizingNode) node.getExpr();
+				VarNumNode numNode = locNode.getNode();
+				
+				if(numNode.isPointer()) {
+					// remove pointer bc localizing a de-localized var
+					numNode.getChildren().clear();
+					node.getChildren().clear();
+					node.add(numNode);
+					compileLetTypeSetNode(node);
+				}else {
+					load("eax", node.getExpr());
+					
+					/*int scopeLetCount = getLocalVarCount(node.getClosestContainer());
+					
+					if (def.getNode().isiStatic()) {
+						writeinstln("lea " + reg + ", " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; load static " + def + " = " + def.getNode().getExpr());
+					} else {
+						writeinstln("lea " + reg + ", dword [esp + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load local 2 " + def + " = " + def.getNode().getExpr());
+					}*/
+				}
+			}else {
+				if (def.getNode().getType().isPointer() ^ node.getLet().isPointer()) {
+					throw new CompilerException("Cannot set pointer to lit value. "+def.getNode()+"  "+node.getLet());
+				}
+			}
+			
+			// just set value
+			
+
 			if (def.getNode().isiStatic()) {
 				writeinstln("mov " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "], eax ; load static " + def + " = " + node.getExpr());
 			} else {
@@ -404,11 +438,10 @@ public class X86Compiler extends L3Compiler {
 		if (node instanceof BinaryOpNode) {
 			generateExprRecursive(reg, node);
 			writeinstln("");
-		} else if (node instanceof NumLitNode) {
+		} /*else if (node instanceof NumLitNode) {
 			long val = (long) ((NumLitNode) node).getValue();
 			writeinstln("mov " + reg + ", " + val + "  ; compileExprCompute " + ((NumLitNode) node).getValue());
-		} else if (node instanceof VarNumNode) {
-			VarNumNode numNode = (VarNumNode) node;
+		} */else if (node instanceof VarNumNode || node instanceof NumLitNode || node instanceof LocalizingNode) {
 			load(reg, node);
 		} else if (node instanceof FunCallNode) {
 			FunCallNode funCall = (FunCallNode) node;
@@ -490,25 +523,46 @@ public class X86Compiler extends L3Compiler {
 			int scopeLetCount = getLocalVarCount(node.getClosestContainer());
 
 			if (numNode.isPointer()) { // is array var
-				writeinstln("; Compute offset into ebx");
-				writeinstln("push eax  ; Pushing to stack in case offset calc uses eax");
-				compileCalcOffset(numNode.getOffset());
-				writeinstln("pop eax  ; Poping from stack to get value back");
-				if (def.getNode().isiStatic()) {
-					writeinstln("lea ecx, " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; Load static address");
-					writeinstln("add ebx, ecx  ; Add static address to offset ebx");
-				} else {
-					writeinstln("add ebx, esp  ; Add pointer to offset ebx");
-				}
 
-				if (def.getNode().hasExpr()) { // let
+				if (numNode.isArrayOffset()) { // is array
+
+					writeinstln("; Compute offset into ebx");
+					writeinstln("push eax  ; Pushing to stack in case offset calc uses eax");
+					compileCalcOffset(numNode.getOffset());
+					writeinstln("pop eax  ; Poping from stack to get value back");
 					if (def.getNode().isiStatic()) {
-						writeinstln("mov " + reg + ", [ebx]  ; load static " + def + " = " + def.getNode().getExpr());
+						writeinstln("lea ecx, " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; Load static address");
+						writeinstln("add ebx, ecx  ; Add static address to offset ebx");
 					} else {
-						writeinstln("mov " + reg + ", [ebx + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load local 1 " + def + " = " + def.getNode().getExpr());
+						writeinstln("add ebx, esp  ; Add pointer to offset ebx");
 					}
-				} else if (!def.getNode().hasExpr()) { // arg
-					writeinstln("mov " + reg + ", [ebx + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load arg 1 " + def + " = stack index " + def.getNode().getLetIndex());
+
+					if (def.getNode().hasExpr()) { // let
+						if (def.getNode().isiStatic()) {
+							writeinstln("mov " + reg + ", [ebx]  ; load static " + def + " = " + def.getNode().getExpr());
+						} else {
+							writeinstln("mov " + reg + ", [ebx + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load local 1 " + def + " = " + def.getNode().getExpr());
+						}
+					} else if (!def.getNode().hasExpr()) { // arg
+						writeinstln("mov " + reg + ", [ebx + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load arg 1 " + def + " = stack index " + def.getNode().getLetIndex());
+					}
+
+				} else { // is regular pointer
+					if (def.getNode().isiStatic()) {
+						writeinstln("lea ebx, " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; Load static address");
+					} else {
+						writeinstln("mov ebx, esp  ; Add pointer to offset ebx");
+					}
+
+					if (def.getNode().hasExpr()) { // let
+						if (def.getNode().isiStatic()) {
+							writeinstln("mov " + reg + ", [ebx]  ; load static " + def + " = " + def.getNode().getExpr());
+						} else {
+							writeinstln("mov " + reg + ", [ebx + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load local 1 " + def + " = " + def.getNode().getExpr());
+						}
+					} else if (!def.getNode().hasExpr()) { // arg
+						writeinstln("mov " + reg + ", [ebx + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load arg 1 " + def + " = stack index " + def.getNode().getLetIndex());
+					}
 				}
 
 			} else { // is direct var
@@ -526,6 +580,31 @@ public class X86Compiler extends L3Compiler {
 			}
 		} else if (node instanceof NumLitNode) {
 			writeinstln("mov " + reg + ", " + ((NumLitNode) node).getValue());
+		} else if (node instanceof LocalizingNode) {
+			LocalizingNode locNode = (LocalizingNode) node;
+			VarNumNode numNode = locNode.getNode();
+			
+			if(numNode.isPointer()) {
+				// remove pointer bc localizing a de-localized var
+				numNode.getChildren().clear();
+				load(reg, numNode);
+			}else {
+				String ident = numNode.getIdent().getIdentifier();
+
+				if (!node.getParentContainer().containsDescriptor(ident)) {
+					throw new CompilerException("Couldn't find: " + numNode.getIdent().getIdentifier() + " in scope: " + node.getParentContainer() + " (" + numNode.getIdent().getLine() + ":" + numNode.getIdent().getColumn() + ")");
+				}
+
+				LetScopeDescriptor def = (LetScopeDescriptor) node.getClosestContainer().getClosestDescriptor(ident);
+				
+				int scopeLetCount = getLocalVarCount(node.getClosestContainer());
+				
+				if (def.getNode().isiStatic()) {
+					writeinstln("lea " + reg + ", " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; load static " + def + " = " + def.getNode().getExpr());
+				} else {
+					writeinstln("lea " + reg + ", dword [esp + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load local 2 " + def + " = " + def.getNode().getExpr());
+				}
+			}
 		}
 
 	}

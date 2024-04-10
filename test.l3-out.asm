@@ -11,69 +11,26 @@ _start:
 	int 0x80   ; Syscall call
 sd_5:  ; main
 	; Setup local: a
-	mov eax, 0  ; compileExprCompute 0
+	mov eax, 55
 	push eax
 	; Setup local: arr
 	sub esp, 12
-	mov eax, 68  ; compileExprCompute 68
-	mov ecx, 0  ; compileExprCompute 0
+	mov eax, 68
+	mov ecx, 0
 	imul ebx, ecx, 4  ; Bc stack var size = 4B
 	add ebx, esp  ; Adding offset for arr
-	mov dword [ebx + 0], eax ; load local LetScopeDescriptor(arr -> sd_4 11:10) = NumLitNode(68)
-	mov eax, 69  ; compileExprCompute 69
-	push eax  ; Pushing to stack in case offset calc uses eax
-	; Call: double
-	mov eax, 0  ; compileExprCompute 0
-	push eax ; adding arg: t
-	call sd_2  ; double
-	add esp, 4  ; removing 1 arg(s)
-	mov ecx, eax
-	imul ebx, ecx, 4  ; Bc stack var size = 4B
-	pop eax  ; Poping from stack to get value back
-	add ebx, esp  ; Adding offset for arr
-	mov dword [ebx + 0], eax ; load local LetScopeDescriptor(arr -> sd_4 11:10) = NumLitNode(69)
-	mov eax, 70  ; compileExprCompute 70
-	push eax  ; Pushing to stack in case offset calc uses eax
-	; Call: double
-	mov eax, 1  ; compileExprCompute 1
-	push eax ; adding arg: t
-	call sd_2  ; double
-	add esp, 4  ; removing 1 arg(s)
-	mov ecx, eax
-	imul ebx, ecx, 4  ; Bc stack var size = 4B
-	pop eax  ; Poping from stack to get value back
-	add ebx, esp  ; Adding offset for arr
-	mov dword [ebx + 0], eax ; load local LetScopeDescriptor(arr -> sd_4 11:10) = NumLitNode(70)
-	mov eax, 155  ; compileExprCompute 155
-	mov ecx, 1  ; compileExprCompute 1
-	imul ebx, ecx, 4  ; Bc stack var size = 4B
-	add ebx, sd_0  ; Adding offset for arr (static)
-	mov dword [ebx], eax ; load static LetScopeDescriptor(ststarr -> sd_0 0:16) = NumLitNode(155)
-	; Compute offset into ebx
-	push eax  ; Pushing to stack in case offset calc uses eax
-	mov ecx, 1  ; compileExprCompute 1
-	imul ebx, ecx, 4  ; Bc stack var size = 4B
-	pop eax  ; Poping from stack to get value back
-	lea ecx, dword [sd_0]  ; Load static address
-	add ebx, ecx  ; Add static address to offset ebx
-	mov eax, [ebx]  ; load static LetScopeDescriptor(ststarr -> sd_0 0:16) = ArrayInitNode(2, true)
-	mov ebx, 1
-	sub eax, ebx  ; VarNumNode(ststarr, pointer=true, arrayOffset=true) - NumLitNode(1) -> eax
-	
-	mov ecx, 2  ; compileExprCompute 2
-	imul ebx, ecx, 4  ; Bc stack var size = 4B
-	add ebx, sd_0  ; Adding offset for arr (static)
-	mov dword [ebx], eax ; load static LetScopeDescriptor(ststarr -> sd_0 0:16) = BinaryOpNode(-)
-	mov eax, 11  ; compileExprCompute 11
-	mov dword [esp + 0], eax ; load local pointer LetScopeDescriptor(arr -> sd_4 11:10) = NumLitNode(11)
+	mov dword [ebx + 0], eax ; load local LetScopeDescriptor(arr -> sd_4 10:10) = NumLitNode(68)
+	mov eax, dword [esp + 12]  ; load local 2 LetScopeDescriptor(a -> sd_3 8:9) = NumLitNode(55)
+	lea eax, dword [esp + 12]  ; load local 2 LetScopeDescriptor(a -> sd_3 8:9) = NumLitNode(55)
+	mov dword [esp + 0], eax ; load local LetScopeDescriptor(arr -> sd_4 10:10) = LocalizingNode
 	; Return
 	; Compute offset into ebx
 	push eax  ; Pushing to stack in case offset calc uses eax
-	mov ecx, 0  ; compileExprCompute 0
+	mov ecx, 0
 	imul ebx, ecx, 4  ; Bc stack var size = 4B
 	pop eax  ; Poping from stack to get value back
 	add ebx, esp  ; Add pointer to offset ebx
-	mov eax, [ebx + 0]  ; load local 1 LetScopeDescriptor(arr -> sd_4 11:10) = ArrayInitNode(3, true)
+	mov eax, [ebx + 0]  ; load local 1 LetScopeDescriptor(arr -> sd_4 10:10) = ArrayInitNode(3, true)
 	jmp sd_5_cln
 	; Cleanup & Return
 sd_5_cln:

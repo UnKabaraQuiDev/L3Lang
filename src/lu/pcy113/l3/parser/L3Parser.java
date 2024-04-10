@@ -20,6 +20,7 @@ import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
+import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
@@ -90,14 +91,9 @@ public class L3Parser {
 			consume(TokenType.COMMENT); // ignore
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)) || (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT))) {
 			LetTypeSetNode set = parseLetTypeSet();
-			System.out.println(container.getDescriptors());
 			if (!container.containsDescriptor(set.getLet().getIdent().getIdentifier())) {
-				throw new ParserException("let " + set.getLet().getIdent().getIdentifier() + " isn't defined: (" + set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn()+")");
+				throw new ParserException("let " + set.getLet().getIdent().getIdentifier() + " isn't defined: (" + set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn() + ")");
 			}
-			/*TypeNode varType = ((LetScopeDescriptor) container.getClosestDescriptor(set.getLet().getIdent().getIdentifier())).getNode().getType();
-			if (varType.isPointer() ^ set.getLet().isPointer()) {
-				throw new ParserException("let types " + set.getLet().getIdent().getIdentifier() + " don't match: "+varType+" & "+set.getLet()+" (" + set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn()+")");
-			}*/
 			parent.add(set);
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.SEMICOLON)) {
@@ -133,11 +129,10 @@ public class L3Parser {
 			LetTypeSetNode typeDefNode = new LetTypeSetNode(val, newValue);
 
 			return typeDefNode;
-		}else if(peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT)) {
+		} else if (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT)) {
 			consume(TokenType.BIT_AND);
 			LetTypeSetNode typeSet = parseLetTypeSet();
 			typeSet.getLet().add(new NumLitNode(0));
-			System.err.println(typeSet.toString(0));
 			return typeSet;
 		}
 		throw new ParserException("Undefined Var def");
@@ -313,7 +308,7 @@ public class L3Parser {
 
 	private LetTypeDefNode parseLetTypeDef(Node parent) throws ParserException {
 		ScopeContainer container = parent.getClosestContainer();
-		
+
 		if ((peek(TokenType.LET) && (peek(1, TokenType.STATIC, TokenType.TYPE)) || peek(1, TokenType.TYPE))) { // generic type
 			Token let = consume(TokenType.LET);
 			boolean iStatic = peek(TokenType.STATIC);
@@ -426,6 +421,16 @@ public class L3Parser {
 		if (canParseArrayInit()) {
 			return parseArrayInit();
 		}
+		
+		if(peek(TokenType.COLON)) {
+			consume(TokenType.COLON);
+			Node varNode = parseExpression();
+			if(varNode instanceof VarNumNode) {
+				return new LocalizingNode((VarNumNode) varNode);
+			}else {
+				throw new ParserException("Can only localize vars");
+			}
+		}
 
 		if (peek(TokenType.STRING)) {
 			return new StringLitNode((StringLiteralToken) consume(TokenType.STRING));
@@ -470,6 +475,15 @@ public class L3Parser {
 			return parseFunCall();
 		} else if (peek(TokenType.IDENT)) {
 			return parseVar();
+		} else if (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT)) {
+			consume(TokenType.BIT_AND);
+			Node identNode = parseTerm();
+			if(identNode instanceof VarNumNode) {
+				identNode.add(new NumLitNode(0L)); // set as pointer
+			}else {
+				throw new ParserException("Cannot treat lit/... as pointer");
+			}
+			return identNode;
 		}
 		return new NumLitNode(0L); // return 0 to make the value negative
 	}

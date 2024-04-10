@@ -6,18 +6,16 @@ fun int16 double(int16 t) {
 }
 
 fun int main() {
+	let int16 a = 55;
 
-	let int16 a = 0;
-
-	let int16: arr = new int16[3];	
+	let int16: arr = new int16[3];
+	
+	// let int16: arr2 = arr;
+	
 	arr[0] = 68;
-	arr[double(0)] = 69;
-	arr[double(1)] = 70;
 	
-	ststarr[1] = 155;
-	ststarr[2] = ststarr[1]-1;
-	
-	&arr = 11;
+	// &arr = &ststarr;
+	arr = :&a;
 	
 	return int arr[0];
 }
