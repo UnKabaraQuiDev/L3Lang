@@ -3,7 +3,6 @@ package lu.pcy113.l3.parser.ast;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
-import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 import lu.pcy113.l3.utils.StringUtils;
 

@@ -105,14 +105,16 @@ public class X86Compiler extends L3Compiler {
 
 		int localVarCount = getLocalVarCount(container);
 
-		System.out.println(def.getNode() + " is local var: " + ((LetTypeDefNode) def.getNode()).getLetIndex() + "/" + localVarCount);
-
 		if (!(def.getNode() instanceof LetTypeDefNode))
 			throw new CompilerException("Unknown node type");
 
 		// int argOffset = def.getNode().isArg() ? 1 : 0;
 
-		if (node.getLet().hasOffset()) {
+		if (node.getLet().isPointer() && node.getLet().isArrayOffset()) { // array set
+			if (!def.getNode().getType().isPointer()) {
+				throw new CompilerException("Var with offset is not a pointer.");
+			}
+
 			compileCalcOffset(node.getLet().getOffset());
 
 			if (def.getNode().isiStatic()) {
@@ -122,7 +124,17 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("add ebx, esp  ; Adding offset for arr");
 				writeinstln("mov dword [ebx + " + (localVarCount - def.getNode().getLetIndex()) * 4 + "], eax ; load local " + def + " = " + node.getExpr());
 			}
-		} else {
+		} else if (node.getLet().isPointer() && !node.getLet().isArrayOffset()) { // pointer value set
+			if (!def.getNode().getType().isPointer()) {
+				throw new CompilerException("Var with offset is not a pointer.");
+			}
+			
+			if (def.getNode().isiStatic()) {
+				writeinstln("mov " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [esp], eax ; load static pointer " + def + " = " + node.getExpr());
+			} else {
+				writeinstln("mov dword [esp + " + (localVarCount - def.getNode().getLetIndex()) * 4 + "], eax ; load local pointer " + def + " = " + node.getExpr());
+			}
+		} else { // just set
 			if (def.getNode().isiStatic()) {
 				writeinstln("mov " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "], eax ; load static " + def + " = " + node.getExpr());
 			} else {
@@ -401,7 +413,7 @@ public class X86Compiler extends L3Compiler {
 		} else if (node instanceof FunCallNode) {
 			FunCallNode funCall = (FunCallNode) node;
 			compileFunCallNode(funCall);
-			if(!reg.equals("eax"))
+			if (!reg.equals("eax"))
 				writeinstln("mov " + reg + ", eax");
 		} else {
 			throw new CompilerException("Expression not implemented: " + node);
@@ -477,21 +489,20 @@ public class X86Compiler extends L3Compiler {
 
 			int scopeLetCount = getLocalVarCount(node.getClosestContainer());
 
-			if (numNode.hasOffset()) { // is array var
+			if (numNode.isPointer()) { // is array var
 				writeinstln("; Compute offset into ebx");
 				writeinstln("push eax  ; Pushing to stack in case offset calc uses eax");
 				compileCalcOffset(numNode.getOffset());
 				writeinstln("pop eax  ; Poping from stack to get value back");
-				if(def.getNode().isiStatic()) {
-					writeinstln("lea ecx, "+getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName()+"]  ; Load static address");
+				if (def.getNode().isiStatic()) {
+					writeinstln("lea ecx, " + getMovTypeNameBySize(MemorySize.getBytes(def.getNode().getType().getIdent().getType())) + " [" + def.getAsmName() + "]  ; Load static address");
 					writeinstln("add ebx, ecx  ; Add static address to offset ebx");
-				}else {
+				} else {
 					writeinstln("add ebx, esp  ; Add pointer to offset ebx");
 				}
 
 				if (def.getNode().hasExpr()) { // let
 					if (def.getNode().isiStatic()) {
-						System.err.println("iz still static: "+node);
 						writeinstln("mov " + reg + ", [ebx]  ; load static " + def + " = " + def.getNode().getExpr());
 					} else {
 						writeinstln("mov " + reg + ", [ebx + " + (scopeLetCount - def.getNode().getLetIndex()) * 4 + "]  ; load local 1 " + def + " = " + def.getNode().getExpr());

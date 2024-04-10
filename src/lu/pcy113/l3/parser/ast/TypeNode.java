@@ -36,7 +36,7 @@ public class TypeNode extends Node {
 	
 	@Override
 	public String toString() {
-		return super.toString() + "(" + generic + ", " + token.getType() + ", " + isPointer() + ")";
+		return super.toString() + "(generic=" + generic + ", " + token.getType() + ", pointer=" + isPointer() + ")";
 	}
 
 }

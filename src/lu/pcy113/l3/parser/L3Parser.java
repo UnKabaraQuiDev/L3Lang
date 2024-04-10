@@ -5,7 +5,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
@@ -67,32 +66,38 @@ public class L3Parser {
 		ScopeContainer container = parent.getClosestContainer();
 
 		if (peek(TokenType.LET)) { // var declaration
-			LetTypeDefNode ltdn = parseLetTypeDef(container);
+			LetTypeDefNode ltdn = parseLetTypeDef(parent);
 			if (container.containsDescriptor(ltdn.getIdent().getIdentifier())) {
 				throw new ParserException("let " + ltdn.getIdent().getIdentifier() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
-			container.addDescriptor(ltdn.getIdent().getIdentifier(), new LetScopeDescriptor(ltdn.getIdent(), ltdn));
 			parent.add(ltdn);
+			container.addDescriptor(ltdn.getIdent().getIdentifier(), new LetScopeDescriptor(ltdn.getIdent(), ltdn));
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))) { // function call
 			parent.add(parseFunCall());
 			consume(TokenType.SEMICOLON);
 		} else if (canParseFun()) {
-			FunDefNode ltdn = parseFunDefExpr();
+			FunDefNode ltdn = parseFunDefExpr(parent);
 			if (container.containsDescriptor(ltdn.getIdent().getIdentifier())) {
 				throw new ParserException("fun " + ltdn.getIdent().getIdentifier() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
 			container.addDescriptor(ltdn.getIdent().getIdentifier(), new FunScopeDescriptor(ltdn.getIdent(), ltdn));
-			parent.add(ltdn);
 		} else if (parent instanceof FunBodyDefNode && peek(TokenType.RETURN)) {
 			ReturnNode rtn = parseReturnExpr();
 			parent.add(rtn);
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.COMMENT)) {
-			consume(TokenType.COMMENT);
-			// ignore
-		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN) || peek(1, TokenType.BRACKET_OPEN))) {
+			consume(TokenType.COMMENT); // ignore
+		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)) || (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT))) {
 			LetTypeSetNode set = parseLetTypeSet();
+			System.out.println(container.getDescriptors());
+			if (!container.containsDescriptor(set.getLet().getIdent().getIdentifier())) {
+				throw new ParserException("let " + set.getLet().getIdent().getIdentifier() + " isn't defined: (" + set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn()+")");
+			}
+			/*TypeNode varType = ((LetScopeDescriptor) container.getClosestDescriptor(set.getLet().getIdent().getIdentifier())).getNode().getType();
+			if (varType.isPointer() ^ set.getLet().isPointer()) {
+				throw new ParserException("let types " + set.getLet().getIdent().getIdentifier() + " don't match: "+varType+" & "+set.getLet()+" (" + set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn()+")");
+			}*/
 			parent.add(set);
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.SEMICOLON)) {
@@ -103,10 +108,10 @@ public class L3Parser {
 	}
 
 	private LetTypeSetNode parseLetTypeSet() throws ParserException {
-		if ((peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN) || peek(1, TokenType.BRACKET_OPEN)))) {
+		if ((peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)))) {
 			// generic type
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
-			
+
 			boolean array = peek(TokenType.BRACKET_OPEN);
 			Node arrayIndex = null;
 			Node val = null;
@@ -116,10 +121,10 @@ public class L3Parser {
 				consume(TokenType.BRACKET_CLOSE);
 
 				val = new VarNumNode(ident, arrayIndex);
-			}else {
+			} else {
 				val = new VarNumNode(ident);
 			}
-			
+
 			Token assign = consume(TokenType.ASSIGN);
 
 			Node newValue = parseExpression();
@@ -128,6 +133,12 @@ public class L3Parser {
 			LetTypeSetNode typeDefNode = new LetTypeSetNode(val, newValue);
 
 			return typeDefNode;
+		}else if(peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT)) {
+			consume(TokenType.BIT_AND);
+			LetTypeSetNode typeSet = parseLetTypeSet();
+			typeSet.getLet().add(new NumLitNode(0));
+			System.err.println(typeSet.toString(0));
+			return typeSet;
 		}
 		throw new ParserException("Undefined Var def");
 	}
@@ -151,8 +162,7 @@ public class L3Parser {
 		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.VOID) && peek(2, TokenType.IDENT) && (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(4, TokenType.PAREN_OPEN));
 	}
 
-	private FunDefNode parseFunDefExpr() throws ParserException {
-		System.out.println(peek() + " -> " + peek(1) + " -> " + peek(2) + " -> " + peek(3) + " -> " + peek(4));
+	private FunDefNode parseFunDefExpr(Node container) throws ParserException {
 		if (canParseGenericTypeFun()) {
 			// generic return type
 			Token fun = consume(TokenType.FUN);
@@ -164,6 +174,7 @@ public class L3Parser {
 			}
 
 			FunDefNode fdn = new FunDefNode(returnType, ident);
+			container.add(fdn);
 
 			FunArgsDefNode args = parseFunArgsDef(fdn);
 
@@ -300,9 +311,10 @@ public class L3Parser {
 		}
 	}
 
-	private LetTypeDefNode parseLetTypeDef(ScopeContainer container) throws ParserException {
-		if ((peek(TokenType.LET) && (peek(1, TokenType.STATIC, TokenType.TYPE)) || peek(1, TokenType.TYPE))) {
-			// generic type
+	private LetTypeDefNode parseLetTypeDef(Node parent) throws ParserException {
+		ScopeContainer container = parent.getClosestContainer();
+		
+		if ((peek(TokenType.LET) && (peek(1, TokenType.STATIC, TokenType.TYPE)) || peek(1, TokenType.TYPE))) { // generic type
 			Token let = consume(TokenType.LET);
 			boolean iStatic = peek(TokenType.STATIC);
 			if (iStatic) {
@@ -321,7 +333,7 @@ public class L3Parser {
 					}
 				}
 				return 0;
-			}).reduce(0, (a, b) -> a + b)+1;
+			}).reduce(0, (a, b) -> a + b) + 1;
 
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, (IdentifierToken) ident, iStatic, false);
 
@@ -336,11 +348,11 @@ public class L3Parser {
 					parseArrayArgs().forEach(typeDefNode::add);
 					consume(TokenType.CURLY_CLOSE);
 				}
-				typeDefNode.setLetIndex(typeDefNode.getLetIndex()+typeDefNode.getChildren().size());
+				typeDefNode.setLetIndex(typeDefNode.getLetIndex() + typeDefNode.getChildren().size());
 			} else {
 				typeDefNode.add(parseExpression());
-				if(typeDefNode.getExpr() instanceof ArrayInitNode) {
-					typeDefNode.setLetIndex(typeDefNode.getLetIndex()-1+((ArrayInitNode) typeDefNode.getExpr()).getArraySize());
+				if (typeDefNode.getExpr() instanceof ArrayInitNode) {
+					typeDefNode.setLetIndex(typeDefNode.getLetIndex() - 1 + ((ArrayInitNode) typeDefNode.getExpr()).getArraySize());
 				}
 			}
 

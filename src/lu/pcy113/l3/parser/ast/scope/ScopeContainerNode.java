@@ -14,12 +14,12 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 			return true;
 		}
 		
-		ScopeContainerNode parent = this.getParentContainer();
+		ScopeContainer parent = this.getParentContainer();
 		
 		if(parent == null)
 			return false;
 		
-		return ((ScopeContainerNode) parent).containsDescriptor(name);
+		return parent.containsDescriptor(name);
 	}
 
 	@Override
@@ -68,16 +68,10 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	@Override
 	public HashMap<String, ScopeDescriptor> getDescriptors() {
 		HashMap<String, ScopeDescriptor> ssd = new HashMap<String, ScopeDescriptor>();
-		ssd.putAll(ssd);
-		
-		Node parent = this;
-		while(parent != null) {
-			parent = parent.getParent();
-			if(parent instanceof ScopeContainerNode) {
-				ssd.putAll(((ScopeContainerNode) parent).getLocalDescriptors());
-			}
+		ScopeContainer par = getParentContainer();
+		if(par != null) {
+			ssd.putAll(par.getDescriptors());
 		}
-		
 		return ssd;
 	}
 
