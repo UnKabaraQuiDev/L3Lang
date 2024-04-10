@@ -1,12 +1,14 @@
-fun int16 double() {
-	let int16 b = 13;
-	return int16 b;
+fun int16 double(int16 t) {
+	t = t+1;
+	return int16 t;
 }
 
 fun int main() {
-	let int16 a = 1;
-	let int16 b = 2;
-	double();
-	a = double();
-	return int a;
+
+	let int16: arr = new int16[3];	
+	arr[0] = 68;
+	arr[double(0)] = 69;
+	arr[double(1)] = 70;
+	
+	return int arr[0];
 }

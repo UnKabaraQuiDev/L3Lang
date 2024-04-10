@@ -5,14 +5,15 @@ import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 public class LetTypeDefNode extends Node {
 
 	private IdentifierToken ident;
-	private boolean iStatic;
+	private boolean iStatic, arg;
 	private int letIndex;
 
-	public LetTypeDefNode(int letIndex, TypeNode type, IdentifierToken ident, boolean iStatic) {
+	public LetTypeDefNode(int letIndex, TypeNode type, IdentifierToken ident, boolean iStatic, boolean arg) {
 		add(type);
 		this.letIndex = letIndex;
 		this.ident = ident;
 		this.iStatic = iStatic;
+		this.arg = arg;
 	}
 
 	public TypeNode getType() {
@@ -38,10 +39,19 @@ public class LetTypeDefNode extends Node {
 	public int getLetIndex() {
 		return letIndex;
 	}
+	
+	public void setLetIndex(int letIndex) {
+		this.letIndex = letIndex;
+	}
 
+	public boolean isArg() {
+		return arg;
+	}
+	
 	@Override
 	public String toString() {
 		return super.toString() + "(" + getType().toString() + " " + ident.getIdentifier() + " " + letIndex + ")";
 	}
+
 
 }

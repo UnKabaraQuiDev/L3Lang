@@ -266,7 +266,7 @@ public class L3Parser {
 			TypeNode typeNode = parseType();
 			Token ident = consume(TokenType.IDENT);
 
-			LetTypeDefNode typeDefNode = new LetTypeDefNode(index, typeNode, (IdentifierToken) ident, false); // TODO: Array
+			LetTypeDefNode typeDefNode = new LetTypeDefNode(index, typeNode, (IdentifierToken) ident, false, true); // TODO: Array
 
 			return typeDefNode;
 		} else if (peek(TokenType.LET) && peek(TokenType.IDENT)) {
@@ -311,16 +311,6 @@ public class L3Parser {
 
 			Token ident = consume(TokenType.IDENT);
 
-			/*
-			 * int nonStaticLetIndex = (int) (long)
-			 * container.getLocalDescriptors().values().stream().map((ScopeDescriptor i) ->
-			 * { if (i instanceof LetScopeDescriptor) { if (((LetScopeDescriptor)
-			 * i).getNode() instanceof LetTypeDefNode) { return ((LetTypeDefNode)
-			 * ((LetScopeDescriptor) i).getNode()).isiStatic() ? 0 : 1; } else if
-			 * (((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) { return 1; }
-			 * } return 0; }).reduce(0, (a, b) -> a + b);
-			 */
-
 			int nonStaticLetIndex = (int) (long) container.getLocalDescriptors().values().stream().map((ScopeDescriptor i) -> {
 				if (i instanceof LetScopeDescriptor) {
 					LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
@@ -332,7 +322,7 @@ public class L3Parser {
 				return 0;
 			}).reduce(0, (a, b) -> a + b)+1;
 
-			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, (IdentifierToken) ident, iStatic);
+			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, (IdentifierToken) ident, iStatic, false);
 
 			if (!peek(TokenType.ASSIGN))
 				return typeDefNode;
@@ -345,8 +335,12 @@ public class L3Parser {
 					parseArrayArgs().forEach(typeDefNode::add);
 					consume(TokenType.CURLY_CLOSE);
 				}
+				typeDefNode.setLetIndex(typeDefNode.getLetIndex()+typeDefNode.getChildren().size());
 			} else {
 				typeDefNode.add(parseExpression());
+				if(typeDefNode.getExpr() instanceof ArrayInitNode) {
+					typeDefNode.setLetIndex(typeDefNode.getLetIndex()-1+((ArrayInitNode) typeDefNode.getExpr()).getArraySize());
+				}
 			}
 
 			return typeDefNode;
