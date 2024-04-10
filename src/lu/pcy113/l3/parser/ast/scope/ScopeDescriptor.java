@@ -8,7 +8,7 @@ public class ScopeDescriptor {
 
 	private IdentifierToken ident;
 	private String asmName = "sd_" + index++;
-
+	
 	public ScopeDescriptor(IdentifierToken ident) {
 		this.ident = ident;
 	}

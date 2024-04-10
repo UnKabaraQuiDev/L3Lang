@@ -330,7 +330,7 @@ public class L3Parser {
 					}
 				}
 				return 0;
-			}).reduce(0, (a, b) -> a + b);
+			}).reduce(0, (a, b) -> a + b)+1;
 
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, (IdentifierToken) ident, iStatic);
 
