@@ -112,13 +112,14 @@ public class X86Compiler extends L3Compiler {
 
 		if (node.getLet().isPointer() && node.getLet().isArrayOffset()) { // array set
 			compileComputeExpr("ebx", node.getLet().getOffset());
+			writeinstln("imul ebx, 4");
 			System.err.println("stack pos: " + STACK_POS + " def: " + def.getLetIndex() + " size: " + def.getType().getSize());
 
 			if (def.isiStatic()) { // static
 				writeinstln("mov [" + desc.getAsmName() + " + ebx], eax  ; compileLetTypeSet(" + node + "): static");
 			} else { // local
-				writeinstln("mov ecx, [esp + " + (STACK_POS - (def.getLetIndex()) * def.getType().getSize()) + "]  ; Loading pointer");
-				writeinstln("add ecx, ebx");
+				writeinstln("mov ecx, [esp + " + (STACK_POS - (def.getLetIndex() - 1) * def.getType().getSize()) + "]  ; Loading pointer");
+				writeinstln("sub ecx, ebx");
 				writeinstln("mov [ecx], eax  ; compileLetTypeSet(" + node + "): local");
 				// writeinstln("mov [esp + " + (STACK_POS - (def.getLetIndex()) *
 				// def.getType().getSize()) + " + ebx], eax ; compileLetTypeSet(" + node + "):
@@ -209,16 +210,21 @@ public class X86Compiler extends L3Compiler {
 
 		if (node.hasExpr()) { // set
 			if (node.getExpr() instanceof ArrayInitNode) {
+				writeinstln("push esp   ; Setup array pointer");
+				writeinstln("sub dword [esp], 4");
+				
 				int arrSize = ((ArrayInitNode) node.getExpr()).getArraySize() * node.getType().getSize();
 				size += arrSize;
 				writeinstln("sub esp, " + arrSize + "  ; Setup array");
 
-				writeinstln("mov eax, esp  ; Setup array pointer");
-				writeinstln("add eax, 1");
+				/*
+				 * writeinstln("mov eax, esp  ; Setup array pointer");
+				 * writeinstln("add eax, 1");
+				 */
 			} else {
 				compileComputeExpr("eax", node.getExpr());
+				writeinstln("push eax  ; Push var: " + desc.getIdent().getIdentifier());
 			}
-			writeinstln("push eax  ; Push var: " + desc.getIdent().getIdentifier());
 		} else { // alloc only
 
 			writeinstln("sub esp, " + size);
@@ -311,11 +317,15 @@ public class X86Compiler extends L3Compiler {
 
 		if (node.isPointer() && node.isArrayOffset()) { // array
 			compileComputeExpr("ebx", node.getOffset());
+			writeinstln("imul ebx, 4");
 
 			if (def.isiStatic()) { // static
 				writeinstln("mov " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLetTypeSet(" + node + "): static");
 			} else { // local
-				writeinstln("mov " + reg + ", [esp + " + (STACK_POS - def.getLetIndex() * def.getType().getSize()) + " + ebx]  ; compileLetTypeSet(" + node + "): local");
+				writeinstln("mov ecx, [esp + " + (STACK_POS - (def.getLetIndex() * def.getType().getSize())) + "]  ; Loading pointer");
+				writeinstln("add ecx, ebx");
+				// writeinstln("mov [ecx], eax  ; compileLetTypeSet(" + node + "): local");
+				writeinstln("mov " + reg + ", [ecx] ; compileLetTypeSet(" + node + "): local");
 			}
 		} else if (node.isPointer() && !node.isArrayOffset()) { // is only pointer
 			implement();
