@@ -1,11 +1,14 @@
 let static int16 b = 13;
 
-fun int16 double(int16 t, int16 x) {
-	return int16 t*x;
+fun int16 double(int16: t, int16 x) {
+	return int16 t[0]*x;
 }
 
 fun int main() {
+	let int16: arr = new int[3];
+	arr[0] = 1;
+	arr[1] = 2;
+	arr[2] = 3;
 	break#("stop");
-	let int16 x = 2;
-	return int double(x, 3);
+	return int double(arr, 3);
 }

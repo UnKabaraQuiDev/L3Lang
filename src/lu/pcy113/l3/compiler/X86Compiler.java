@@ -128,7 +128,6 @@ public class X86Compiler extends L3Compiler {
 		if (node.getLet().isPointer() && node.getLet().isArrayOffset()) { // array set
 			compileComputeExpr("ebx", node.getLet().getOffset());
 			writeinstln("imul ebx, 4");
-			System.err.println("stack pos: " + STACK_POS + " def: " + def.getLetIndex() + " size: " + def.getType().getSize());
 
 			if (def.isiStatic()) { // static
 				writeinstln("mov [" + desc.getAsmName() + " + ebx], eax  ; compileLetTypeSet(" + node + "): static");
@@ -136,9 +135,6 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("mov ecx, [esp + " + (STACK_POS - (def.getLetIndex() - 1) * def.getType().getSize()) + "]  ; Loading pointer");
 				writeinstln("add ecx, ebx");
 				writeinstln("mov [ecx], eax  ; compileLetTypeSet(" + node + "): local");
-				// writeinstln("mov [esp + " + (STACK_POS - (def.getLetIndex()) *
-				// def.getType().getSize()) + " + ebx], eax ; compileLetTypeSet(" + node + "):
-				// local");
 			}
 		} else if (node.getLet().isPointer() && !node.getLet().isArrayOffset()) { // pointer set
 			implement();
@@ -243,7 +239,7 @@ public class X86Compiler extends L3Compiler {
 				size += arrSize;
 
 				writeinstln("push esp   ; Setup array pointer");
-				writeinstln("sub dword [esp], " + (arrSize + 4));
+				writeinstln("sub dword [esp], " + size);
 
 				writeinstln("sub esp, " + arrSize + "  ; Setup array");
 
@@ -384,26 +380,32 @@ public class X86Compiler extends L3Compiler {
 		LetScopeDescriptor desc = (LetScopeDescriptor) container.getClosestDescriptor(ident);
 		LetTypeDefNode def = desc.getNode();
 
-		if (node.isPointer() && node.isArrayOffset()) { // array
+		if (def.getType().isPointer() && node.isArrayOffset()) { // array
 			compileComputeExpr("ebx", node.getOffset());
 			writeinstln("imul ebx, 4");
 
 			if (def.isiStatic()) { // static
-				writeinstln("mov " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLetTypeSet(" + node + "): static");
+				writeinstln("mov " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadVarNum(" + node + "): static");
 			} else { // local
-				writeinstln("mov ecx, [esp + " + (STACK_POS - (def.getLetIndex()) * def.getType().getSize()) + "]  ; Loading pointer");
+				GlobalLogger.log("1 "+node+" stackpos: "+STACK_POS);
+				writeinstln("mov ecx, [esp + " + (STACK_POS - (def.getLetIndex() - 1) * def.getType().getSize()) + "]  ; Loading pointer");
 				writeinstln("add ecx, ebx");
-				writeinstln("mov " + reg + ", [ecx] ; compileLetTypeSet(" + node + "): local");
+				writeinstln("mov " + reg + ", [ecx] ; compileLoadVarNum(" + node + "): local");
 			}
-		} else if (node.isPointer() && !node.isArrayOffset()) { // is only pointer
-			implement();
-		} else if (!node.isPointer()) { // direct access
+		} else if (def.getType().isPointer() && !node.isArrayOffset()) { // is only pointer
+			if (def.isiStatic()) { // static
+				writeinstln("lea " + reg + ", [" + desc.getAsmName() + "]  ; compileLoadVarNum(" + node + "): static");
+			} else { // local
+				GlobalLogger.log("2 "+node+" stackpos: "+STACK_POS);
+				writeinstln("lea "+reg+", [esp + " + (STACK_POS - (def.getLetIndex()) * def.getType().getSize()) + "]  ; Loading pointer");
+				// writeinstln("mov " + reg + ", [ecx] ; compileLoadVarNum(" + node + "): local");
+			}
+		} else if (!def.getType().isPointer()) { // direct access
 			if (def.isiStatic()) {
 				writeinstln("mov " + reg + ", [" + desc.getAsmName() + "]  ; compileLoadVarNum(" + node + "): static");
 			} else {
-				GlobalLogger.log("1 "+node+" stackpos: "+STACK_POS);
+				GlobalLogger.log("3 "+node+" stackpos: "+STACK_POS);
 				writeinstln("mov " + reg + ", [esp + " + (STACK_POS - (def.getLetIndex() + 1 - (def.isArg() ? 1 : 0)) * def.getType().getSize()) + "]  ; compileLoadVarNum(" + node + "): local; STACK_POS = " + STACK_POS);
-				GlobalLogger.log("2 stackpos: "+STACK_POS);
 			}
 		}
 	}
