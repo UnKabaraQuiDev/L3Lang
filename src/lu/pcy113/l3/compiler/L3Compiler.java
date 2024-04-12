@@ -13,7 +13,7 @@ public abstract class L3Compiler {
 	protected RuntimeNode root;
 	protected File outFile;
 	protected FileWriter fw;
-	protected StringBuilder dataBuilder;
+	protected StringBuilder dataBuilder, textBuilder;
 
 	public L3Compiler(RuntimeNode env, String outPath) {
 		this.root = env;
@@ -22,16 +22,14 @@ public abstract class L3Compiler {
 
 	public abstract void compile() throws CompilerException;
 
-	private int sectionIndex = 1;
-	protected String newSection() {
-		return "_sec_"+(sectionIndex++);
-	}
-	
-	private int varIndex = 1;
-	protected String newVar() {
-		return "var_"+(varIndex++);
-	}
-	
+	/*
+	 * private int sectionIndex = 1; protected String newSection() { return
+	 * "_sec_"+(sectionIndex++); }
+	 * 
+	 * private int varIndex = 1; protected String newVar() { return
+	 * "var_"+(varIndex++); }
+	 */
+
 	protected void exec(String cmd, File dir) throws IOException, InterruptedException {
 		Process process = Runtime.getRuntime().exec(cmd);
 
@@ -43,7 +41,7 @@ public abstract class L3Compiler {
 			System.out.println(line);
 		}
 		reader.close();
-		
+
 		reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 		while ((line = reader.readLine()) != null) {
 			System.err.println(line);
@@ -56,9 +54,13 @@ public abstract class L3Compiler {
 	protected void writeinstln(String string) throws CompilerException {
 		writeln("\t" + string);
 	}
-	
+
 	protected void writedataln(String string) throws CompilerException {
-		dataBuilder.append("\t"+string+"\n");
+		dataBuilder.append("\t" + string + "\n");
+	}
+
+	protected void writetextln(String string) throws CompilerException {
+		textBuilder.append("\t" + string + "\n");
 	}
 
 	protected void writeln(String string) throws CompilerException {
@@ -77,7 +79,16 @@ public abstract class L3Compiler {
 			throw new CompilerException("Could not append data section to output writer: " + outFile, e);
 		}
 	}
-	
+
+	protected void appendText() throws CompilerException {
+		try {
+			fw.write("section .text\n");
+			fw.write(textBuilder.toString());
+		} catch (IOException e) {
+			throw new CompilerException("Could not append data section to output writer: " + outFile, e);
+		}
+	}
+
 	protected void flushAndClose() throws CompilerException {
 		try {
 			fw.flush();
@@ -90,6 +101,7 @@ public abstract class L3Compiler {
 	protected FileWriter createWriter() throws CompilerException {
 		try {
 			dataBuilder = new StringBuilder();
+			textBuilder = new StringBuilder();
 			return new FileWriter(outFile);
 		} catch (IOException e) {
 			throw new CompilerException("Could not create output writer to: " + outFile, e);

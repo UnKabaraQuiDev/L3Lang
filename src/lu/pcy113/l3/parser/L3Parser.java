@@ -324,11 +324,11 @@ public class L3Parser {
 					LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
 					if (letDesc.getNode() instanceof LetTypeDefNode) {
 						LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();
-						return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize()+1 : 1);
+						return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize() + 1 : 1);
 					}
 				}
 				return 0;
-			}).reduce(0, (a, b) -> a + b) + 1;
+			}).reduce(0, (a, b) -> a + b);
 
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, (IdentifierToken) ident, iStatic, false);
 
@@ -421,13 +421,13 @@ public class L3Parser {
 		if (canParseArrayInit()) {
 			return parseArrayInit();
 		}
-		
-		if(peek(TokenType.COLON)) {
+
+		if (peek(TokenType.COLON)) {
 			consume(TokenType.COLON);
 			Node varNode = parseExpression();
-			if(varNode instanceof VarNumNode) {
+			if (varNode instanceof VarNumNode) {
 				return new LocalizingNode((VarNumNode) varNode);
-			}else {
+			} else {
 				throw new ParserException("Can only localize vars");
 			}
 		}
@@ -478,9 +478,9 @@ public class L3Parser {
 		} else if (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT)) {
 			consume(TokenType.BIT_AND);
 			Node identNode = parseTerm();
-			if(identNode instanceof VarNumNode) {
+			if (identNode instanceof VarNumNode) {
 				identNode.add(new NumLitNode(0L)); // set as pointer
-			}else {
+			} else {
 				throw new ParserException("Cannot treat lit/... as pointer");
 			}
 			return identNode;

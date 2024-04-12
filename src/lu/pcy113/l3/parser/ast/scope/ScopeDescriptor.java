@@ -20,6 +20,10 @@ public class ScopeDescriptor {
 	public String getAsmName() {
 		return asmName;
 	}
+	
+	public void setAsmName(String asmName) {
+		this.asmName = asmName;
+	}
 
 	@Override
 	public String toString() {

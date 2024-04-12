@@ -19,6 +19,10 @@ public class TypeNode extends Node {
 		this.pointer = pointer;
 	}
 
+	public int getSize() {
+		return 4;
+	}
+	
 	public boolean isVoid() {
 		return getIdent().getType().equals(TokenType.VOID);
 	}
