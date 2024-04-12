@@ -12,7 +12,7 @@ public class FunCallNode extends Node {
 		this.preset = preset;
 	}
 	
-	public IdentifierToken getName() {
+	public IdentifierToken getIdent() {
 		return name;
 	}
 	

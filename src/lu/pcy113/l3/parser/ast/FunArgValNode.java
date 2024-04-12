@@ -9,7 +9,7 @@ public class FunArgValNode extends Node {
 		add(node);
 	}
 
-	public Node getExpression() {
+	public Node getExpr() {
 		return children.get(0);
 	}
 	

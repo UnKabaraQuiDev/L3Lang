@@ -13,6 +13,7 @@ import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.ArrayInitNode;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.FunArgDefNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsDefNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
@@ -189,9 +190,10 @@ public class L3Parser {
 
 		int index = 0;
 		while (!peek(TokenType.PAREN_CLOSE)) {
-			LetTypeDefNode arg = parseFunArgDef(index++);
+			FunArgDefNode arg = parseFunArgDef(index++);
+			LetTypeDefNode let = arg.getLet();
 			argsNode.add(arg);
-			fdn.addDescriptor(arg.getIdent().getIdentifier(), new LetScopeDescriptor(arg.getIdent(), arg));
+			fdn.addDescriptor(let.getIdent().getIdentifier(), new LetScopeDescriptor(let.getIdent(), let));
 			if (peek(TokenType.COMMA)) {
 				consume();
 			}
@@ -267,17 +269,17 @@ public class L3Parser {
 		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN) || peek(TokenType.IDENT);
 	}
 
-	private LetTypeDefNode parseFunArgDef(int index) throws ParserException {
-		if ((peek(TokenType.TYPE) && peek(1, TokenType.IDENT))) {
+	private FunArgDefNode parseFunArgDef(int index) throws ParserException {
+		if ((peek(TokenType.TYPE) && peek(1, TokenType.IDENT)) || (peek(TokenType.TYPE) && peek(1, TokenType.COLON) && peek(2, TokenType.IDENT))) {
 			// generic type
 			TypeNode typeNode = parseType();
 			Token ident = consume(TokenType.IDENT);
 
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(index, typeNode, (IdentifierToken) ident, false, true); // TODO: Array
 
-			return typeDefNode;
-		} else if (peek(TokenType.LET) && peek(TokenType.IDENT)) {
-			assert false : "Defined typed not defined yet.";
+			return new FunArgDefNode(typeDefNode);
+		} else if (peek(TokenType.IDENT)) {
+			throw new ParserException("Defined typed not defined yet.");
 		}
 		throw new ParserException("Undefined Var def");
 	}
