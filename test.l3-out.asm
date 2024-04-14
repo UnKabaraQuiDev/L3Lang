@@ -1,5 +1,5 @@
 _start:
-	mov eax, 13  ; compileComputeExpr(NumLitNode(13))
+	mov dword eax, 13  ; compileComputeExpr(NumLitNode(13))
 	mov [sd_0], eax  ; Setting: b
 	call main  ; Call main
 	; Exit program
@@ -10,61 +10,85 @@ main:  ; main
 	push esp   ; Setup array pointer
 	sub dword [esp], 24
 	sub esp, 20  ; Setup array
-	mov eax, 116  ; compileComputeExpr(NumLitNode(116))
+	mov dword eax, 116  ; compileComputeExpr(NumLitNode(116))
 	mov [esp + 0], eax
-	mov eax, 101  ; compileComputeExpr(NumLitNode(101))
+	mov dword eax, 101  ; compileComputeExpr(NumLitNode(101))
 	mov [esp + 4], eax
-	mov eax, 115  ; compileComputeExpr(NumLitNode(115))
+	mov dword eax, 115  ; compileComputeExpr(NumLitNode(115))
 	mov [esp + 8], eax
-	mov eax, 116  ; compileComputeExpr(NumLitNode(116))
+	mov dword eax, 116  ; compileComputeExpr(NumLitNode(116))
 	mov [esp + 12], eax
-	mov eax, 0  ; compileComputeExpr(NumLitNode(0))
+	mov dword eax, 0  ; compileComputeExpr(NumLitNode(0))
 	mov [esp + 16], eax
-	; Exit program
-	mov ebx, 2  ; compileComputeExpr(NumLitNode(2))
-	mov eax, 1 ; Syscall exit
-	int 0x80   ; Syscall call
+stop:  ; breakpoint at: 38:1
 	push esp   ; Setup array pointer
-	sub dword [esp], 16
-	sub esp, 12  ; Setup array
-stop:  ; breakpoint at: 12:1
-	mov eax, 2  ; compileComputeExpr(NumLitNode(2))
-	mov ebx, 0  ; compileComputeExpr(NumLitNode(0))
-	imul ebx, 4
-	mov ecx, [esp + 12]  ; Loading pointer, stack = 40, index = 3
-	add ecx, ebx
-	mov [ecx], eax  ; compileLetTypeSet(LetTypeSetNode(lu.pcy113.l3.lexer.tokens.IdentifierToken[line=13, column=1, type=lu.pcy113.l3.lexer.TokenType[IDENT, fixed=false, string=false], identifier=arr])): local pointer
-	mov eax, 2  ; compileComputeExpr(NumLitNode(2))
-	mov ebx, 1  ; compileComputeExpr(NumLitNode(1))
-	imul ebx, 4
-	mov ecx, [esp + 12]  ; Loading pointer, stack = 40, index = 3
-	add ecx, ebx
-	mov [ecx], eax  ; compileLetTypeSet(LetTypeSetNode(lu.pcy113.l3.lexer.tokens.IdentifierToken[line=14, column=1, type=lu.pcy113.l3.lexer.TokenType[IDENT, fixed=false, string=false], identifier=arr])): local pointer
-	mov eax, 3  ; compileComputeExpr(NumLitNode(3))
-	mov ebx, 2  ; compileComputeExpr(NumLitNode(2))
-	imul ebx, 4
-	mov ecx, [esp + 12]  ; Loading pointer, stack = 40, index = 3
-	add ecx, ebx
-	mov [ecx], eax  ; compileLetTypeSet(LetTypeSetNode(lu.pcy113.l3.lexer.tokens.IdentifierToken[line=15, column=1, type=lu.pcy113.l3.lexer.TokenType[IDENT, fixed=false, string=false], identifier=arr])): local pointer
-	mov eax, 69  ; compileComputeExpr(NumLitNode(69))
-	push eax  ; Push var: x
-	mov eax, [esp + 36] ; compileLoadVarNum(VarNumNode(arr, pointer=false, arrayOffset=false)): local
+	sub dword [esp], 20
+	sub esp, 16  ; Setup array
+	mov dword eax, 115  ; compileComputeExpr(NumLitNode(115))
+	mov [esp + 0], eax
+	mov dword eax, 116  ; compileComputeExpr(NumLitNode(116))
+	mov [esp + 4], eax
+	mov dword eax, 112  ; compileComputeExpr(NumLitNode(112))
+	mov [esp + 8], eax
+	mov dword eax, 0  ; compileComputeExpr(NumLitNode(0))
+	mov [esp + 12], eax
+	mov eax, [esp + 16]  ; Load pointer into reg
 	push eax
-	mov eax, 3  ; compileComputeExpr(NumLitNode(3))
+	call sd_5  ; println
+	add dword esp, 24  ; Free mem from fun call
+	push esp   ; Setup array pointer
+	sub dword [esp], 20
+	sub esp, 16  ; Setup array
+	mov dword eax, 115  ; compileComputeExpr(NumLitNode(115))
+	mov [esp + 0], eax
+	mov dword eax, 116  ; compileComputeExpr(NumLitNode(116))
+	mov [esp + 4], eax
+	mov dword eax, 112  ; compileComputeExpr(NumLitNode(112))
+	mov [esp + 8], eax
+	mov dword eax, 0  ; compileComputeExpr(NumLitNode(0))
+	mov [esp + 12], eax
+	mov eax, [esp + 16]  ; Load pointer into reg
 	push eax
-	call sd_3  ; double
-	add dword esp, 8
+	call sd_3  ; strlen
+	add dword esp, 24  ; Free mem from fun call
 	mov eax, eax
 	jmp main_cln  ; ReturnNode
 main_cln:
-	add esp, 44
+	add esp, 24
 	ret
-sd_3:  ; double
-	mov eax, [esp + 16] ; compileLoadVarNum(VarNumNode(t, pointer=true, arrayOffset=false)): local
-	mov ebx, [esp + 4]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local; STACK_POS = 8
-	imul eax, ebx  ; VarNumNode(t, pointer=true, arrayOffset=false) * VarNumNode(x, pointer=false, arrayOffset=false) -> eax
+sd_3:  ; strlen
+	mov eax, [esp + 4]  ; Copy the address of the string into eax
+	xor ecx, ecx  ; Clear ecx (counter register)
+.loop:
+	cmp dword [eax], 0  ; Compare the byte at the current address with null terminator
+	je .done  ; If null terminator is found, exit loop
+	add dword eax, 4  ; Move to the next byte in the string
+	inc ecx  ; Increment the counter
+	jmp .loop  ; Repeat the loop
+.done:
+	mov dword eax, 0  ; compileComputeExpr(NumLitNode(0))
+	push dword eax  ; Push var: length
+	mov [esp], ecx  ; Move strlen to var
+	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(length, pointer=false, arrayOffset=false)): local; STACK_POS = 8
 	jmp sd_3_cln  ; ReturnNode
 sd_3_cln:
+	add esp, 4
+	ret
+sd_5:  ; println
+	mov ecx, [esp + 4]  ; Copy the address of the string into eax
+.loop:
+	cmp dword [ecx], 0  ; Compare the byte at the current address with null terminator
+	je .done  ; If null terminator is found, exit loop
+	; Print write
+	mov eax, 4  ; Write
+	mov ebx, 1  ; Stdout
+	mov edx, 1  ; Length
+	int 0x80  ; Syscall
+	add dword ecx, 4  ; Move to the next byte in the string
+	jmp .loop  ; Repeat the loop
+.done:
+	jmp sd_5_cln  ; ReturnNode
+sd_5_cln:
 	add esp, 0
 	ret
 section .text

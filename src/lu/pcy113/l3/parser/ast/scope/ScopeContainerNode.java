@@ -5,20 +5,20 @@ import java.util.HashMap;
 import lu.pcy113.l3.parser.ast.Node;
 
 public class ScopeContainerNode extends Node implements ScopeContainer {
-	
+
 	private HashMap<String, ScopeDescriptor> descriptors = new HashMap<>();
-	
+
 	@Override
 	public boolean containsDescriptor(String name) {
-		if(localContainsDescriptor(name)) {
+		if (localContainsDescriptor(name)) {
 			return true;
 		}
-		
+
 		ScopeContainer parent = this.getParentContainer();
-		
-		if(parent == null)
+
+		if (parent == null)
 			return false;
-		
+
 		return parent.containsDescriptor(name);
 	}
 
@@ -31,27 +31,31 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	public ScopeDescriptor getLocalDescriptor(String name) {
 		return descriptors.get(name);
 	}
-	
+
 	@Override
 	public ScopeDescriptor getClosestDescriptor(String name) {
-		if(localContainsDescriptor(name)) {
+		if (localContainsDescriptor(name)) {
 			return descriptors.get(name);
 		}
-		return getContainer(name).getClosestDescriptor(name);
+		ScopeContainer container = getContainer(name);
+		if(container == null) {
+			return null;
+		}
+		return container.getClosestDescriptor(name);
 	}
 
 	@Override
 	public ScopeContainer getContainer(String name) {
-		if(localContainsDescriptor(name)) {
+		if (localContainsDescriptor(name)) {
 			return this;
 		}
-		
+
 		Node parent = this.getParentContainer();
-		
-		if(((ScopeContainerNode) parent).containsDescriptor(name)) {
+
+		if (((ScopeContainerNode) parent).containsDescriptor(name)) {
 			return (ScopeContainer) parent;
 		}
-		
+
 		return null;
 	}
 
@@ -69,7 +73,7 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	public HashMap<String, ScopeDescriptor> getDescriptors() {
 		HashMap<String, ScopeDescriptor> ssd = new HashMap<String, ScopeDescriptor>();
 		ssd.putAll(getLocalDescriptors());
-		if(getParentContainer() != null) {
+		if (getParentContainer() != null) {
 			ssd.putAll(getParentContainer().getDescriptors());
 		}
 		return ssd;
