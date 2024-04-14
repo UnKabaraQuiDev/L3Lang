@@ -310,15 +310,13 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("mov " + reg + ", eax");
 			}
 
-		} else if (node instanceof NumLitNode) {
-			implement(node);
 		} else {
-			implement(node);
+			implement();
 		}
-
 	}
 
 	private void compileComputeExpr(String reg, Node node) throws CompilerException {
+		System.err.println("compute Expr: " + node);
 		if (node instanceof FunCallNode) {
 			compileFunCall((FunCallNode) node);
 			writeinstln("mov " + reg + ", eax");
@@ -380,6 +378,8 @@ public class X86Compiler extends L3Compiler {
 		LetScopeDescriptor desc = (LetScopeDescriptor) container.getClosestDescriptor(ident);
 		LetTypeDefNode def = desc.getNode();
 
+		System.err.println("is ?: " + node + " = " + def.getType().isPointer());
+
 		if (def.getType().isPointer() /* && node.isArrayOffset() */) { // array
 			if (node.isArrayOffset()) {
 				compileComputeExpr("ebx", node.getOffset());
@@ -389,16 +389,17 @@ public class X86Compiler extends L3Compiler {
 					writeinstln("mov " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadVarNum(" + node + "): static");
 				} else { // local
 					GlobalLogger.log("1 " + node + " stackpos: " + STACK_POS);
-					writeinstln("mov ecx, [esp + " + (STACK_POS - (def.getLetIndex()) * def.getType().getSize()) + "]  ; Loading pointer");
+					writeinstln("mov ecx, [esp + " + (STACK_POS - (def.getLetIndex() - 1 - (def.isArg() ? 1 : 0)) * def.getType().getSize()) + "]  ; Loading pointer");
 					writeinstln("add ecx, ebx");
 					writeinstln("mov " + reg + ", [ecx] ; compileLoadVarNum(" + node + "): local");
 				}
 			} else {
+				System.err.println("is pointer wo offset: " + node + " offset=" + (STACK_POS - (def.getLetIndex() - 1 - (def.isArg() ? 1 : 0)) * def.getType().getSize()) + " index=" + def.getLetIndex());
 				if (def.isiStatic()) { // static
 					writeinstln("mov " + reg + ", [" + desc.getAsmName() + "]  ; compileLoadVarNum(" + node + "): static");
 				} else {
 					GlobalLogger.log("2 " + node + " stackpos: " + STACK_POS);
-					writeinstln("mov " + reg + ", [esp + " + (STACK_POS - (def.getLetIndex() - 1) * def.getType().getSize()) + "] ; compileLoadVarNum(" + node + "): local");
+					writeinstln("mov " + reg + ", [esp + " + (STACK_POS - (def.getLetIndex() - 1 - (def.isArg() ? 1 : 0)) * def.getType().getSize()) + "] ; compileLoadVarNum(" + node + "): local");
 				}
 			}
 		} else if (!def.getType().isPointer()) { // direct access

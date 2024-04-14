@@ -10,7 +10,7 @@ main:  ; main
 	push esp   ; Setup array pointer
 	sub dword [esp], 16
 	sub esp, 12  ; Setup array
-	mov eax, 1  ; compileComputeExpr(NumLitNode(1))
+	mov eax, 2  ; compileComputeExpr(NumLitNode(2))
 	mov ebx, 0  ; compileComputeExpr(NumLitNode(0))
 	imul ebx, 4
 	mov ecx, [esp + 12]  ; Loading pointer
@@ -43,13 +43,9 @@ main_cln:
 	add esp, 20
 	ret
 sd_3:  ; double
-	mov ebx, 1  ; compileComputeExpr(NumLitNode(1))
-	imul ebx, 4
-	mov ecx, [esp + 8]  ; Loading pointer
-	add ecx, ebx
-	mov eax, [ecx] ; compileLoadVarNum(VarNumNode(t, pointer=true, arrayOffset=true)): local
+	mov eax, [esp + 16] ; compileLoadVarNum(VarNumNode(t, pointer=true, arrayOffset=false)): local
 	mov ebx, [esp + 4]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local; STACK_POS = 8
-	imul eax, ebx  ; VarNumNode(t, pointer=true, arrayOffset=true) * VarNumNode(x, pointer=false, arrayOffset=false) -> eax
+	imul eax, ebx  ; VarNumNode(t, pointer=true, arrayOffset=false) * VarNumNode(x, pointer=false, arrayOffset=false) -> eax
 	jmp sd_3_cln  ; ReturnNode
 sd_3_cln:
 	add esp, 0

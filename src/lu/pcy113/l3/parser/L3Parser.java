@@ -250,7 +250,7 @@ public class L3Parser {
 		GlobalLogger.log();
 		FunArgsValNode fargs = new FunArgsValNode();
 		fcn.add(fargs);
-		int index = 1;
+		int index = 0;
 		while (!peek(TokenType.PAREN_CLOSE)) {
 			fargs.add(parseFunArgVal(index++));
 			if (peek(TokenType.COMMA)) {
@@ -266,7 +266,7 @@ public class L3Parser {
 	}
 
 	private boolean canParseExpr() {
-		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT) || peek(TokenType.PAREN_OPEN) || peek(TokenType.IDENT);
+		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT, TokenType.PAREN_OPEN, TokenType.IDENT);
 	}
 
 	private FunArgDefNode parseFunArgDef(int index) throws ParserException {
@@ -358,14 +358,6 @@ public class L3Parser {
 			if (i instanceof LetScopeDescriptor && ((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) {
 				LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
 				LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();
-				// System.err.println("node: " + letNode.getIdent().getIdentifier() +
-				// ":\nstatic: " + letNode.isiStatic() + " arg: " + letNode.isArg() + " has
-				// expr: " + letNode.hasExpr() + " size: "
-				// + (letNode.hasExpr() && letNode.getExpr() instanceof ArrayInitNode ?
-				// ((ArrayInitNode) letNode.getExpr()).getArraySize() + 1 : 1) + " = "
-				// + (letNode.isiStatic() ? 0 : (letNode.getType().isPointer() &&
-				// letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode)
-				// letNode.getExpr()).getArraySize() + 1 : 1)));
 				return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize() + 1 : 1);
 			}
 			return 0;
@@ -436,13 +428,27 @@ public class L3Parser {
 			return parseArrayInit();
 		}
 
-		if (peek(TokenType.COLON)) {
+		if (peek(TokenType.COLON)) { // create pointer to var
 			consume(TokenType.COLON);
 			Node varNode = parseExpression();
 			if (varNode instanceof VarNumNode) {
 				return new LocalizingNode((VarNumNode) varNode);
 			} else {
 				throw new ParserException("Can only localize vars");
+			}
+		}else if(peek(TokenType.BIT_AND)) {
+			consume(TokenType.BIT_AND);
+			Node identParent = parseTerm();
+			Node identNode = identParent;
+			if(identNode instanceof BinaryOpNode) {
+				identNode = ((BinaryOpNode) identParent).getLeft();
+			}
+			System.out.println("new: "+identNode.getClass().getName());
+			if (identNode instanceof VarNumNode) {
+				identNode.add(new NumLitNode(0L)); // set as pointer
+				return identParent;
+			} else {
+				throw new ParserException("Cannot treat lit/... as pointer");
 			}
 		}
 
@@ -492,6 +498,7 @@ public class L3Parser {
 		} else if (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT)) {
 			consume(TokenType.BIT_AND);
 			Node identNode = parseTerm();
+			System.out.println(identNode.getClass().getName());
 			if (identNode instanceof VarNumNode) {
 				identNode.add(new NumLitNode(0L)); // set as pointer
 			} else {
