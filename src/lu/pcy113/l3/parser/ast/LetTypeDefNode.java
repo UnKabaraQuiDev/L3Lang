@@ -50,7 +50,7 @@ public class LetTypeDefNode extends Node {
 	
 	@Override
 	public String toString() {
-		return super.toString() + "(" + getType().toString() + " " + ident.getIdentifier() + " " + letIndex + ")";
+		return super.toString() + "(" + getType().toString() + ", " + ident.getIdentifier() + ", index=" + letIndex + ")";
 	}
 
 

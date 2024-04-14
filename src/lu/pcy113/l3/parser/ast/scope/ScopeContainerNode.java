@@ -68,9 +68,9 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	@Override
 	public HashMap<String, ScopeDescriptor> getDescriptors() {
 		HashMap<String, ScopeDescriptor> ssd = new HashMap<String, ScopeDescriptor>();
-		ScopeContainer par = getParentContainer();
-		if(par != null) {
-			ssd.putAll(par.getDescriptors());
+		ssd.putAll(getLocalDescriptors());
+		if(getParentContainer() != null) {
+			ssd.putAll(getParentContainer().getDescriptors());
 		}
 		return ssd;
 	}

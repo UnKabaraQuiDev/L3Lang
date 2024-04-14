@@ -250,7 +250,7 @@ public class L3Parser {
 		GlobalLogger.log();
 		FunArgsValNode fargs = new FunArgsValNode();
 		fcn.add(fargs);
-		int index = 0;
+		int index = 1;
 		while (!peek(TokenType.PAREN_CLOSE)) {
 			fargs.add(parseFunArgVal(index++));
 			if (peek(TokenType.COMMA)) {
@@ -273,8 +273,9 @@ public class L3Parser {
 		if ((peek(TokenType.TYPE) && peek(1, TokenType.IDENT)) || (peek(TokenType.TYPE) && peek(1, TokenType.COLON) && peek(2, TokenType.IDENT))) {
 			// generic type
 			TypeNode typeNode = parseType();
-			Token ident = consume(TokenType.IDENT);
+			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 
+			System.err.println("for arg node: " + ident.getIdentifier() + " = " + index);
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(index, typeNode, (IdentifierToken) ident, false, true); // TODO: Array
 
 			return new FunArgDefNode(typeDefNode);
@@ -319,20 +320,12 @@ public class L3Parser {
 			}
 			TypeNode type = parseType();
 
-			Token ident = consume(TokenType.IDENT);
+			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 
-			int nonStaticLetIndex = (int) (long) container.getLocalDescriptors().values().stream().map((ScopeDescriptor i) -> {
-				if (i instanceof LetScopeDescriptor) {
-					LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
-					if (letDesc.getNode() instanceof LetTypeDefNode) {
-						LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();
-						return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize() + 1 : 1);
-					}
-				}
-				return 0;
-			}).reduce(0, (a, b) -> a + b);
+			int nonStaticLetIndex = getLetIndex(container);
+			System.err.println("for: " + ident.getIdentifier() + " = " + nonStaticLetIndex);
 
-			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, (IdentifierToken) ident, iStatic, false);
+			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, ident, iStatic, false);
 
 			if (!peek(TokenType.ASSIGN))
 				return typeDefNode;
@@ -358,6 +351,25 @@ public class L3Parser {
 			throw new ParserException("Defined typed not defined yet.");
 		}
 		throw new ParserException("Undefined Var def");
+	}
+
+	private int getLetIndex(ScopeContainer container) {
+		return (int) (long) container.getDescriptors().values().stream().map((ScopeDescriptor i) -> {
+			if (i instanceof LetScopeDescriptor && ((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) {
+				LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
+				LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();
+				// System.err.println("node: " + letNode.getIdent().getIdentifier() +
+				// ":\nstatic: " + letNode.isiStatic() + " arg: " + letNode.isArg() + " has
+				// expr: " + letNode.hasExpr() + " size: "
+				// + (letNode.hasExpr() && letNode.getExpr() instanceof ArrayInitNode ?
+				// ((ArrayInitNode) letNode.getExpr()).getArraySize() + 1 : 1) + " = "
+				// + (letNode.isiStatic() ? 0 : (letNode.getType().isPointer() &&
+				// letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode)
+				// letNode.getExpr()).getArraySize() + 1 : 1)));
+				return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize() + 1 : 1);
+			}
+			return 0;
+		}).reduce(0, (a, b) -> a + b);
 	}
 
 	private List<Node> parseArrayArgs() throws ParserException { // TODO
