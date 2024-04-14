@@ -275,7 +275,6 @@ public class L3Parser {
 			TypeNode typeNode = parseType();
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 
-			System.err.println("for arg node: " + ident.getIdentifier() + " = " + index);
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(index, typeNode, (IdentifierToken) ident, false, true); // TODO: Array
 
 			return new FunArgDefNode(typeDefNode);
@@ -323,7 +322,6 @@ public class L3Parser {
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 
 			int nonStaticLetIndex = getLetIndex(container);
-			System.err.println("for: " + ident.getIdentifier() + " = " + nonStaticLetIndex);
 
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(nonStaticLetIndex, type, ident, iStatic, false);
 
@@ -342,7 +340,10 @@ public class L3Parser {
 			} else {
 				typeDefNode.add(parseExpression());
 				if (typeDefNode.getExpr() instanceof ArrayInitNode) {
+					// TODO -1 really needed ? v
 					typeDefNode.setLetIndex(typeDefNode.getLetIndex() - 1 + ((ArrayInitNode) typeDefNode.getExpr()).getArraySize());
+				}else if(typeDefNode.getExpr() instanceof StringLitNode) {
+					typeDefNode.setLetIndex(typeDefNode.getLetIndex() - 1 + ((StringLitNode) typeDefNode.getExpr()).getArraySize());
 				}
 			}
 
@@ -436,14 +437,13 @@ public class L3Parser {
 			} else {
 				throw new ParserException("Can only localize vars");
 			}
-		}else if(peek(TokenType.BIT_AND)) {
+		} else if (peek(TokenType.BIT_AND)) { // value from pointer
 			consume(TokenType.BIT_AND);
 			Node identParent = parseTerm();
 			Node identNode = identParent;
-			if(identNode instanceof BinaryOpNode) {
+			if (identNode instanceof BinaryOpNode) {
 				identNode = ((BinaryOpNode) identParent).getLeft();
 			}
-			System.out.println("new: "+identNode.getClass().getName());
 			if (identNode instanceof VarNumNode) {
 				identNode.add(new NumLitNode(0L)); // set as pointer
 				return identParent;

@@ -1,6 +1,6 @@
 package lu.pcy113.l3.parser.ast;
 
-public class ArrayInitNode extends Node {
+public class ArrayInitNode extends Node implements ArrayInit {
 
 	private boolean empty;
 	private int arraySize;
@@ -14,9 +14,20 @@ public class ArrayInitNode extends Node {
 	public boolean isEmpty() {
 		return empty;
 	}
-
+	
+	@Override
+	public boolean hasExpr() {
+		return children.size() > 2;
+	}
+	
+	@Override
 	public int getArraySize() {
 		return arraySize;
+	}
+	
+	@Override
+	public Node getExpr(int i) {
+		return children.get(i);
 	}
 
 	@Override

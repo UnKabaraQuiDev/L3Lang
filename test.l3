@@ -5,11 +5,14 @@ fun int16 double(int16: t, int x) {
 }
 
 fun int main() {
+	let int8: string = "test";
+
 	let int16: arr = new int[3];
+	break#("stop");
 	arr[0] = 2;
 	arr[1] = 2;
 	arr[2] = 3;
 	let int16 x = 69;
-	break#("stop");
+	
 	return int double(arr, 3);
 }
