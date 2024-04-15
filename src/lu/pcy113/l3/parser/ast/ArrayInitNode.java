@@ -35,4 +35,8 @@ public class ArrayInitNode extends Node implements ArrayInit {
 		return super.toString() + "(" + arraySize + ", " + empty + ")";
 	}
 
+	public boolean isRaw() {
+		return hasExpr() && children.subList(1, children.size()).stream().allMatch(c -> c instanceof NumLitNode);
+	}
+
 }

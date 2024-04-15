@@ -1,4 +1,4 @@
-let static int16 b = 13;
+let static int16: string = "string";
 
 fun int16 strlen(int8: str) {
 	asm#("mov eax, [esp + 4]  ; Copy the address of the string into eax");
@@ -34,10 +34,22 @@ fun void println(int8: str) {
 	asmlb#(".done:");
 }
 
+fun void memcpy(int32: from, int32: to, int32 length) {
+	asm#("mov ecx, [esp + 4]  ; Length");
+	asm#("mov esi, [esp + 12]  ; From");
+	asm#("mov edi, [esp + 8]  ; To");
+	
+	asmlb#(".copy_loop");
+	asm#("mov eax, [esi]");
+	asm#("mov [edi], eax");
+	asm#("add esi, 4");
+	asm#("add edi, 4");
+	asm#("loop .copy_loop");
+}
+
 fun int main() {
-	let int8: string = "test";
 	break#("stop");
-	println("stp");
+	println(string);
 
 	return int strlen("stp");
 }

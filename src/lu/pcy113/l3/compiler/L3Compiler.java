@@ -22,13 +22,15 @@ public abstract class L3Compiler {
 
 	public abstract void compile() throws CompilerException;
 
-	/*
-	 * private int sectionIndex = 1; protected String newSection() { return
-	 * "_sec_"+(sectionIndex++); }
-	 * 
-	 * private int varIndex = 1; protected String newVar() { return
-	 * "var_"+(varIndex++); }
-	 */
+	private int sectionIndex = 1;
+	protected String newSection() {
+		return "_sec_" + (sectionIndex++);
+	}
+
+	private int varIndex = 1;
+	protected String newVar() {
+		return "var_" + (varIndex++);
+	}
 
 	protected void exec(String cmd, File dir) throws IOException, InterruptedException {
 		Process process = Runtime.getRuntime().exec(cmd);
