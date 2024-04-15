@@ -65,7 +65,14 @@ public class X86Compiler extends L3Compiler {
 		}
 	}
 
-	private Stack<Node> vStack = new Stack<>();
+	private Stack<Node> vStack = new Stack<Node>() {
+		public Node push(Node n) {
+			GlobalLogger.getLogger().addCallerWhiteList(this.getClass().getName());
+			GlobalLogger.log();
+			GlobalLogger.log(n);
+			return super.push(n);
+		}
+	};
 
 	private void compile(Node node) throws CompilerException {
 		GlobalLogger.log();
@@ -348,18 +355,44 @@ public class X86Compiler extends L3Compiler {
 
 			if (right instanceof BinaryOpNode) {
 				generateExprRecursive("ebx", ((BinaryOpNode) right));
+				writeinstln("push ebx");
+				vStack.push(right);
 			}
 			if (left instanceof BinaryOpNode) {
 				generateExprRecursive("eax", ((BinaryOpNode) left));
+				writeinstln("push eax");
+				vStack.push(right);
 			}
 
 			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode) {
 				compileComputeExpr("eax", left);
+				writeinstln("push eax");
+				vStack.push(left);
 			}
 			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode) {
 				compileComputeExpr("ebx", right);
+				writeinstln("push ebx");
+				vStack.push(right);
 			}
-
+			
+			if (left instanceof BinaryOpNode) {
+				writeinstln("pop eax");
+				vStack.pop();
+			}
+			if (right instanceof BinaryOpNode) {
+				writeinstln("pop ebx");
+				vStack.pop();
+			}
+			
+			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode) {
+				writeinstln("pop ebx");
+				vStack.pop();
+			}
+			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode) {
+				writeinstln("pop eax");
+				vStack.pop();
+			}
+			
 			TokenType operator = binaryNode.getOperator();
 
 			switch (operator) {
@@ -465,8 +498,10 @@ public class X86Compiler extends L3Compiler {
 
 			writeinstln("call " + desc.getAsmName() + "  ; " + desc.getIdentifier().getValue());
 
+			vStack.pop();
+			
 			int size = getStackSize(startStackIndex);
-
+			
 			writeinstln("add dword esp, " + size + "  ; Free mem from fun call");
 
 		}
@@ -489,7 +524,7 @@ public class X86Compiler extends L3Compiler {
 		} else if (node instanceof LetTypeDefNode) {
 			return ((LetTypeDefNode) node).getStackSize();
 		} else if (node instanceof FunCallNode) {
-			return ((FunDefNode) ((FunScopeDescriptor) node.getParentContainer().getClosestDescriptor(((FunCallNode) node).getIdent().getValue())).getNode()).getReturnType().getSize();
+			return 4;
 		} else if (node instanceof FunArgValNode) {
 			return ((FunArgValNode) node).getStackSize();
 		} else if (node instanceof FunDefNode) {

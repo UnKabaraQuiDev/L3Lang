@@ -1,3 +1,8 @@
+fun int test() {
+	let int te = 10;
+	return int te;
+}
+
 fun int main() {
 	let int8: arr = new int8[3];
 	
@@ -9,15 +14,5 @@ fun int main() {
 
 	break#("stop1");
 	
-	let int8: arr2 = new int8[3];
-	
-	break#("stop2");
-	
-	arr2[0] = 1;
-	arr2[1] = 2;
-	arr2[2] = 3;
-
-	break#("stop3");
-	
-	return int arr[2]*test;
+	return int arr[1]*test();
 }
