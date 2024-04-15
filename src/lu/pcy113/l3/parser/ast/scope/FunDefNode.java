@@ -32,7 +32,7 @@ public class FunDefNode extends ScopeContainerNode {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + getReturnType() + ": " + ident.getIdentifier() + ")";
+		return super.toString() + "(" + getReturnType() + ": " + ident.getValue() + ")";
 	}
 
 }

@@ -11,7 +11,7 @@ public class IdentifierToken extends Token {
 		this.identifier = strValue;
 	}
 	
-	public String getIdentifier() {return identifier;}
+	public String getValue() {return identifier;}
 	
 	@Override
 	public String toString() {

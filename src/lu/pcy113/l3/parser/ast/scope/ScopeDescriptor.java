@@ -13,7 +13,7 @@ public class ScopeDescriptor {
 		this.ident = ident;
 	}
 
-	public IdentifierToken getIdent() {
+	public IdentifierToken getIdentifier() {
 		return ident;
 	}
 
@@ -27,7 +27,7 @@ public class ScopeDescriptor {
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "(" + ident.getIdentifier() + " -> " + getAsmName() + " " + ident.getLine() + ":" + ident.getColumn() + ")";
+		return this.getClass().getSimpleName() + "(" + ident.getValue() + " -> " + getAsmName() + " " + ident.getLine() + ":" + ident.getColumn() + ")";
 	}
 
 }

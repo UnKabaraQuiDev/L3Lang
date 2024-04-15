@@ -27,7 +27,7 @@ public class MemorySize {
 		this.bytes = getBytes(type);
 		
 		if((bits == -1 || bytes == -1) && token instanceof IdentifierToken) {
-			this.customSizeIdent = ((IdentifierToken) token).getIdentifier();
+			this.customSizeIdent = ((IdentifierToken) token).getValue();
 		}
 	}
 	

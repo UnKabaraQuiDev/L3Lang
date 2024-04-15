@@ -35,7 +35,7 @@ public class VarNumNode extends Node {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + ident.getIdentifier() + ", pointer=" + isPointer() + ", arrayOffset="+arrayOffset+")";
+		return super.toString() + "(" + ident.getValue() + ", pointer=" + isPointer() + ", arrayOffset="+arrayOffset+")";
 	}
 
 }

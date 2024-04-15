@@ -1,61 +1,13 @@
-let static int16: string = "string";
-
-fun int16 strlen(int8: str) {
-	asm#("mov eax, [esp + 4]  ; Copy the address of the string into eax");
-	asm#("xor ecx, ecx  ; Clear ecx (counter register)");
-	
-	asmlb#(".loop:");
-	asm#("cmp dword [eax], 0  ; Compare the byte at the current address with null terminator");
-	asm#("je .done  ; If null terminator is found, exit loop");
-	asm#("add dword eax, 4  ; Move to the next byte in the string");
-	asm#("inc ecx  ; Increment the counter");
-	asm#("jmp .loop  ; Repeat the loop");
-	
-	asmlb#(".done:");
-	
-	let int16 length = 0;
-	
-	asm#("mov [esp], ecx  ; Move strlen to var");
-	
-	return int16 length;
-}
-
-fun void println(int8: str) {
-	asm#("mov ecx, [esp + 4]  ; Copy the address of the string into eax");
-	
-	asmlb#(".loop:");
-	asm#("cmp dword [ecx], 0  ; Compare the byte at the current address with null terminator");
-	asm#("je .done  ; If null terminator is found, exit loop");
-	printwrite#();
-	asm#("add dword ecx, 4  ; Move to the next byte in the string");
-	asm#("jmp .loop  ; Repeat the loop");
-	
-	asmlb#(".done:");
-}
-
-fun void memcpy(int32: from, int32: to, int32 length) {
-	asm#("mov ecx, [esp + 4]  ; Length");
-	asm#("mov edi, [esp + 8]  ; To");
-	asm#("mov esi, [esp + 12]  ; From");
-	
-	asmlb#(".copy_loop:");
-	asm#("mov eax, [esi]");
-	asm#("mov [edi], eax");
-	asm#("add esi, 4");
-	asm#("add edi, 4");
-	asm#("loop .copy_loop");
-}
-
-fun void test() {
-	let int8: text = "text";
-}
-
 fun int main() {
-	let int16: a = "test\n";
-	break#("stop");
-	println(a);
+	let int8: arr = new int8[3];
 	
-	test();
+	break#("stop");
 
-	return int strlen(string);
+	arr[0] = 1;
+	arr[1] = 2;
+	arr[2] = 3;
+
+	break#("stop1");
+
+	return int arr[2];
 }

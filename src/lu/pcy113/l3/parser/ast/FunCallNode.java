@@ -26,7 +26,7 @@ public class FunCallNode extends Node {
 	
 	@Override
 	public String toString() {
-		return super.toString()+"("+name.getIdentifier()+", "+(preset ? "preset" : "def")+")";
+		return super.toString()+"("+name.getValue()+", "+(preset ? "preset" : "def")+")";
 	}
 
 }

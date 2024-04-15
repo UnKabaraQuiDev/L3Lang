@@ -6,11 +6,10 @@ public class LetTypeDefNode extends Node {
 
 	private IdentifierToken ident;
 	private boolean iStatic, arg;
-	private int letIndex;
+	private int stackIndex = 0, stackSize = 4;
 
-	public LetTypeDefNode(int letIndex, TypeNode type, IdentifierToken ident, boolean iStatic, boolean arg) {
+	public LetTypeDefNode(TypeNode type, IdentifierToken ident, boolean iStatic, boolean arg) {
 		add(type);
-		this.letIndex = letIndex;
 		this.ident = ident;
 		this.iStatic = iStatic;
 		this.arg = arg;
@@ -36,22 +35,29 @@ public class LetTypeDefNode extends Node {
 		return iStatic;
 	}
 
-	public int getLetIndex() {
-		return letIndex;
+	public int getStackSize() {
+		return stackSize;
 	}
-	
-	public void setLetIndex(int letIndex) {
-		this.letIndex = letIndex;
+
+	public void setStackSize(int stackSize) {
+		this.stackSize = stackSize;
+	}
+
+	public int getStackIndex() {
+		return stackIndex;
+	}
+
+	public void setStackIndex(int stackIndex) {
+		this.stackIndex = stackIndex;
 	}
 
 	public boolean isArg() {
 		return arg;
 	}
-	
+
 	@Override
 	public String toString() {
-		return super.toString() + "(" + getType().toString() + ", " + ident.getIdentifier() + ", index=" + letIndex + ")";
+		return super.toString() + "(" + getType().toString() + ", " + ident.getValue() + ", index=" + stackIndex + ")";
 	}
-
 
 }
