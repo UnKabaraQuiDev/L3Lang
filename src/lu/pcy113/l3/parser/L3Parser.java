@@ -336,14 +336,14 @@ public class L3Parser {
 					parseArrayArgs().forEach(typeDefNode::add);
 					consume(TokenType.CURLY_CLOSE);
 				}
-				typeDefNode.setLetIndex(typeDefNode.getLetIndex() + typeDefNode.getChildren().size());
+				typeDefNode.setLetIndex(typeDefNode.getLetIndex() /*+ typeDefNode.getChildren().size()*/);
 			} else {
 				typeDefNode.add(parseExpression());
 				if (typeDefNode.getExpr() instanceof ArrayInitNode) {
 					// TODO -1 really needed ? v
-					typeDefNode.setLetIndex(typeDefNode.getLetIndex() - 1 + ((ArrayInitNode) typeDefNode.getExpr()).getArraySize());
+					// typeDefNode.setLetIndex(typeDefNode.getLetIndex() - 1 + ((ArrayInitNode) typeDefNode.getExpr()).getArraySize());
 				} else if (typeDefNode.getExpr() instanceof StringLitNode) {
-					typeDefNode.setLetIndex(typeDefNode.getLetIndex() - 1 + ((StringLitNode) typeDefNode.getExpr()).getArraySize());
+					// typeDefNode.setLetIndex(typeDefNode.getLetIndex() - 1 + ((StringLitNode) typeDefNode.getExpr()).getArraySize());
 				}
 			}
 
@@ -359,7 +359,7 @@ public class L3Parser {
 			if (i instanceof LetScopeDescriptor && ((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) {
 				LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
 				LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();
-				return letNode.isiStatic() ? 0 : (letNode.getType().isPointer() && letNode.hasExpr() && letNode.getExpr() instanceof ArrayInitNode ? ((ArrayInitNode) letNode.getExpr()).getArraySize() + 1 : 1);
+				return letNode.isiStatic() ? 0 : 1;
 			}
 			return 0;
 		}).reduce(0, (a, b) -> a + b);

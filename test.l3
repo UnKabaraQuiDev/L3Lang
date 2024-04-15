@@ -12,7 +12,6 @@ fun int16 strlen(int8: str) {
 	asm#("jmp .loop  ; Repeat the loop");
 	
 	asmlb#(".done:");
-	//asm#("ret  ; Return with the length of the string in ecx");
 	
 	let int16 length = 0;
 	
@@ -36,10 +35,10 @@ fun void println(int8: str) {
 
 fun void memcpy(int32: from, int32: to, int32 length) {
 	asm#("mov ecx, [esp + 4]  ; Length");
-	asm#("mov esi, [esp + 12]  ; From");
 	asm#("mov edi, [esp + 8]  ; To");
+	asm#("mov esi, [esp + 12]  ; From");
 	
-	asmlb#(".copy_loop");
+	asmlb#(".copy_loop:");
 	asm#("mov eax, [esi]");
 	asm#("mov [edi], eax");
 	asm#("add esi, 4");
@@ -48,8 +47,10 @@ fun void memcpy(int32: from, int32: to, int32 length) {
 }
 
 fun int main() {
+	let int16: a = "test";
 	break#("stop");
-	println(string);
+	println(a);
+	println("\n");
 
-	return int strlen("stp");
+	return int strlen(string);
 }
