@@ -8,6 +8,16 @@ fun int main() {
 	arr[2] = 3;
 
 	break#("stop1");
+	
+	let int8: arr2 = new int8[3];
+	
+	break#("stop2");
+	
+	arr2[0] = 1;
+	arr2[1] = 2;
+	arr2[2] = 3;
 
-	return int arr[2];
+	break#("stop3");
+	
+	return int arr[2]*test;
 }
