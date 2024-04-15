@@ -213,7 +213,7 @@ public class L3Parser {
 			parseLineExpr(fdb);
 		}
 
-		if (!(fdb.getChildren().getLast() instanceof ReturnNode)) {
+		if (!fdb.getChildren().isEmpty() && !(fdb.getChildren().getLast() instanceof ReturnNode)) {
 			if (fdn.getReturnType().isVoid()) {
 				fdb.add(new ReturnNode(fdn.getReturnType(), null));
 			} else {

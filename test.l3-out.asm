@@ -8,18 +8,20 @@ main:  ; main
 	mov eax, dword [heap_ptr]
 	push eax  ; Setup array pointer
 	sub esp, 12
-	mov dword [esp + 8], sd_10  ; From
+	mov dword [esp + 8], sd_12  ; From
 	mov dword [esp + 4], eax  ; To
 	mov dword [esp + 0], 6  ; Length
 	call sd_9
 	add esp, 12
 	mov eax, dword [heap_ptr]  ; Load pointer into reg
 	add dword [heap_ptr], 24
-stop:  ; breakpoint at: 50:1
+stop:  ; breakpoint at: 54:1
 	mov eax, [esp + 0] ; compileLoadVarNum(VarNumNode(a, pointer=false, arrayOffset=false)): local, stack = 4, index = 0, rindex = 0, is arg = false
 	push eax
 	call sd_5  ; println
 	add dword esp, 4  ; Free mem from fun call
+	call sd_11  ; test
+	add dword esp, 0  ; Free mem from fun call
 	mov eax, sd_0  ; compileLoadVarNum(VarNumNode(string, pointer=false, arrayOffset=false)): static
 	push eax
 	call sd_3  ; strlen
@@ -78,6 +80,21 @@ sd_9:  ; memcpy
 sd_9_cln:
 	add esp, 0
 	ret
+sd_11:  ; test
+	mov eax, dword [heap_ptr]
+	push eax  ; Setup array pointer
+	sub esp, 12
+	mov dword [esp + 8], sd_10  ; From
+	mov dword [esp + 4], eax  ; To
+	mov dword [esp + 0], 5  ; Length
+	call sd_9
+	add esp, 12
+	mov eax, dword [heap_ptr]  ; Load pointer into reg
+	add dword [heap_ptr], 20
+	jmp sd_11_cln  ; ReturnNode
+sd_11_cln:
+	add esp, 4
+	ret
 section .text
 	global _start
 	global main
@@ -86,4 +103,5 @@ section .data
 	heap_space resb 1024
 	heap_ptr dd heap_space
 	sd_0 dd 115, 116, 114, 105, 110, 103, 0  ; string
-	sd_10 dd 116, 101, 115, 116, 10, 0  ; a
+	sd_12 dd 116, 101, 115, 116, 10, 0  ; a
+	sd_10 dd 116, 101, 120, 116, 0  ; text

@@ -46,10 +46,16 @@ fun void memcpy(int32: from, int32: to, int32 length) {
 	asm#("loop .copy_loop");
 }
 
+fun void test() {
+	let int8: text = "text";
+}
+
 fun int main() {
 	let int16: a = "test\n";
 	break#("stop");
 	println(a);
+	
+	test();
 
 	return int strlen(string);
 }

@@ -425,7 +425,11 @@ public class X86Compiler extends L3Compiler {
 				writeinstln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr()).getString().getValue());
 			} else if (name.equals("asmlb")) {
 				writeln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr()).getString().getValue());
-			} else {
+			} /*else if (name.equals("free")) {
+				FunArgValNode argVal = (FunArgValNode) node.getArgs().getChildren().get(0);
+				VarNumNode varNum = (VarNumNode) argVal.getExpr();
+				LetScopeDescriptor desc = (LetScopeDescriptor) argVal.getClosestContainer().getClosestDescriptor(varNum.getIdent().getIdentifier());
+			}*/ else {
 				throw new CompilerException("Preset function not found: " + name);
 			}
 
