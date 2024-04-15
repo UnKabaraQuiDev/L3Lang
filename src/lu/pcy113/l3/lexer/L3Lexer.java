@@ -156,11 +156,25 @@ public class L3Lexer {
 					while (hasNext() && peek() != '\"') {
 						if (peek("\\")) {
 							consume();
+							if(peek('0', 'e', 'f', 'v', 'b', 't', 'n', 'r')) {
+								String strV = ("\\"+consume())
+										.replace("\\n", "\n")
+										.replace("\\r", "\r")
+										.replace("\\t", "\t")
+										.replace("\\b", "\b")
+										//.replace("\\v", "\v")
+										.replace("\\f", "\f")
+										//.replace("\\e", "\e")
+										.replace("\\0", "\0");
+								strValue += strV;
+							}
+						}else {
+							strValue += consume();
 						}
-						strValue += consume();
 					}
-					if (!hasNext())
+					if (!hasNext()) {
 						throw new LexerException("Unterminated string, starting at: " + cl + ":" + cc);
+					}
 					consume();
 					flushToken();
 					break next;
@@ -479,6 +493,24 @@ public class L3Lexer {
 			break;
 		}
 		return b;
+	}
+	
+	public boolean peek(char... s) {
+		int c = peek();
+		for(char cs : s) {
+			if(cs == c)
+				return true;
+		}
+		return false;
+	}
+	
+	public boolean peek(int x, char... s) {
+		int c = peek(x);
+		for(char cs : s) {
+			if(cs == c)
+				return true;
+		}
+		return false;
 	}
 
 	public boolean peek(int x, String s) {

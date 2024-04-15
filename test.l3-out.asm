@@ -10,29 +10,16 @@ main:  ; main
 	sub esp, 12
 	mov dword [esp + 8], sd_10  ; From
 	mov dword [esp + 4], eax  ; To
-	mov dword [esp + 0], 5  ; Length
+	mov dword [esp + 0], 6  ; Length
 	call sd_9
 	add esp, 12
 	mov eax, dword [heap_ptr]  ; Load pointer into reg
-	add dword [heap_ptr], 20
+	add dword [heap_ptr], 24
 stop:  ; breakpoint at: 50:1
 	mov eax, [esp + 0] ; compileLoadVarNum(VarNumNode(a, pointer=false, arrayOffset=false)): local, stack = 4, index = 0, rindex = 0, is arg = false
 	push eax
 	call sd_5  ; println
 	add dword esp, 4  ; Free mem from fun call
-	mov eax, dword [heap_ptr]
-	push eax  ; Setup array pointer
-	sub esp, 12
-	mov dword [esp + 8], var_1  ; From
-	mov dword [esp + 4], eax  ; To
-	mov dword [esp + 0], 2  ; Length
-	call sd_9
-	add esp, 12
-	mov eax, dword [heap_ptr]  ; Load pointer into reg
-	add dword [heap_ptr], 8
-	push eax
-	call sd_5  ; println
-	add dword esp, 8  ; Free mem from fun call
 	mov eax, sd_0  ; compileLoadVarNum(VarNumNode(string, pointer=false, arrayOffset=false)): static
 	push eax
 	call sd_3  ; strlen
@@ -99,5 +86,4 @@ section .data
 	heap_space resb 1024
 	heap_ptr dd heap_space
 	sd_0 dd 115, 116, 114, 105, 110, 103, 0  ; string
-	sd_10 dd 116, 101, 115, 116, 0  ; a
-	var_1 dd 110, 0  ; null
+	sd_10 dd 116, 101, 115, 116, 10, 0  ; a

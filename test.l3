@@ -47,10 +47,9 @@ fun void memcpy(int32: from, int32: to, int32 length) {
 }
 
 fun int main() {
-	let int16: a = "test";
+	let int16: a = "test\n";
 	break#("stop");
 	println(a);
-	println("\n");
 
 	return int strlen(string);
 }
