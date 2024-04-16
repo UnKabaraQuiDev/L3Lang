@@ -14,5 +14,9 @@ fun int main() {
 
 	break#("stop1");
 	
+	if(arr[0]) {
+		let int16 x = 12;
+	}
+	
 	return int arr[1]*test();
 }
