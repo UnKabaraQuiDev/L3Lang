@@ -95,3 +95,6 @@ test/
 /target/*
 /logs/*
 /target/
+
+.fuse_*
+.gdb_history
