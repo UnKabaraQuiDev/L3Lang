@@ -16,29 +16,25 @@ stop:  ; breakpoint at: 8:1
 	mov dword eax, 1  ; compileComputeExpr(NumLitNode(1))
 	mov dword ebx, 0  ; compileComputeExpr(NumLitNode(0))
 	imul ebx, 4
-	mov ecx, [esp_start]  ; Loading pointer
-	mov ecx, [ecx - 0]  ; index = 0
+	mov ecx, [esp + 12]  ; Loading pointer, index = 0, size = 16
 	add ecx, ebx
 	mov [ecx], eax  ; compileLetTypeSet(LetTypeSetNode(lu.pcy113.l3.lexer.tokens.IdentifierToken[line=10, column=1, type=lu.pcy113.l3.lexer.TokenType[IDENT, fixed=false, string=false], identifier=arr])): local pointer
 	mov dword eax, 2  ; compileComputeExpr(NumLitNode(2))
 	mov dword ebx, 1  ; compileComputeExpr(NumLitNode(1))
 	imul ebx, 4
-	mov ecx, [esp_start]  ; Loading pointer
-	mov ecx, [ecx - 0]  ; index = 0
+	mov ecx, [esp + 12]  ; Loading pointer, index = 0, size = 16
 	add ecx, ebx
 	mov [ecx], eax  ; compileLetTypeSet(LetTypeSetNode(lu.pcy113.l3.lexer.tokens.IdentifierToken[line=11, column=1, type=lu.pcy113.l3.lexer.TokenType[IDENT, fixed=false, string=false], identifier=arr])): local pointer
 	mov dword eax, 3  ; compileComputeExpr(NumLitNode(3))
 	mov dword ebx, 2  ; compileComputeExpr(NumLitNode(2))
 	imul ebx, 4
-	mov ecx, [esp_start]  ; Loading pointer
-	mov ecx, [ecx - 0]  ; index = 0
+	mov ecx, [esp + 12]  ; Loading pointer, index = 0, size = 16
 	add ecx, ebx
 	mov [ecx], eax  ; compileLetTypeSet(LetTypeSetNode(lu.pcy113.l3.lexer.tokens.IdentifierToken[line=12, column=1, type=lu.pcy113.l3.lexer.TokenType[IDENT, fixed=false, string=false], identifier=arr])): local pointer
 stop1:  ; breakpoint at: 14:1
 	mov dword ebx, 1  ; compileComputeExpr(NumLitNode(1))
 	imul ebx, 4
-	mov ecx, [esp_start]  ; Loading pointer
-	mov ecx, [ecx - 0]  ; index = 0
+	mov ecx, [esp + 12]  ; Loading pointer, index = 0, size = 16
 	add ecx, ebx
 	mov eax, [ecx] ; compileLoadVarNum(VarNumNode(arr, pointer=true, arrayOffset=true)): local
 	push eax
@@ -56,8 +52,7 @@ main_cln:
 sd_1:  ; test
 	mov dword eax, 10  ; compileComputeExpr(NumLitNode(10))
 	push dword eax  ; Push var: te
-	mov ecx, [esp_start]  ; compileLoadVarNum(VarNumNode(te, pointer=false, arrayOffset=false)): local
-	mov eax, [ecx - 20]  ; index = 20
+	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(te, pointer=false, arrayOffset=false)): local
 	jmp sd_1_cln  ; ReturnNode
 sd_1_cln:
 	add esp, 4
