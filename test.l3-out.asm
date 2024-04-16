@@ -22,9 +22,10 @@ main:  ; main
 	push dword eax  ; Push var: x
 stop:  ; breakpoint at: 62:2
 _sec_1:  ; While at: 64:2
+	mov dword ebx, 3  ; compileComputeExpr(NumLitNode(3))
 	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local
-	cmp eax, 0
-	je _sec_1_end
+	cmp eax, ebx
+	jl _sec_1_end
 stop1:  ; breakpoint at: 65:3
 	mov eax, [esp + 84] ; compileLoadVarNum(VarNumNode(str, pointer=false, arrayOffset=false)): local
 	push eax

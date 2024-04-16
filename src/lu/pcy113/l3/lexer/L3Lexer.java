@@ -39,8 +39,8 @@ import static lu.pcy113.l3.lexer.TokenType.INT_32;
 import static lu.pcy113.l3.lexer.TokenType.INT_64;
 import static lu.pcy113.l3.lexer.TokenType.INT_8;
 import static lu.pcy113.l3.lexer.TokenType.LET;
-import static lu.pcy113.l3.lexer.TokenType.LOWER;
-import static lu.pcy113.l3.lexer.TokenType.LOWER_EQUALS;
+import static lu.pcy113.l3.lexer.TokenType.LESS;
+import static lu.pcy113.l3.lexer.TokenType.LESS_EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.MINUS;
 import static lu.pcy113.l3.lexer.TokenType.MODULO;
 import static lu.pcy113.l3.lexer.TokenType.MUL;
@@ -303,9 +303,9 @@ public class L3Lexer {
 				case '<':
 					if (peek() == '=') {
 						consume();
-						type = LOWER_EQUALS;
+						type = LESS_EQUALS;
 					} else
-						type = LOWER;
+						type = LESS;
 					flushToken();
 					break next;
 				case '>':

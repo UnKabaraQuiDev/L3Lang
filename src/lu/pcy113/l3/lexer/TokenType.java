@@ -5,7 +5,7 @@ public enum TokenType {
 	LET("let"), FUN("fun"),
 
 	TYPE(), INT(TYPE, "int"),
-	
+
 	INT_1(INT, "int1"), INT_8(INT, "int8"), INT_16(INT, "int16"), INT_32(TYPE, "int32"), INT_64(TYPE, "int64"),
 
 	INT_8_S(INT, "int8s"), INT_16_S(INT, "int16s"), INT_32_S(INT, "int32s"), INT_64_S(INT, "int64s"),
@@ -29,9 +29,9 @@ public enum TokenType {
 	TRUE("true"), FALSE("false"),
 
 	IF("if"), ELSE("else"),
-	
+
 	STATIC("static"),
-	
+
 	SWITCH("switch"), CASE("case"), DEFAULT("default"),
 
 	FOR("for"), WHILE("while"), BREAK("break"),
@@ -41,7 +41,7 @@ public enum TokenType {
 	BIT_OR('|'), BIT_AND('&'), BIT_XOR('^'), BIT_NOT('~'),
 
 	OR("||"), AND("&&"), NOT('!'),
-	
+
 	HASH('#'),
 
 	PLUS('+'), MINUS('-'), MUL('*'), DIV('/'), MODULO('%'),
@@ -50,7 +50,7 @@ public enum TokenType {
 
 	EQUALS("=="), NOT_EQUALS("!="),
 
-	LOWER('<'), LOWER_EQUALS("<="),
+	LESS('<'), LESS_EQUALS("<="),
 
 	GREATER('>'), GREATER_EQUALS(">=");
 

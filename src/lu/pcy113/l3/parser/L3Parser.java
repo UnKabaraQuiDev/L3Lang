@@ -13,6 +13,7 @@ import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.ArrayInitNode;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FunArgDefNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
@@ -79,9 +80,9 @@ public class L3Parser {
 			}
 			parent.add(ltdn);
 			container.addDescriptor(ltdn.getIdent().getValue(), new LetScopeDescriptor(ltdn.getIdent(), ltdn));
-			System.err.println("let parsed: "+ltdn.getIdent().getValue());
-			System.err.println("container = "+container+" for = "+parent);
-			System.err.println("container = "+container.getLocalDescriptors());
+			System.err.println("let parsed: " + ltdn.getIdent().getValue());
+			System.err.println("container = " + container + " for = " + parent);
+			System.err.println("container = " + container.getLocalDescriptors());
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))) { // function call
 			parent.add(parseFunCall());
@@ -100,7 +101,7 @@ public class L3Parser {
 			consume(TokenType.COMMENT); // ignore
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)) || (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT))) {
 			LetTypeSetNode set = parseLetTypeSet();
-			System.err.println("container = "+container+" for = "+parent);
+			System.err.println("container = " + container + " for = " + parent);
 			if (!container.containsDescriptor(set.getLet().getIdent().getValue())) {
 				throw new ParserException("let " + set.getLet().getIdent().getValue() + " isn't defined: (" + set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn() + ")");
 			}
@@ -110,7 +111,7 @@ public class L3Parser {
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.IF)) {
 			IfContainerNode ifdef = parseIfContainerExpr(parent);
-		} else if(peek(TokenType.WHILE)) {
+		} else if (peek(TokenType.WHILE)) {
 			WhileDefNode whileDef = parseWhileDefNode(parent);
 		} else {
 			throw new ParserException("Expression not implemented: (" + parent.getClass().getSimpleName() + ") " + peek() + "->" + peek(1) + "->" + peek(2));
@@ -122,16 +123,16 @@ public class L3Parser {
 			Token whileToken = consume(TokenType.WHILE);
 			consume(TokenType.PAREN_OPEN);
 
-			Node condition = parseExpression();
+			Node condition = parseComparison();
 
 			consume(TokenType.PAREN_CLOSE);
 
 			WhileDefNode whileDef = new WhileDefNode(whileToken, condition);
-			
+
 			parent.add(whileDef);
-			
+
 			ScopeBodyNode body = parseIfDefBody(whileDef);
-			
+
 			return whileDef;
 		}
 		throw new ParserException("An error occured when parsing while-statement");
@@ -142,21 +143,21 @@ public class L3Parser {
 			IfContainerNode container = new IfContainerNode();
 
 			parent.add(container);
-			
+
 			IfDefNode ifDef = parseIfDefExpr();
 			container.add(ifDef);
-			
-			while(peek(TokenType.ELSE)) {
-				if(peek(1, TokenType.IF)) {
+
+			while (peek(TokenType.ELSE)) {
+				if (peek(1, TokenType.IF)) {
 					consume(TokenType.ELSE);
 					IfDefNode ifDef2 = parseIfDefExpr();
 					container.add(ifDef2);
-				}else {
+				} else {
 					ElseDefNode elseDef = parseElseDefExpr();
 					container.add(elseDef);
 				}
 			}
-			
+
 			return container;
 		}
 		throw new ParserException("An error occured when parsing if-statements");
@@ -197,14 +198,14 @@ public class L3Parser {
 		ScopeBodyNode fdb = new ScopeBodyNode();
 		fdn.add(fdb);
 
-		if(peek(TokenType.CURLY_OPEN)) {
+		if (peek(TokenType.CURLY_OPEN)) {
 			consume(TokenType.CURLY_OPEN);
 			while (!peek(TokenType.CURLY_CLOSE)) {
 				parseLineExpr(fdb);
 			}
-	
+
 			consume(TokenType.CURLY_CLOSE);
-		}else {
+		} else {
 			parseLineExpr(fdb);
 		}
 
@@ -635,6 +636,18 @@ public class L3Parser {
 			return parseVar();
 		} else {
 			throw new ParserException("Expected expression");
+		}
+	}
+
+	private Node parseComparison() throws ParserException {
+		Node left = parseExpression();
+
+		if (peek(TokenType.LESS, TokenType.LESS_EQUALS, TokenType.GREATER, TokenType.GREATER_EQUALS, TokenType.EQUALS, TokenType.NOT_EQUALS)) {
+			TokenType operator = consume(TokenType.LESS, TokenType.LESS_EQUALS, TokenType.GREATER, TokenType.GREATER_EQUALS, TokenType.EQUALS, TokenType.NOT_EQUALS).getType();
+			Node right = parseExpression();
+			return new ComparisonOpNode(left, operator, right);
+		} else {
+			return left; // If there's no comparison operator, return the left expression as-is
 		}
 	}
 

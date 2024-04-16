@@ -9,6 +9,7 @@ import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.ArrayInit;
 import lu.pcy113.l3.parser.ast.ArrayInitNode;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FunArgDefNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
@@ -180,9 +181,47 @@ public class X86Compiler extends L3Compiler {
 
 	private void compileWhileDefConditionNode(WhileDefNode node) throws CompilerException {
 		Node expr = node.getCondition();
-		compileComputeExpr("eax", expr);
-		writeinstln("cmp eax, 0");
-		writeinstln("je " + node.getAsmName() + "_end");
+		if (expr instanceof ComparisonOpNode) {
+			compileInvertedConditionExpr((ComparisonOpNode) expr, node.getAsmName() + "_end");
+		} else {
+			implement();
+			compileComputeExpr("eax", expr);
+			writeinstln("cmp eax, 0");
+			writeinstln("je " + node.getAsmName() + "_end");
+		}
+	}
+
+	private void compileInvertedConditionExpr(ComparisonOpNode node, String label) throws CompilerException {
+		compileComputeExpr("ebx", node.getRight());
+		
+		compileComputeExpr("eax", node.getLeft());
+
+		String op = "";
+		switch (node.getOperator()) {
+		case LESS:
+			op = "jge"; // jl
+			break;
+		case LESS_EQUALS:
+			op = "jg"; // jle
+			break;
+		case GREATER:
+			op = "jle"; // jg
+			break;
+		case GREATER_EQUALS:
+			op = "jl"; // jge
+			break;
+		case EQUALS:
+			op = "jne"; // je
+			break;
+		case NOT_EQUALS:
+			op = "je"; // jne
+			break;
+		default:
+			throw new CompilerException("No comparison");
+		}
+
+		writeinstln("cmp eax, ebx");
+		writeinstln(op + " " + label);
 	}
 
 	private void compileIfContainerNode(IfContainerNode node) throws CompilerException {
@@ -307,7 +346,9 @@ public class X86Compiler extends L3Compiler {
 			if (def.isiStatic()) { // static
 				writeinstln("mov [" + desc.getAsmName() + "], eax  ; compileLetTypeSet(" + node + "): static");
 			} else { // local
-				// writeinstln("mov eax, [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "]  ; compileLetTypeSet(" + node + "): local, index = " + def.getStackIndex());
+				// writeinstln("mov eax, [esp + " + (getStackIndex() - def.getStackIndex() - 4)
+				// + "] ; compileLetTypeSet(" + node + "): local, index = " +
+				// def.getStackIndex());
 				// writeinstln("mov [ecx], eax");
 				writeinstln("mov [esp - " + (getStackIndex() - def.getStackIndex() - 4) + "], eax ; compileLetTypeSet(" + node + "): local, index = " + def.getStackIndex());
 			}
