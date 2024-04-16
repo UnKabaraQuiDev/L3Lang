@@ -9,14 +9,18 @@ import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.ArrayInit;
 import lu.pcy113.l3.parser.ast.ArrayInitNode;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FunArgDefNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
+import lu.pcy113.l3.parser.ast.IfContainerNode;
+import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
+import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.StringLitNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
@@ -66,14 +70,20 @@ public class X86Compiler extends L3Compiler {
 		}
 	}
 
-	private Stack<Node> vStack = new Stack<Node>() {
-		public Node push(Node n) {
-			GlobalLogger.getLogger().addCallerWhiteList(this.getClass().getName());
-			GlobalLogger.log();
-			GlobalLogger.log(n);
-			return super.push(n);
-		}
-	};
+	private Stack<Node> vStack = new Stack<Node>();
+
+	public Node push(Node n) {
+		GlobalLogger.log();
+		GlobalLogger.log("push: " + n);
+		return vStack.push(n);
+	}
+
+	public Node pop() {
+		GlobalLogger.log();
+		Node pop = vStack.pop();
+		GlobalLogger.log("pop: " + pop);
+		return pop;
+	}
 
 	private void compile(Node node) throws CompilerException {
 		GlobalLogger.log();
@@ -130,9 +140,89 @@ public class X86Compiler extends L3Compiler {
 			compileLetTypeSet((LetTypeSetNode) node);
 		} else if (node instanceof FunCallNode) {
 			compileFunCall((FunCallNode) node);
+		} else if (node instanceof IfContainerNode) {
+			compileIfContainerNode((IfContainerNode) node);
+		} else if (node instanceof ReturnNode) {
+			compileReturn((ReturnNode) node);
 		} else {
 			implement(node);
 		}
+	}
+
+	private void compileIfContainerNode(IfContainerNode node) throws CompilerException {
+
+		String ifContainerName = newSection();
+		node.setAsmName(ifContainerName);
+
+		int i = 0;
+
+		for (Node n : node) {
+			if (n instanceof IfDefNode) {
+				((IfDefNode) n).setAsmName(ifContainerName + "_" + i++);
+
+				compileIfDefConditionNode((IfDefNode) n);
+			} else if (n instanceof ElseDefNode) {
+				((ElseDefNode) n).setAsmName(ifContainerName + "_" + i++);
+
+				writeinstln("jmp " + ((ElseDefNode) n).getAsmName());
+			} else {
+				implement(n);
+			}
+		}
+		
+		if(!(node.getChildren().getLast() instanceof ElseDefNode)) {
+			writeinstln("jmp " + node.getAsmName() + "_end");
+		}
+		
+		for (Node n : node) {
+			if (n instanceof IfDefNode) {
+				compileIfElseDefBodyNode((IfDefNode) n);
+			} else if (n instanceof ElseDefNode) {
+				compileIfElseDefBodyNode((ElseDefNode) n);
+			}
+		}
+
+		writeln(node.getAsmName() + "_end:");
+	}
+
+	private void compileIfElseDefBodyNode(Node node) throws CompilerException {
+		ScopeBodyNode body = null;
+		String asmName = null;
+		if (node instanceof IfDefNode) {
+			body = ((IfDefNode) node).getBody();
+			asmName = ((IfDefNode) node).getAsmName();
+		} else if (node instanceof ElseDefNode) {
+			body = ((ElseDefNode) node).getBody();
+			asmName = ((ElseDefNode) node).getAsmName();
+		} else {
+			implement(node);
+		}
+
+		IfContainerNode container = (IfContainerNode) node.getParent();
+
+		writeln(asmName + ":");
+		for (Node n : body) {
+			compile(n);
+		}
+		writeinstln("jmp " + container.getAsmName() + "_end");
+	}
+
+	private FunDefNode getFunDefParent(Node node) throws CompilerException {
+		Node parent = node.getParent();
+		while (!(parent instanceof FunDefNode)) {
+			parent = parent.getParent();
+			if (parent == null) {
+				throw new CompilerException("Node has no FunDefNode parent.");
+			}
+		}
+		return (FunDefNode) parent;
+	}
+
+	private void compileIfDefConditionNode(IfDefNode n) throws CompilerException {
+		Node expr = n.getCondition();
+		compileComputeExpr("eax", expr);
+		writeinstln("cmp eax, 0");
+		writeinstln("jne " + n.getAsmName());
 	}
 
 	private void compileLetTypeSet(LetTypeSetNode node) throws CompilerException {
@@ -175,7 +265,9 @@ public class X86Compiler extends L3Compiler {
 		}
 	}
 
-	private void compileReturn(FunScopeDescriptor desc, ReturnNode node) throws CompilerException {
+	private void compileReturn(ReturnNode node) throws CompilerException {
+		FunScopeDescriptor desc = (FunScopeDescriptor) node.getClosestContainer().getClosestDescriptor(getFunDefParent(node).getIdent().getValue());
+		
 		FunDefNode fun = desc.getNode();
 
 		if (!fun.getReturnType().isVoid()) {
@@ -231,11 +323,7 @@ public class X86Compiler extends L3Compiler {
 
 		writeln(desc.getAsmName() + ":  ; " + desc.getIdentifier().getValue());
 		for (Node n : node.getBody().getChildren()) {
-			if (n instanceof ReturnNode) {
-				compileReturn(desc, (ReturnNode) n);
-			} else {
-				compile(n);
-			}
+			compile(n);
 		}
 
 		// remove args from stack BEFORE cleaning up local vars
@@ -250,20 +338,16 @@ public class X86Compiler extends L3Compiler {
 		FunDefNode node = desc.getNode();
 
 		// add args to stack
-		// node.getArgs().getChildren().forEach(c -> vStack.push(((FunArgDefNode)
+		// node.getArgs().getChildren().forEach(c -> push(((FunArgDefNode)
 		// c).getLet()));
 
-		vStack.push(node); // call/ret
+		push(node); // call/ret
 
 		final int startStackIndex = vStack.size() - 1;
 
 		writeln(desc.getAsmName() + ":  ; " + desc.getIdentifier().getValue());
 		for (Node n : node.getBody().getChildren()) {
-			if (n instanceof ReturnNode) {
-				compileReturn(desc, (ReturnNode) n);
-			} else {
-				compile(n);
-			}
+			compile(n);
 		}
 
 		// remove args from stack BEFORE cleaning up local vars
@@ -273,8 +357,8 @@ public class X86Compiler extends L3Compiler {
 		writeinstln("add esp, " + size);
 		writeinstln("ret");
 
-		vStack.pop(); // call/ret
-		// node.getArgs().getChildren().forEach(c -> vStack.pop());
+		pop(); // call/ret
+		// node.getArgs().getChildren().forEach(c -> pop());
 	}
 
 	private void compileLetTypeDef(LetScopeDescriptor desc) throws CompilerException {
@@ -346,7 +430,7 @@ public class X86Compiler extends L3Compiler {
 
 		node.setStackIndex(currentStackIndex);
 
-		vStack.push(node);
+		push(node);
 	}
 
 	private void generateExprRecursive(String reg, Node node) throws CompilerException {
@@ -359,41 +443,41 @@ public class X86Compiler extends L3Compiler {
 			if (right instanceof BinaryOpNode) {
 				generateExprRecursive("ebx", ((BinaryOpNode) right));
 				writeinstln("push ebx");
-				vStack.push(right);
+				push(right);
 			}
 			if (left instanceof BinaryOpNode) {
 				generateExprRecursive("eax", ((BinaryOpNode) left));
 				writeinstln("push eax");
-				vStack.push(right);
+				push(right);
 			}
 
 			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode) {
 				compileComputeExpr("eax", left);
 				writeinstln("push eax");
-				vStack.push(left);
+				push(left);
 			}
 			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode) {
 				compileComputeExpr("ebx", right);
 				writeinstln("push ebx");
-				vStack.push(right);
+				push(right);
 			}
 
 			if (left instanceof BinaryOpNode) {
 				writeinstln("pop eax");
-				vStack.pop();
+				pop();
 			}
 			if (right instanceof BinaryOpNode) {
 				writeinstln("pop ebx");
-				vStack.pop();
+				pop();
 			}
 
 			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode) {
 				writeinstln("pop ebx");
-				vStack.pop();
+				pop();
 			}
 			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode) {
 				writeinstln("pop eax");
-				vStack.pop();
+				pop();
 			}
 
 			TokenType operator = binaryNode.getOperator();
@@ -546,17 +630,17 @@ public class X86Compiler extends L3Compiler {
 			}
 
 			final int startStackIndex = vStack.size() - 1;
-			
-			node.getArgs().getChildren().forEach(c -> vStack.push((FunArgValNode) c));
-			vStack.push(node);
+
+			node.getArgs().getChildren().forEach(c -> push((FunArgValNode) c));
+			push(node);
 
 			writeinstln("call " + desc.getAsmName() + "  ; " + desc.getIdentifier().getValue());
 
-			vStack.pop();
+			pop();
 			int size = getStackSize(startStackIndex);
 			writeinstln("add dword esp, " + size + "  ; Free mem from fun call");
 
-			node.getArgs().getChildren().forEach(c -> vStack.pop());
+			node.getArgs().getChildren().forEach(c -> pop());
 		}
 	}
 

@@ -13,12 +13,13 @@ import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.ArrayInitNode;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FunArgDefNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsDefNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
-import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
+import lu.pcy113.l3.parser.ast.IfContainerNode;
 import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
@@ -26,6 +27,7 @@ import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
+import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.StringLitNode;
 import lu.pcy113.l3.parser.ast.TypeNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
@@ -71,47 +73,113 @@ public class L3Parser {
 		if (peek(TokenType.LET)) { // var declaration
 			LetTypeDefNode ltdn = parseLetTypeDef(parent);
 			if (container.containsDescriptor(ltdn.getIdent().getValue())) {
-				throw new ParserException("let " + ltdn.getIdent().getValue() + " already defined: "
-						+ ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
+				throw new ParserException("let " + ltdn.getIdent().getValue() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
 			parent.add(ltdn);
 			container.addDescriptor(ltdn.getIdent().getValue(), new LetScopeDescriptor(ltdn.getIdent(), ltdn));
 			consume(TokenType.SEMICOLON);
-		} else if (peek(TokenType.IDENT)
-				&& (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))) { // function call
+		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))) { // function call
 			parent.add(parseFunCall());
 			consume(TokenType.SEMICOLON);
 		} else if (canParseFun()) {
 			FunDefNode ltdn = parseFunDefExpr(parent);
 			if (container.containsDescriptor(ltdn.getIdent().getValue())) {
-				throw new ParserException("fun " + ltdn.getIdent().getValue() + " already defined: "
-						+ ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
+				throw new ParserException("fun " + ltdn.getIdent().getValue() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
 			container.addDescriptor(ltdn.getIdent().getValue(), new FunScopeDescriptor(ltdn.getIdent(), ltdn));
-		} else if (parent instanceof FunBodyDefNode && peek(TokenType.RETURN)) {
+		} else if (parent instanceof ScopeBodyNode && peek(TokenType.RETURN)) {
 			ReturnNode rtn = parseReturnExpr();
 			parent.add(rtn);
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.COMMENT)) {
 			consume(TokenType.COMMENT); // ignore
-		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN))
-				|| (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT))) {
+		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)) || (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT))) {
 			LetTypeSetNode set = parseLetTypeSet();
 			if (!container.containsDescriptor(set.getLet().getIdent().getValue())) {
-				throw new ParserException("let " + set.getLet().getIdent().getValue() + " isn't defined: ("
-						+ set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn() + ")");
+				throw new ParserException("let " + set.getLet().getIdent().getValue() + " isn't defined: (" + set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn() + ")");
 			}
 			parent.add(set);
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.SEMICOLON)) {
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.IF)) {
-			// IfDefNode ifdef = parseIfDefExpr();
-			// parent.add(ifdef);
+			IfContainerNode ifdef = parseIfContainerExpr();
+			parent.add(ifdef);
 		} else {
-			throw new ParserException("Expression not implemented: (" + parent.getClass().getSimpleName() + ") "
-					+ peek() + "->" + peek(1) + "->" + peek(2));
+			throw new ParserException("Expression not implemented: (" + parent.getClass().getSimpleName() + ") " + peek() + "->" + peek(1) + "->" + peek(2));
 		}
+	}
+
+	private IfContainerNode parseIfContainerExpr() throws ParserException {
+		if (peek(TokenType.IF) && peek(1, TokenType.PAREN_OPEN)) {
+			IfContainerNode container = new IfContainerNode();
+
+			IfDefNode ifDef = parseIfDefExpr();
+			container.add(ifDef);
+			
+			while(peek(TokenType.ELSE)) {
+				if(peek(1, TokenType.IF)) {
+					consume(TokenType.ELSE);
+					IfDefNode ifDef2 = parseIfDefExpr();
+					container.add(ifDef2);
+				}else {
+					ElseDefNode elseDef = parseElseDefExpr();
+					container.add(elseDef);
+				}
+			}
+			
+			return container;
+		}
+		throw new ParserException("An error occured when parsing if-statements");
+	}
+
+	private ElseDefNode parseElseDefExpr() throws ParserException {
+		if (peek(TokenType.ELSE)) {
+			consume(TokenType.ELSE);
+
+			ElseDefNode elseDef = new ElseDefNode();
+
+			ScopeBodyNode body = parseIfDefBody(elseDef);
+
+			return elseDef;
+		}
+		throw new ParserException("An error occured when parsing else-statement");
+	}
+
+	private IfDefNode parseIfDefExpr() throws ParserException {
+		if (peek(TokenType.IF) && peek(1, TokenType.PAREN_OPEN)) {
+			consume(TokenType.IF);
+			consume(TokenType.PAREN_OPEN);
+
+			Node condition = parseExpression();
+
+			consume(TokenType.PAREN_CLOSE);
+
+			IfDefNode ifDef = new IfDefNode(condition);
+
+			ScopeBodyNode body = parseIfDefBody(ifDef);
+
+			return ifDef;
+		}
+		throw new ParserException("An error occured when parsing if-statement");
+	}
+
+	private ScopeBodyNode parseIfDefBody(Node fdn) throws ParserException {
+		ScopeBodyNode fdb = new ScopeBodyNode();
+		fdn.add(fdb);
+
+		if(peek(TokenType.CURLY_OPEN)) {
+			consume(TokenType.CURLY_OPEN);
+			while (!peek(TokenType.CURLY_CLOSE)) {
+				parseLineExpr(fdb);
+			}
+	
+			consume(TokenType.CURLY_CLOSE);
+		}else {
+			parseLineExpr(fdb);
+		}
+
+		return fdb;
 	}
 
 	private LetTypeSetNode parseLetTypeSet() throws ParserException {
@@ -161,14 +229,11 @@ public class L3Parser {
 	}
 
 	private boolean canParseFun() {
-		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.IDENT, TokenType.VOID)
-				&& peek(2, TokenType.IDENT)
-				&& (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(2, TokenType.PAREN_OPEN));
+		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.IDENT, TokenType.VOID) && peek(2, TokenType.IDENT) && (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(2, TokenType.PAREN_OPEN));
 	}
 
 	private boolean canParseGenericTypeFun() {
-		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.VOID) && peek(2, TokenType.IDENT)
-				&& (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(4, TokenType.PAREN_OPEN));
+		return peek(TokenType.FUN) && peek(1, TokenType.TYPE, TokenType.VOID) && peek(2, TokenType.IDENT) && (peek(3, TokenType.PAREN_OPEN, TokenType.HASH) || peek(4, TokenType.PAREN_OPEN));
 	}
 
 	private FunDefNode parseFunDefExpr(Node container) throws ParserException {
@@ -187,7 +252,7 @@ public class L3Parser {
 
 			FunArgsDefNode args = parseFunArgsDef(fdn);
 
-			FunBodyDefNode body = parseFunDefBody(fdn);
+			ScopeBodyNode body = parseFunDefBody(fdn);
 
 			return fdn;
 		} else {
@@ -217,8 +282,8 @@ public class L3Parser {
 		return argsNode;
 	}
 
-	private FunBodyDefNode parseFunDefBody(FunDefNode fdn) throws ParserException {
-		FunBodyDefNode fdb = new FunBodyDefNode();
+	private ScopeBodyNode parseFunDefBody(FunDefNode fdn) throws ParserException {
+		ScopeBodyNode fdb = new ScopeBodyNode();
 		fdn.add(fdb);
 
 		consume(TokenType.CURLY_OPEN);
@@ -279,13 +344,11 @@ public class L3Parser {
 	}
 
 	private boolean canParseExpr() {
-		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT))
-				|| peek(TokenType.NUM_LIT, TokenType.PAREN_OPEN, TokenType.IDENT);
+		return (peek(TokenType.MINUS) && peek(1, TokenType.NUM_LIT)) || peek(TokenType.NUM_LIT, TokenType.PAREN_OPEN, TokenType.IDENT);
 	}
 
 	private FunArgDefNode parseFunArgDef() throws ParserException {
-		if ((peek(TokenType.TYPE) && peek(1, TokenType.IDENT))
-				|| (peek(TokenType.TYPE) && peek(1, TokenType.COLON) && peek(2, TokenType.IDENT))) {
+		if ((peek(TokenType.TYPE) && peek(1, TokenType.IDENT)) || (peek(TokenType.TYPE) && peek(1, TokenType.COLON) && peek(2, TokenType.IDENT))) {
 			// generic type
 			TypeNode typeNode = parseType();
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
@@ -410,8 +473,7 @@ public class L3Parser {
 			Node left = simplifyExpression(binaryOpNode.getLeft());
 			Node right = simplifyExpression(binaryOpNode.getRight());
 			if (left instanceof NumLitNode && right instanceof NumLitNode) {
-				long result = performOperation((long) ((NumLitNode) left).getValue(), binaryOpNode.getOperator(),
-						(long) ((NumLitNode) right).getValue());
+				long result = performOperation((long) ((NumLitNode) left).getValue(), binaryOpNode.getOperator(), (long) ((NumLitNode) right).getValue());
 				return new NumLitNode(result);
 			} else {
 				binaryOpNode.setLeft(left);
@@ -498,8 +560,7 @@ public class L3Parser {
 	}
 
 	private boolean canParseArrayInit() {
-		return peek(TokenType.NEW) && peek(1, TokenType.TYPE, TokenType.IDENT) && peek(2, TokenType.BRACKET_OPEN)
-				&& peek(3, TokenType.NUM_LIT) && peek(4, TokenType.BRACKET_CLOSE);
+		return peek(TokenType.NEW) && peek(1, TokenType.TYPE, TokenType.IDENT) && peek(2, TokenType.BRACKET_OPEN) && peek(3, TokenType.NUM_LIT) && peek(4, TokenType.BRACKET_CLOSE);
 	}
 
 	private Node parseTerm() throws ParserException {
@@ -539,8 +600,7 @@ public class L3Parser {
 			Node expr = parseExpression();
 			consume(TokenType.PAREN_CLOSE);
 			return expr;
-		} else if ((peek(TokenType.IDENT) && peek(1, TokenType.PAREN_OPEN))
-				|| (peek(TokenType.MINUS) && peek(1, TokenType.IDENT) && peek(2, TokenType.PAREN_OPEN))) {
+		} else if ((peek(TokenType.IDENT) && peek(1, TokenType.PAREN_OPEN)) || (peek(TokenType.MINUS) && peek(1, TokenType.IDENT) && peek(2, TokenType.PAREN_OPEN))) {
 			return parseFunCall();
 		} else if (peek(TokenType.IDENT) || (peek(TokenType.MINUS) && peek(1, TokenType.IDENT))) {
 			return parseVar();

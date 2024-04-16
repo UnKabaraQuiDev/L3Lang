@@ -37,6 +37,70 @@ main:  ; main
 	call sd_1  ; println
 	add dword esp, 28  ; Free mem from fun call
 	mov dword eax, 1  ; compileComputeExpr(NumLitNode(1))
+	push eax
+	mov dword ebx, 1  ; compileComputeExpr(NumLitNode(1))
+	push ebx
+	pop ebx
+	pop eax
+	sub eax, ebx  ; NumLitNode(1) - NumLitNode(1) -> eax
+	cmp eax, 0
+	jne _sec_1_0
+	jmp _sec_1_end
+_sec_1_0:
+	mov eax, esp
+	sub eax, 24
+	push eax  ; Setup array pointer
+	sub esp, 20
+	sub esp, 12
+	mov dword [esp + 8], var_3  ; From
+	mov dword [esp + 4], eax  ; To
+	mov dword [esp + 0], 5  ; Length
+	call sd_5
+	add esp, 12
+	mov eax, [esp + 20]  ; Loading StringLitNode pointer
+	push eax
+	call sd_1  ; println
+	add dword esp, 28  ; Free mem from fun call
+	jmp _sec_1_end
+_sec_1_end:
+	mov dword eax, 0  ; compileComputeExpr(NumLitNode(0))
+	cmp eax, 0
+	jne _sec_2_0
+	jmp _sec_2_1
+_sec_2_0:
+	mov eax, esp
+	sub eax, 24
+	push eax  ; Setup array pointer
+	sub esp, 20
+	sub esp, 12
+	mov dword [esp + 8], var_4  ; From
+	mov dword [esp + 4], eax  ; To
+	mov dword [esp + 0], 5  ; Length
+	call sd_5
+	add esp, 12
+	mov eax, [esp + 20]  ; Loading StringLitNode pointer
+	push eax
+	call sd_1  ; println
+	add dword esp, 28  ; Free mem from fun call
+	jmp _sec_2_end
+_sec_2_1:
+	mov eax, esp
+	sub eax, 24
+	push eax  ; Setup array pointer
+	sub esp, 20
+	sub esp, 12
+	mov dword [esp + 8], var_5  ; From
+	mov dword [esp + 4], eax  ; To
+	mov dword [esp + 0], 5  ; Length
+	call sd_5
+	add esp, 12
+	mov eax, [esp + 20]  ; Loading StringLitNode pointer
+	push eax
+	call sd_1  ; println
+	add dword esp, 28  ; Free mem from fun call
+	jmp _sec_2_end
+_sec_2_end:
+	mov dword eax, 1  ; compileComputeExpr(NumLitNode(1))
 	jmp main_cln  ; ReturnNode
 main_cln:
 	add esp, 0
@@ -111,3 +175,6 @@ section .data
 	esp_start dd 0
 	var_1 dd 115, 116, 114, 0  ; 55:12
 	var_2 dd 115, 116, 114, 49, 0  ; 56:12
+	var_3 dd 115, 116, 114, 50, 0  ; 59:13
+	var_4 dd 115, 116, 114, 51, 0  ; 62:13
+	var_5 dd 115, 116, 114, 52, 0  ; 64:13

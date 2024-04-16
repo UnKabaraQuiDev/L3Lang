@@ -1,12 +1,13 @@
 package lu.pcy113.l3.parser.ast;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 import lu.pcy113.l3.utils.StringUtils;
 
-public class Node {
+public class Node implements Iterable<Node> {
 
 	protected Node parent;
 	protected LinkedList<Node> children = new LinkedList<>();
@@ -88,6 +89,11 @@ public class Node {
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName();
+	}
+
+	@Override
+	public Iterator<Node> iterator() {
+		return children.iterator();
 	}
 
 }
