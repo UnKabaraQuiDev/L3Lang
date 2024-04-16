@@ -26,6 +26,7 @@ import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
 import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
@@ -80,9 +81,6 @@ public class L3Parser {
 			}
 			parent.add(ltdn);
 			container.addDescriptor(ltdn.getIdent().getValue(), new LetScopeDescriptor(ltdn.getIdent(), ltdn));
-			System.err.println("let parsed: " + ltdn.getIdent().getValue());
-			System.err.println("container = " + container + " for = " + parent);
-			System.err.println("container = " + container.getLocalDescriptors());
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))) { // function call
 			parent.add(parseFunCall());
@@ -101,7 +99,6 @@ public class L3Parser {
 			consume(TokenType.COMMENT); // ignore
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)) || (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT))) {
 			LetTypeSetNode set = parseLetTypeSet();
-			System.err.println("container = " + container + " for = " + parent);
 			if (!container.containsDescriptor(set.getLet().getIdent().getValue())) {
 				throw new ParserException("let " + set.getLet().getIdent().getValue() + " isn't defined: (" + set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn() + ")");
 			}
@@ -611,7 +608,6 @@ public class L3Parser {
 		} else if (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT)) {
 			consume(TokenType.BIT_AND);
 			Node identNode = parseTerm();
-			System.out.println(identNode.getClass().getName());
 			if (identNode instanceof VarNumNode) {
 				identNode.add(new NumLitNode(0L)); // set as pointer
 			} else {
@@ -640,15 +636,37 @@ public class L3Parser {
 	}
 
 	private Node parseComparison() throws ParserException {
-		Node left = parseExpression();
+		Node left = null;
+		
+		if(peek(TokenType.PAREN_OPEN)) {
+			consume(TokenType.PAREN_OPEN);
+			left = parseComparison();
+			consume(TokenType.PAREN_CLOSE);
+		}else {
+			left = parseExpression();
+		}
 
 		if (peek(TokenType.LESS, TokenType.LESS_EQUALS, TokenType.GREATER, TokenType.GREATER_EQUALS, TokenType.EQUALS, TokenType.NOT_EQUALS)) {
 			TokenType operator = consume(TokenType.LESS, TokenType.LESS_EQUALS, TokenType.GREATER, TokenType.GREATER_EQUALS, TokenType.EQUALS, TokenType.NOT_EQUALS).getType();
 			Node right = parseExpression();
-			return new ComparisonOpNode(left, operator, right);
-		} else {
-			return left; // If there's no comparison operator, return the left expression as-is
+			left = new ComparisonOpNode(left, operator, right);
 		}
+
+		if (peek(TokenType.AND)) {
+			consume(TokenType.AND);
+			Node right = parseComparison();
+			return new LogicalOpNode(left, TokenType.AND, right);
+		} else if (peek(TokenType.OR)) {
+			consume(TokenType.OR);
+			Node right = parseComparison();
+			return new LogicalOpNode(left, TokenType.OR, right);
+		} else if (peek(TokenType.BIT_XOR)) {
+			consume(TokenType.BIT_XOR);
+			Node right = parseComparison();
+			return new LogicalOpNode(left, TokenType.BIT_XOR, right);
+		}
+
+		return left; // If there's no comparison operator, return the left expression as-is
 	}
 
 	private Node parseNumLit() throws ParserException {

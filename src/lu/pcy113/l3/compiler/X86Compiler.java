@@ -184,7 +184,6 @@ public class X86Compiler extends L3Compiler {
 		if (expr instanceof ComparisonOpNode) {
 			compileInvertedConditionExpr((ComparisonOpNode) expr, node.getAsmName() + "_end");
 		} else {
-			implement();
 			compileComputeExpr("eax", expr);
 			writeinstln("cmp eax, 0");
 			writeinstln("je " + node.getAsmName() + "_end");
@@ -193,9 +192,14 @@ public class X86Compiler extends L3Compiler {
 
 	private void compileInvertedConditionExpr(ComparisonOpNode node, String label) throws CompilerException {
 		compileComputeExpr("ebx", node.getRight());
+		push(node.getRight());
+		writeinstln("push ebx");
 		
 		compileComputeExpr("eax", node.getLeft());
-
+		
+		pop();
+		writeinstln("pop ebx");
+		
 		String op = "";
 		switch (node.getOperator()) {
 		case LESS:

@@ -61,7 +61,7 @@ fun int main() {
 	
 	break#("stop");
 	
-	while((x >= 3)) {
+	while((x == 5 || x == 4) && x != 0) {
 		break#("stop1");
 		println(str);
 		x = x - 1;
