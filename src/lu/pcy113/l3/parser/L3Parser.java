@@ -18,6 +18,7 @@ import lu.pcy113.l3.parser.ast.FunArgDefNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsDefNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
+import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.IfContainerNode;
 import lu.pcy113.l3.parser.ast.IfDefNode;
@@ -72,6 +73,7 @@ public class L3Parser {
 
 		if (peek(TokenType.LET)) { // var declaration
 			LetTypeDefNode ltdn = parseLetTypeDef(parent);
+			System.err.println("container = "+container+" for = "+parent);
 			if (container.containsDescriptor(ltdn.getIdent().getValue())) {
 				throw new ParserException("let " + ltdn.getIdent().getValue() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
@@ -87,7 +89,7 @@ public class L3Parser {
 				throw new ParserException("fun " + ltdn.getIdent().getValue() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
 			container.addDescriptor(ltdn.getIdent().getValue(), new FunScopeDescriptor(ltdn.getIdent(), ltdn));
-		} else if (parent instanceof ScopeBodyNode && peek(TokenType.RETURN)) {
+		} else if (peek(TokenType.RETURN)) {
 			ReturnNode rtn = parseReturnExpr();
 			parent.add(rtn);
 			consume(TokenType.SEMICOLON);
@@ -135,9 +137,9 @@ public class L3Parser {
 
 	private ElseDefNode parseElseDefExpr() throws ParserException {
 		if (peek(TokenType.ELSE)) {
-			consume(TokenType.ELSE);
+			Token elseToken = consume(TokenType.ELSE);
 
-			ElseDefNode elseDef = new ElseDefNode();
+			ElseDefNode elseDef = new ElseDefNode(elseToken);
 
 			ScopeBodyNode body = parseIfDefBody(elseDef);
 
@@ -148,14 +150,14 @@ public class L3Parser {
 
 	private IfDefNode parseIfDefExpr() throws ParserException {
 		if (peek(TokenType.IF) && peek(1, TokenType.PAREN_OPEN)) {
-			consume(TokenType.IF);
+			Token ifToken = consume(TokenType.IF);
 			consume(TokenType.PAREN_OPEN);
 
 			Node condition = parseExpression();
 
 			consume(TokenType.PAREN_CLOSE);
 
-			IfDefNode ifDef = new IfDefNode(condition);
+			IfDefNode ifDef = new IfDefNode(ifToken, condition);
 
 			ScopeBodyNode body = parseIfDefBody(ifDef);
 
@@ -252,7 +254,7 @@ public class L3Parser {
 
 			FunArgsDefNode args = parseFunArgsDef(fdn);
 
-			ScopeBodyNode body = parseFunDefBody(fdn);
+			FunBodyDefNode body = parseFunBodyDef(fdn);
 
 			return fdn;
 		} else {
@@ -282,8 +284,8 @@ public class L3Parser {
 		return argsNode;
 	}
 
-	private ScopeBodyNode parseFunDefBody(FunDefNode fdn) throws ParserException {
-		ScopeBodyNode fdb = new ScopeBodyNode();
+	private FunBodyDefNode parseFunBodyDef(FunDefNode fdn) throws ParserException {
+		FunBodyDefNode fdb = new FunBodyDefNode();
 		fdn.add(fdb);
 
 		consume(TokenType.CURLY_OPEN);

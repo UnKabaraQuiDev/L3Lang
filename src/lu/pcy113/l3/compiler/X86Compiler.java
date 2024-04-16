@@ -28,6 +28,7 @@ import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeDescriptor;
 import lu.pcy113.l3.utils.FileUtils;
 import lu.pcy113.pclib.GlobalLogger;
@@ -156,6 +157,8 @@ public class X86Compiler extends L3Compiler {
 
 		int i = 0;
 
+		writeln(node.getAsmName() + ":  ; If container at: " + ((IfDefNode) node.getChildren().getFirst()).getToken().getPosition());
+
 		for (Node n : node) {
 			if (n instanceof IfDefNode) {
 				((IfDefNode) n).setAsmName(ifContainerName + "_" + i++);
@@ -169,11 +172,11 @@ public class X86Compiler extends L3Compiler {
 				implement(n);
 			}
 		}
-		
-		if(!(node.getChildren().getLast() instanceof ElseDefNode)) {
+
+		if (!(node.getChildren().getLast() instanceof ElseDefNode)) {
 			writeinstln("jmp " + node.getAsmName() + "_end");
 		}
-		
+
 		for (Node n : node) {
 			if (n instanceof IfDefNode) {
 				compileIfElseDefBodyNode((IfDefNode) n);
@@ -188,22 +191,34 @@ public class X86Compiler extends L3Compiler {
 	private void compileIfElseDefBodyNode(Node node) throws CompilerException {
 		ScopeBodyNode body = null;
 		String asmName = null;
+		String asmNameComment = null;
 		if (node instanceof IfDefNode) {
 			body = ((IfDefNode) node).getBody();
 			asmName = ((IfDefNode) node).getAsmName();
+			asmNameComment = "If node at: " + ((IfDefNode) node).getToken().getPosition();
 		} else if (node instanceof ElseDefNode) {
 			body = ((ElseDefNode) node).getBody();
 			asmName = ((ElseDefNode) node).getAsmName();
+			asmNameComment = "Else node at: " + ((ElseDefNode) node).getToken().getPosition();
 		} else {
 			implement(node);
 		}
 
 		IfContainerNode container = (IfContainerNode) node.getParent();
 
-		writeln(asmName + ":");
+		final int startStackIndex = vStack.size() - 1;
+		body.setStartStackIndex(startStackIndex);
+
+		writeln(asmName + ":  ; " + asmNameComment);
 		for (Node n : body) {
 			compile(n);
 		}
+
+		int size = getStackSize(startStackIndex);
+
+		writeln(body.getClnAsmName());
+		writeinstln("add esp, " + size + "  ; Free mem");
+
 		writeinstln("jmp " + container.getAsmName() + "_end");
 	}
 
@@ -267,11 +282,19 @@ public class X86Compiler extends L3Compiler {
 
 	private void compileReturn(ReturnNode node) throws CompilerException {
 		FunScopeDescriptor desc = (FunScopeDescriptor) node.getClosestContainer().getClosestDescriptor(getFunDefParent(node).getIdent().getValue());
-		
+
 		FunDefNode fun = desc.getNode();
 
 		if (!fun.getReturnType().isVoid()) {
 			compileComputeExpr("eax", node.getExpr());
+		}
+
+		if (node.getParent() instanceof ScopeBodyNode) {
+			int size = getStackSize(((ScopeContainerNode) node.getParent()).getStartStackIndex());
+
+			writeinstln("add esp, " + size + "  ; Free mem from local scope bc of return");
+
+			((ScopeContainerNode) node.getParent()).getLocalDescriptors().values().forEach(c -> pop());
 		}
 
 		writeinstln("jmp " + desc.getAsmName() + "_cln  ; " + node);
@@ -350,7 +373,6 @@ public class X86Compiler extends L3Compiler {
 			compile(n);
 		}
 
-		// remove args from stack BEFORE cleaning up local vars
 		int size = getStackSize(startStackIndex);
 
 		writeln(desc.getAsmName() + "_cln:");
@@ -358,7 +380,6 @@ public class X86Compiler extends L3Compiler {
 		writeinstln("ret");
 
 		pop(); // call/ret
-		// node.getArgs().getChildren().forEach(c -> pop());
 	}
 
 	private void compileLetTypeDef(LetScopeDescriptor desc) throws CompilerException {
@@ -366,6 +387,7 @@ public class X86Compiler extends L3Compiler {
 
 		String asmName = desc.getAsmName();
 		String name = node.getIdent().getValue();
+		String pos = node.getIdent().getPosition();
 
 		final int typeSize = node.getType().getSize();
 		int size = node.getType().getSize();
@@ -387,10 +409,10 @@ public class X86Compiler extends L3Compiler {
 					if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
 						if (expr instanceof StringLitNode) {
 							writedataln(asmName + " dd " + (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
-									+ "  ; " + name);
+									+ "  ; " + name + " at " + pos);
 						} else if (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw()) {
 							writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
-									+ "  ; " + name);
+									+ "  ; " + name + " at " + pos);
 						}
 
 						writeinstln("sub esp, 12");

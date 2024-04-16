@@ -9,8 +9,8 @@ public class Token {
 	
 	public Token(TokenType _t, int _l, int _c) {
 		this.type = _t;
-		this.line = _l;
-		this.column = _c;
+		this.line = _l+1;
+		this.column = _c+1;
 	}
 	
 	public int getColumn() {return column;}
@@ -18,7 +18,7 @@ public class Token {
 	public TokenType getType() {return type;}
 	
 	public String getPosition() {
-		return (line+1)+":"+(column+1);
+		return (line)+":"+(column);
 	}
 	
 	@Override

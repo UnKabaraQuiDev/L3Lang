@@ -9,26 +9,26 @@ _start:
 	int 0x80   ; Syscall call
 main:  ; main
 	mov eax, esp
-	sub eax, 20
+	sub eax, 84
 	push eax  ; Setup array pointer
-	sub esp, 16
+	sub esp, 80
+	sub esp, 12
+	mov dword [esp + 8], sd_11  ; From
+	mov dword [esp + 4], eax  ; To
+	mov dword [esp + 0], 20  ; Length
+	call sd_5
+	add esp, 12
+	mov eax, [esp + 80] ; compileLoadVarNum(VarNumNode(str, pointer=false, arrayOffset=false)): local
+	push eax
+	call sd_1  ; println
+	add dword esp, 4  ; Free mem from fun call
+	mov eax, esp
+	sub eax, 24
+	push eax  ; Setup array pointer
+	sub esp, 20
 	sub esp, 12
 	mov dword [esp + 8], var_1  ; From
 	mov dword [esp + 4], eax  ; To
-	mov dword [esp + 0], 4  ; Length
-	call sd_5
-	add esp, 12
-	mov eax, [esp + 16]  ; Loading StringLitNode pointer
-	push eax
-	call sd_1  ; println
-	add dword esp, 24  ; Free mem from fun call
-	mov eax, esp
-	sub eax, 24
-	push eax  ; Setup array pointer
-	sub esp, 20
-	sub esp, 12
-	mov dword [esp + 8], var_2  ; From
-	mov dword [esp + 4], eax  ; To
 	mov dword [esp + 0], 5  ; Length
 	call sd_5
 	add esp, 12
@@ -36,74 +36,37 @@ main:  ; main
 	push eax
 	call sd_1  ; println
 	add dword esp, 28  ; Free mem from fun call
-	mov dword eax, 1  ; compileComputeExpr(NumLitNode(1))
-	push eax
-	mov dword ebx, 1  ; compileComputeExpr(NumLitNode(1))
-	push ebx
-	pop ebx
-	pop eax
-	sub eax, ebx  ; NumLitNode(1) - NumLitNode(1) -> eax
-	cmp eax, 0
-	jne _sec_1_0
-	jmp _sec_1_end
-_sec_1_0:
-	mov eax, esp
-	sub eax, 24
-	push eax  ; Setup array pointer
-	sub esp, 20
-	sub esp, 12
-	mov dword [esp + 8], var_3  ; From
-	mov dword [esp + 4], eax  ; To
-	mov dword [esp + 0], 5  ; Length
-	call sd_5
-	add esp, 12
-	mov eax, [esp + 20]  ; Loading StringLitNode pointer
-	push eax
-	call sd_1  ; println
-	add dword esp, 28  ; Free mem from fun call
-	jmp _sec_1_end
-_sec_1_end:
+stop:  ; breakpoint at: 59:2
+_sec_1:  ; If container at: 60:2
 	mov dword eax, 0  ; compileComputeExpr(NumLitNode(0))
 	cmp eax, 0
-	jne _sec_2_0
-	jmp _sec_2_1
-_sec_2_0:
-	mov eax, esp
-	sub eax, 24
-	push eax  ; Setup array pointer
-	sub esp, 20
-	sub esp, 12
-	mov dword [esp + 8], var_4  ; From
-	mov dword [esp + 4], eax  ; To
-	mov dword [esp + 0], 5  ; Length
-	call sd_5
-	add esp, 12
-	mov eax, [esp + 20]  ; Loading StringLitNode pointer
-	push eax
-	call sd_1  ; println
-	add dword esp, 28  ; Free mem from fun call
-	jmp _sec_2_end
-_sec_2_1:
-	mov eax, esp
-	sub eax, 24
-	push eax  ; Setup array pointer
-	sub esp, 20
-	sub esp, 12
-	mov dword [esp + 8], var_5  ; From
-	mov dword [esp + 4], eax  ; To
-	mov dword [esp + 0], 5  ; Length
-	call sd_5
-	add esp, 12
-	mov eax, [esp + 20]  ; Loading StringLitNode pointer
-	push eax
-	call sd_1  ; println
-	add dword esp, 28  ; Free mem from fun call
-	jmp _sec_2_end
-_sec_2_end:
+	jne _sec_1_0
+	jmp _sec_1_1
+_sec_1_0:  ; If node at: 60:2
+	mov dword eax, 0  ; compileComputeExpr(NumLitNode(0))
+	push dword eax  ; Push var: x
+	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local
+	add esp, 4  ; Free mem from local scope bc of return
+	jmp main_cln  ; ReturnNode
+_sec_1_0_cln
+	add esp, 0  ; Free mem
+	jmp _sec_1_end
+_sec_1_1:  ; Else node at: 63:3
+	mov dword eax, 1  ; compileComputeExpr(NumLitNode(1))
+	push dword eax  ; Push var: y
+	mov dword eax, 2  ; compileComputeExpr(NumLitNode(2))
+	push dword eax  ; Push var: x
+	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local
+	add esp, 8  ; Free mem from local scope bc of return
+	jmp main_cln  ; ReturnNode
+_sec_1_1_cln
+	add esp, 0  ; Free mem
+	jmp _sec_1_end
+_sec_1_end:
 	mov dword eax, 1  ; compileComputeExpr(NumLitNode(1))
 	jmp main_cln  ; ReturnNode
 main_cln:
-	add esp, 0
+	add esp, 84
 	ret
 sd_1:  ; println
 	mov ecx, [esp + 4]  ; Copy the address of the string into eax
@@ -171,10 +134,8 @@ sd_10_cln:
 section .text
 	global _start
 	global main
+	global stop
 section .data
 	esp_start dd 0
-	var_1 dd 115, 116, 114, 0  ; 55:12
-	var_2 dd 115, 116, 114, 49, 0  ; 56:12
-	var_3 dd 115, 116, 114, 50, 0  ; 59:13
-	var_4 dd 115, 116, 114, 51, 0  ; 62:13
-	var_5 dd 115, 116, 114, 52, 0  ; 64:13
+	sd_11 dd 112, 114, 105, 110, 116, 108, 110, 32, 116, 104, 105, 115, 32, 115, 116, 114, 105, 110, 103, 0  ; str at 55:11
+	var_1 dd 115, 116, 114, 49, 0  ; 57:12

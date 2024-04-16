@@ -6,6 +6,7 @@ import lu.pcy113.l3.parser.ast.Node;
 
 public class ScopeContainerNode extends Node implements ScopeContainer {
 
+	private int startStackIndex;
 	private HashMap<String, ScopeDescriptor> descriptors = new HashMap<>();
 
 	@Override
@@ -20,6 +21,14 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 			return false;
 
 		return parent.containsDescriptor(name);
+	}
+
+	public int getStartStackIndex() {
+		return startStackIndex;
+	}
+
+	public void setStartStackIndex(int startStackIndex) {
+		this.startStackIndex = startStackIndex;
 	}
 
 	@Override
@@ -38,7 +47,7 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 			return descriptors.get(name);
 		}
 		ScopeContainer container = getContainer(name);
-		if(container == null) {
+		if (container == null) {
 			return null;
 		}
 		return container.getClosestDescriptor(name);
