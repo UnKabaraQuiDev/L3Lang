@@ -11,6 +11,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 
 	@Override
 	public boolean containsDescriptor(String name) {
+		System.out.println(this+" + "+descriptors);
+		
 		if (localContainsDescriptor(name)) {
 			return true;
 		}

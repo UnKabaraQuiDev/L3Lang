@@ -23,6 +23,7 @@ import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.StringLitNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
@@ -145,13 +146,46 @@ public class X86Compiler extends L3Compiler {
 			compileIfContainerNode((IfContainerNode) node);
 		} else if (node instanceof ReturnNode) {
 			compileReturn((ReturnNode) node);
+		} else if (node instanceof WhileDefNode) {
+			compileWhileDefNode((WhileDefNode) node);
 		} else {
 			implement(node);
 		}
 	}
 
-	private void compileIfContainerNode(IfContainerNode node) throws CompilerException {
+	private void compileWhileDefNode(WhileDefNode node) throws CompilerException {
+		String whileName = newSection();
+		node.setAsmName(whileName);
 
+		ScopeBodyNode body = node.getBody();
+
+		writeln(node.getAsmName() + ":  ; While at: " + ((WhileDefNode) node).getToken().getPosition());
+		compileWhileDefConditionNode(node);
+
+		final int startStackIndex = vStack.size() - 1;
+		body.setStartStackIndex(startStackIndex);
+
+		for (Node n : body) {
+			compile(n);
+		}
+		writeinstln("jmp " + node.getAsmName());
+
+		int size = getStackSize(startStackIndex);
+
+		writeln(body.getClnAsmName() + ":");
+		writeinstln("add esp, " + size + "  ; Free mem");
+
+		writeln(node.getAsmName() + "_end:");
+	}
+
+	private void compileWhileDefConditionNode(WhileDefNode node) throws CompilerException {
+		Node expr = node.getCondition();
+		compileComputeExpr("eax", expr);
+		writeinstln("cmp eax, 0");
+		writeinstln("je " + node.getAsmName() + "_end");
+	}
+
+	private void compileIfContainerNode(IfContainerNode node) throws CompilerException {
 		String ifContainerName = newSection();
 		node.setAsmName(ifContainerName);
 
@@ -265,7 +299,7 @@ public class X86Compiler extends L3Compiler {
 			if (def.isiStatic()) { // static
 				writeinstln("mov [" + desc.getAsmName() + "], eax  ; compileLetTypeSet(" + node + "): static");
 			} else { // local
-				writeinstln("mov [ecx], [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "]");
+				writeinstln("mov [ecx], [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "]  ; compileLetTypeSet(" + node + "): local, index = " + def.getStackIndex());
 				// writeinstln("mov [ecx - " + (def.getStackIndex()) + "], eax ;
 				// compileLetTypeSet(" + node + "): local, index = " + def.getStackIndex());
 			}
@@ -273,9 +307,9 @@ public class X86Compiler extends L3Compiler {
 			if (def.isiStatic()) { // static
 				writeinstln("mov [" + desc.getAsmName() + "], eax  ; compileLetTypeSet(" + node + "): static");
 			} else { // local
-				writeinstln("mov [ecx], [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "]");
-				// writeinstln("mov [ecx - " + (def.getStackIndex()) + "], eax ;
-				// compileLetTypeSet(" + node + "): local, index = " + def.getStackIndex());
+				// writeinstln("mov eax, [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "]  ; compileLetTypeSet(" + node + "): local, index = " + def.getStackIndex());
+				// writeinstln("mov [ecx], eax");
+				writeinstln("mov [esp - " + (getStackIndex() - def.getStackIndex() - 4) + "], eax ; compileLetTypeSet(" + node + "): local, index = " + def.getStackIndex());
 			}
 		}
 	}

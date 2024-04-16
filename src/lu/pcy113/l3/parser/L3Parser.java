@@ -32,6 +32,7 @@ import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.StringLitNode;
 import lu.pcy113.l3.parser.ast.TypeNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
@@ -73,12 +74,14 @@ public class L3Parser {
 
 		if (peek(TokenType.LET)) { // var declaration
 			LetTypeDefNode ltdn = parseLetTypeDef(parent);
-			System.err.println("container = "+container+" for = "+parent);
 			if (container.containsDescriptor(ltdn.getIdent().getValue())) {
 				throw new ParserException("let " + ltdn.getIdent().getValue() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
 			parent.add(ltdn);
 			container.addDescriptor(ltdn.getIdent().getValue(), new LetScopeDescriptor(ltdn.getIdent(), ltdn));
+			System.err.println("let parsed: "+ltdn.getIdent().getValue());
+			System.err.println("container = "+container+" for = "+parent);
+			System.err.println("container = "+container.getLocalDescriptors());
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))) { // function call
 			parent.add(parseFunCall());
@@ -97,6 +100,7 @@ public class L3Parser {
 			consume(TokenType.COMMENT); // ignore
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)) || (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT))) {
 			LetTypeSetNode set = parseLetTypeSet();
+			System.err.println("container = "+container+" for = "+parent);
 			if (!container.containsDescriptor(set.getLet().getIdent().getValue())) {
 				throw new ParserException("let " + set.getLet().getIdent().getValue() + " isn't defined: (" + set.getLet().getIdent().getLine() + ":" + set.getLet().getIdent().getColumn() + ")");
 			}
@@ -105,17 +109,40 @@ public class L3Parser {
 		} else if (peek(TokenType.SEMICOLON)) {
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.IF)) {
-			IfContainerNode ifdef = parseIfContainerExpr();
-			parent.add(ifdef);
+			IfContainerNode ifdef = parseIfContainerExpr(parent);
+		} else if(peek(TokenType.WHILE)) {
+			WhileDefNode whileDef = parseWhileDefNode(parent);
 		} else {
 			throw new ParserException("Expression not implemented: (" + parent.getClass().getSimpleName() + ") " + peek() + "->" + peek(1) + "->" + peek(2));
 		}
 	}
 
-	private IfContainerNode parseIfContainerExpr() throws ParserException {
+	private WhileDefNode parseWhileDefNode(Node parent) throws ParserException {
+		if (peek(TokenType.WHILE) && peek(1, TokenType.PAREN_OPEN)) {
+			Token whileToken = consume(TokenType.WHILE);
+			consume(TokenType.PAREN_OPEN);
+
+			Node condition = parseExpression();
+
+			consume(TokenType.PAREN_CLOSE);
+
+			WhileDefNode whileDef = new WhileDefNode(whileToken, condition);
+			
+			parent.add(whileDef);
+			
+			ScopeBodyNode body = parseIfDefBody(whileDef);
+			
+			return whileDef;
+		}
+		throw new ParserException("An error occured when parsing while-statement");
+	}
+
+	private IfContainerNode parseIfContainerExpr(Node parent) throws ParserException {
 		if (peek(TokenType.IF) && peek(1, TokenType.PAREN_OPEN)) {
 			IfContainerNode container = new IfContainerNode();
 
+			parent.add(container);
+			
 			IfDefNode ifDef = parseIfDefExpr();
 			container.add(ifDef);
 			

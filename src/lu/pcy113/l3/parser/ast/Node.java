@@ -63,7 +63,11 @@ public class Node implements Iterable<Node> {
 
 	public ScopeContainerNode getParentContainer() {
 		Node parent = this.getParent();
-		while (parent != null && !(parent instanceof ScopeContainerNode)) {
+		while (!(parent instanceof ScopeContainerNode)) {
+			System.out.println("parent: "+parent);
+			if(parent == null) {
+				return null;
+			}
 			parent = parent.getParent();
 		}
 		return (ScopeContainerNode) parent;

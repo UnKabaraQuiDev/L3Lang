@@ -9,8 +9,11 @@ fun void println(int8: str) {
 	asm#("jmp .loop  ; Repeat the loop");
 	
 	asmlb#(".done:");
-	asm#("mov byte [ecx], 10  ; Newline");
+	asm#("sub esp, 4");
+	asm#("mov ecx, esp");
+	asm#("mov dword [ecx], 10  ; Newline");
 	printwrite#();
+	asm#("add esp, 4");
 }
 
 fun void memcpy(int32: from, int32: to, int32 length) {
@@ -53,18 +56,16 @@ fun int test() {
 
 fun int main() {
 	let int8: str = "println this string";
-	println(str);
-	println("str1");
+	
+	let int16 x = 5;
 	
 	break#("stop");
-	if(0) {
-		let int16 x = 0;
-		return int16 x;
-	}else {
-		let int16 y = 1;
-		let int16 x = 2;
-		return int16 x;
+	
+	while(x) {
+		break#("stop1");
+		println(str);
+		x = x - 1;
 	}
 	
-	return int 1;
+	return int 3;
 }
