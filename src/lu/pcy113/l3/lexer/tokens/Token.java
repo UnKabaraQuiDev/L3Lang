@@ -17,9 +17,13 @@ public class Token {
 	public int getLine() {return line;}
 	public TokenType getType() {return type;}
 	
+	public String getPosition() {
+		return (line+1)+":"+(column+1);
+	}
+	
 	@Override
 	public String toString() {
-		return Token.class.getName()+"[line="+line+", column="+column+", type="+type+"]";
+		return Token.class.getName()+"["+getPosition()+", type="+type+"]";
 	}
 	
 }

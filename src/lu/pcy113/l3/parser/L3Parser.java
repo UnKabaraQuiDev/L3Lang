@@ -19,6 +19,7 @@ import lu.pcy113.l3.parser.ast.FunArgsDefNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
+import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
 import lu.pcy113.l3.parser.ast.LocalizingNode;
@@ -105,7 +106,8 @@ public class L3Parser {
 		} else if (peek(TokenType.SEMICOLON)) {
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.IF)) {
-			parse
+			// IfDefNode ifdef = parseIfDefExpr();
+			// parent.add(ifdef);
 		} else {
 			throw new ParserException("Expression not implemented: (" + parent.getClass().getSimpleName() + ") "
 					+ peek() + "->" + peek(1) + "->" + peek(2));

@@ -4,7 +4,7 @@ import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 
 public class StringLitNode extends Node implements ArrayInit {
 
-	private int length;
+	private int length, stackSize;
 	private StringLiteralToken string;
 	
 	public StringLitNode(StringLiteralToken stringToken) {
@@ -19,6 +19,16 @@ public class StringLitNode extends Node implements ArrayInit {
 	
 	public StringLiteralToken getString() {
 		return string;
+	}
+	
+	@Override
+	public int getStackSize() {
+		return stackSize;
+	}
+	
+	@Override
+	public void setStackSize(int i) {
+		this.stackSize = i;
 	}
 	
 	@Override
@@ -38,7 +48,7 @@ public class StringLitNode extends Node implements ArrayInit {
 	
 	@Override
 	public String toString() {
-		return super.toString()+"("+string.getValue()+")";
+		return super.toString()+"('"+string.getValue()+"')";
 	}
 
 }

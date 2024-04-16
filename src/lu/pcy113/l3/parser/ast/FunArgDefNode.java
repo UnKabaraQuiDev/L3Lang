@@ -9,5 +9,10 @@ public class FunArgDefNode extends Node {
 	public LetTypeDefNode getLet() {
 		return (LetTypeDefNode) children.get(0);
 	}
+	
+	@Override
+	public String toString() {
+		return super.toString()+"("+getLet()+")";
+	}
 
 }

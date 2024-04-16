@@ -8,4 +8,7 @@ public interface ArrayInit {
 
 	Node getExpr(int i);
 
+	int getStackSize();
+	void setStackSize(int i);
+
 }

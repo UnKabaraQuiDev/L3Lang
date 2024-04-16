@@ -24,5 +24,5 @@ public class StringLiteralToken extends LiteralToken<String> {
 	public String toString() {
 		return StringLiteralToken.class.getName()+"[line="+line+", column="+column+", type="+type+", value="+value+"]";
 	}
-	
+
 }
