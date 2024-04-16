@@ -19,6 +19,7 @@ import static lu.pcy113.l3.lexer.TokenType.CURLY_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.DEC_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.DEFAULT;
 import static lu.pcy113.l3.lexer.TokenType.DIV;
+import static lu.pcy113.l3.lexer.TokenType.DOLLAR;
 import static lu.pcy113.l3.lexer.TokenType.DOT;
 import static lu.pcy113.l3.lexer.TokenType.ELSE;
 import static lu.pcy113.l3.lexer.TokenType.EQUALS;
@@ -38,9 +39,9 @@ import static lu.pcy113.l3.lexer.TokenType.INT_16;
 import static lu.pcy113.l3.lexer.TokenType.INT_32;
 import static lu.pcy113.l3.lexer.TokenType.INT_64;
 import static lu.pcy113.l3.lexer.TokenType.INT_8;
-import static lu.pcy113.l3.lexer.TokenType.LET;
 import static lu.pcy113.l3.lexer.TokenType.LESS;
 import static lu.pcy113.l3.lexer.TokenType.LESS_EQUALS;
+import static lu.pcy113.l3.lexer.TokenType.LET;
 import static lu.pcy113.l3.lexer.TokenType.MINUS;
 import static lu.pcy113.l3.lexer.TokenType.MODULO;
 import static lu.pcy113.l3.lexer.TokenType.MUL;
@@ -61,6 +62,7 @@ import static lu.pcy113.l3.lexer.TokenType.TRUE;
 import static lu.pcy113.l3.lexer.TokenType.TYPE;
 import static lu.pcy113.l3.lexer.TokenType.VOID;
 import static lu.pcy113.l3.lexer.TokenType.WHILE;
+import static lu.pcy113.l3.lexer.TokenType.XOR;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -179,6 +181,11 @@ public class L3Lexer {
 					flushToken();
 					break next;
 
+				case '$':
+					type = DOLLAR;
+					flushToken();
+					break next;
+					
 				case ':':
 					type = COLON;
 					flushToken();
@@ -283,7 +290,12 @@ public class L3Lexer {
 					break next;
 
 				case '^':
-					type = BIT_XOR;
+					if (peek() == '^') {
+						consume();
+						type = XOR;
+					} else {
+						type = BIT_XOR;
+					}
 					flushToken();
 					break next;
 

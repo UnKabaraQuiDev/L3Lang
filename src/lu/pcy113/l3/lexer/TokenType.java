@@ -16,7 +16,7 @@ public enum TokenType {
 
 	IDENT(),
 
-	COMMA(','), DOT('.'), COLON(':'), SEMICOLON(';'),
+	COMMA(','), DOT('.'), COLON(':'), SEMICOLON(';'), DOLLAR('$'),
 
 	ARROW("->"),
 
@@ -40,7 +40,7 @@ public enum TokenType {
 
 	BIT_OR('|'), BIT_AND('&'), BIT_XOR('^'), BIT_NOT('~'),
 
-	OR("||"), AND("&&"), NOT('!'),
+	OR("||"), AND("&&"), NOT('!'), XOR("^^"),
 
 	HASH('#'),
 
