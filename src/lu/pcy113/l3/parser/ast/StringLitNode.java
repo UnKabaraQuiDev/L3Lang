@@ -1,5 +1,6 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 
 public class StringLitNode extends Node implements ArrayInit {
@@ -19,6 +20,10 @@ public class StringLitNode extends Node implements ArrayInit {
 	
 	public StringLiteralToken getString() {
 		return string;
+	}
+	
+	public TypeNode getType() {
+		return new TypeNode(true, TokenType.INT_8, true);
 	}
 	
 	@Override

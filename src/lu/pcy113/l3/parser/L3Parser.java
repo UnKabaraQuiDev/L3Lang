@@ -86,8 +86,8 @@ public class L3Parser {
 			return funCall;
 		} else if (canParseFun()) {
 			FunDefNode ltdn = parseFunDefExpr(parent);
-			if (container.containsDescriptor(ltdn.getIdent().getValue())) {
-				throw new ParserException("fun " + ltdn.getIdent().getValue() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
+			if (container.containsFunDescriptor(ltdn)) {
+				throw new ParserException("Fun " + ltdn.getIdent().getValue() + " already defined: " + ltdn.getIdent().getLine() + ":" + ltdn.getIdent().getColumn());
 			}
 			container.addDescriptor(ltdn.getIdent().getValue(), new FunScopeDescriptor(ltdn.getIdent(), ltdn));
 
@@ -107,9 +107,7 @@ public class L3Parser {
 			parent.add(set);
 
 			return set;
-		} /*
-			 * else if (peek(TokenType.SEMICOLON)) { consume(TokenType.SEMICOLON); }
-			 */else if (peek(TokenType.IF)) {
+		} else if (peek(TokenType.IF)) {
 			IfContainerNode ifdef = parseIfContainerExpr(parent);
 
 			return ifdef;
@@ -377,13 +375,12 @@ public class L3Parser {
 			parseLineExpr(fdb);
 		}
 
-		if (!fdb.getChildren().isEmpty() && !(fdb.getChildren().getLast() instanceof ReturnNode)) {
-			if (fdn.getReturnType().isVoid()) {
-				fdb.add(new ReturnNode(fdn.getReturnType(), null));
-			} else {
-				throw new ParserException("Missing final return statement: " + peek());
-			}
+		if (fdb.getChildren().isEmpty() || !(fdb.getChildren().getLast() instanceof ReturnNode) && !fdn.getReturnType().isVoid()) {
+			throw new ParserException("Missing final return statement: " + peek());
+		}else {
+			fdb.add(new ReturnNode(fdn.getReturnType(), null));
 		}
+		
 
 		consume(TokenType.CURLY_CLOSE);
 
@@ -487,8 +484,6 @@ public class L3Parser {
 
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 
-			// int nonStaticLetIndex = getLetIndex(container);
-
 			LetTypeDefNode typeDefNode = new LetTypeDefNode(type, ident, iStatic, false);
 
 			if (!peek(TokenType.ASSIGN))
@@ -496,24 +491,27 @@ public class L3Parser {
 
 			Token assign = consume(TokenType.ASSIGN);
 
-			if (type.isPointer() && peek(TokenType.CURLY_OPEN)) {
+			if (peek(TokenType.NEW)) {
+				consume(TokenType.NEW);
+				
+				TypeNode newType = parseType();
+				if(peek(TokenType.BRACKET_OPEN)) {
+					consume(TokenType.BRACKET_OPEN);
+					
+					int newTypeArrayLength = (int) (long) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
+					
+					typeDefNode.add(new ArrayInitNode(newType, newTypeArrayLength));
+					
+					consume(TokenType.BRACKET_CLOSE);
+				}
+			} else if (type.isPointer() && peek(TokenType.CURLY_OPEN)) {
 				if (peek(TokenType.CURLY_OPEN)) {
 					consume(TokenType.CURLY_OPEN);
 					parseArrayArgs().forEach(typeDefNode::add);
 					consume(TokenType.CURLY_CLOSE);
 				}
-				// typeDefNode.setLetIndex(typeDefNode.getLetIndex() /*+
-				// typeDefNode.getChildren().size()*/);
 			} else {
 				typeDefNode.add(parseExpression());
-				if (typeDefNode.getExpr() instanceof ArrayInitNode) {
-					// TODO -1 really needed ? v
-					// typeDefNode.setLetIndex(typeDefNode.getLetIndex() - 1 + ((ArrayInitNode)
-					// typeDefNode.getExpr()).getArraySize());
-				} else if (typeDefNode.getExpr() instanceof StringLitNode) {
-					// typeDefNode.setLetIndex(typeDefNode.getLetIndex() - 1 + ((StringLitNode)
-					// typeDefNode.getExpr()).getArraySize());
-				}
 			}
 
 			if (container.containsDescriptor(ident.getValue())) {
@@ -521,7 +519,7 @@ public class L3Parser {
 			}
 			parent.add(typeDefNode);
 			container.addDescriptor(ident.getValue(), new LetScopeDescriptor(ident, typeDefNode));
-			
+
 			return typeDefNode;
 		} else if (peek(TokenType.LET) && peek(TokenType.IDENT)) {
 			throw new ParserException("Defined typed not defined yet.");
@@ -530,7 +528,7 @@ public class L3Parser {
 	}
 
 	private int getLetIndex(ScopeContainer container) {
-		return (int) (long) container.getDescriptors().values().stream().map((ScopeDescriptor i) -> {
+		return (int) (long) container.getDescriptors().values().stream().flatMap(List::stream).map((ScopeDescriptor i) -> {
 			if (i instanceof LetScopeDescriptor && ((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) {
 				LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
 				LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();

@@ -19,4 +19,8 @@ public class ReturnNode extends Node {
 		return (TypeNode) children.get(0);
 	}
 
+	public boolean hasExpr() {
+		return children.size() > 1;
+	}
+
 }

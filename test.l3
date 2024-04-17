@@ -16,6 +16,37 @@ fun void println(int8: str) {
 	asm#("add esp, 4");
 }
 
+fun void println(int16 number) {
+	break#("println");
+	let int8: str = new int8[2]; // 10 digits + null-terminator
+	
+	stringify(number, str);
+	
+	break#("println2");
+	
+	println(str);
+}
+
+fun void stringify(int16 number, int8: str) {
+	break#("stringify");
+
+	asm#("lea esi, [esp + 8]  ; Load address of the number");
+	asm#("mov edi, [esp + 4]  ; Load address of the string");
+	// asm#("mov edi, [edi]");
+	
+	asmlb#(".convert_loop:");
+	asm#("mov eax, dword [esi]  ; Load the 32-bit number");
+	asm#("mov edx, 0  ; Clear EDX for division");
+	asm#("mov ecx, 10  ; Set divisor to 10");
+	asm#("div ecx  ; Divide EAX by 10");
+	
+	asm#("add dl, '0'  ; Convert remainder to ASCII");
+	asm#("mov [edi], dl  ; Store ASCII digit in buffer");
+	asm#("add edi, 4  ; Move buffer pointer back");
+	asm#("test eax, eax  ; Check if quotient is zero");
+	asm#("jnz .convert_loop  ; If not, continue conversion");
+}
+
 fun void memcpy(int32: from, int32: to, int32 length) {
 	asm#("mov ecx, [esp + 4]  ; Length");
 	asm#("mov edi, [esp + 8]  ; To");
@@ -50,37 +81,25 @@ fun int16 strlen(int8: str) {
 }
 
 fun int test() {
-	let int te = 10;
-	return int te;
+	println("test1");
+	return int 0;
+}
+
+fun int test(int x) {
+	println("test2");
+	return int 0;
 }
 
 fun int main() {
-	let int8: str = "println this string";
-	
-	let int16 x = 5;
-	
-	while(x == 4 || x == 5 || false) {
-		println(str);
-		x = x - 1;
-	}
-	
-	x = 2;
+	let int16 a = 2;
 	
 	break#("stop1");
 	
-	if(x) {
-		println("x");
-	}else if(x == false) {
-		println("x2");
-	}else {
-		println("x3");
-	}
-	
+	println(a);
+
 	break#("stop");
 	
-	for(let int16 i = 0; i < 2; i = i+1) {
-		println("a");
-	}
+	println("sss");
 	
-	return int x;
+	return int a;
 }
