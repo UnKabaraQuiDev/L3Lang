@@ -38,10 +38,8 @@ public class Node implements Iterable<Node> {
 	
 	@SuppressWarnings("unchecked")
 	public <T> T getParent(Class<T> clazz) {
-		System.err.println("CHECKING: "+clazz);
 		Node paren = this;
 		do {
-			System.out.println("PARENT: "+paren);
 			paren = paren.getParent();
 			if(paren == null)
 				return null;
@@ -64,7 +62,6 @@ public class Node implements Iterable<Node> {
 	public ScopeContainerNode getParentContainer() {
 		Node parent = this.getParent();
 		while (!(parent instanceof ScopeContainerNode)) {
-			System.out.println("parent: "+parent);
 			if(parent == null) {
 				return null;
 			}

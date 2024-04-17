@@ -59,16 +59,20 @@ fun int main() {
 	
 	let int16 x = 5;
 	
-	break#("stop");
-	
 	while(x == 4 || x == 5 || false) {
-		break#("stop1");
 		println(str);
-		break#("stop2");
 		x = x - 1;
 	}
 	
-	x = false;
+	x = 2;
+	
+	if(x) {
+		println("x");
+	}else if(x == false) {
+		println("x2");
+	}else {
+		println("x3");
+	}
 	
 	return int x;
 }

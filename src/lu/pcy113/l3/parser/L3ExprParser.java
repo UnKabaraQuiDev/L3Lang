@@ -100,8 +100,6 @@ public class L3ExprParser {
 	private Node parseFactor() throws ParserException {
 		Node left = parsePrimary();
 
-		System.out.println("fac prim: " + left);
-
 		if (peek(TokenType.ASSIGN)) {
 			left = parseLetTypeSet(left);
 		}

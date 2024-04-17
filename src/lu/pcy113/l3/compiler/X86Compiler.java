@@ -172,6 +172,8 @@ public class X86Compiler extends L3Compiler {
 		ScopeBodyNode body = node.getBody();
 
 		writeln(node.getAsmName() + ":  ; While at: " + ((WhileDefNode) node).getToken().getPosition());
+		node.setAsmName("."+node.getAsmName());
+		writeln(node.getAsmName() + ":");
 		compileWhileDefConditionNode(node);
 
 		final int startStackIndex = vStack.size() - 1;
@@ -195,44 +197,6 @@ public class X86Compiler extends L3Compiler {
 		compileComputeExpr("eax", expr);
 		writeinstln("cmp eax, 0");
 		writeinstln("je " + node.getAsmName() + "_end");
-	}
-
-	private void compileInvertedConditionExpr(ComparisonOpNode node, String label) throws CompilerException {
-		compileComputeExpr("ebx", node.getRight());
-		push(node.getRight());
-		writeinstln("push ebx");
-
-		compileComputeExpr("eax", node.getLeft());
-
-		pop();
-		writeinstln("pop ebx");
-
-		String op = "";
-		switch (node.getOperator()) {
-		case LESS:
-			op = "jge"; // jl
-			break;
-		case LESS_EQUALS:
-			op = "jg"; // jle
-			break;
-		case GREATER:
-			op = "jle"; // jg
-			break;
-		case GREATER_EQUALS:
-			op = "jl"; // jge
-			break;
-		case EQUALS:
-			op = "jne"; // je
-			break;
-		case NOT_EQUALS:
-			op = "je"; // jne
-			break;
-		default:
-			throw new CompilerException("No comparison");
-		}
-
-		writeinstln("cmp eax, ebx");
-		writeinstln(op + " " + label);
 	}
 
 	private void compileIfContainerNode(IfContainerNode node) throws CompilerException {

@@ -24,7 +24,7 @@ public abstract class L3Compiler {
 
 	private int sectionIndex = 1;
 	protected String newSection() {
-		return "_sec_" + (sectionIndex++);
+		return "sec_" + (sectionIndex++);
 	}
 
 	private int varIndex = 1;
