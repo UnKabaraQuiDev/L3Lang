@@ -77,21 +77,22 @@ sec_1:  ; While at: 62:2
 	pop eax
 	mov [ecx], eax  ; compileLetTypeSet(LetTypeSetNode(VarNumNode(x, pointer=false, arrayOffset=false)))
 sec_2:  ; If container at: 69:2
+.sec_2:
 	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local
 	cmp eax, 0
-	jne sec_2_0
+	jne .sec_2_0
 	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local
 	push eax
-	mov dword ebx, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.Token[71:16, type=lu.pcy113.l3.lexer.TokenType[FALSE, fixed=true, string=true, stringValue=false]]))
+	mov dword ebx, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.Token[72:16, type=lu.pcy113.l3.lexer.TokenType[FALSE, fixed=true, string=true, stringValue=false]]))
 	push ebx
 	pop ebx
 	pop eax
 	cmp eax, ebx
 	sete al
 	cmp eax, 0
-	jne sec_2_1
-	jmp sec_2_2
-sec_2_0:  ; If node at: 69:2
+	jne .sec_2_1
+	jmp .sec_2_2
+.sec_2_0:  ; If node at: 69:2
 	mov eax, esp
 	sub eax, 12
 	push eax  ; Setup array pointer
@@ -106,10 +107,13 @@ sec_2_0:  ; If node at: 69:2
 	push eax
 	call sd_1  ; println
 	add dword esp, 16  ; Free mem from fun call
-sec_2_0_cln
+	mov dword eax, 69  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=71, column=13, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=69, value=69]))
+	add esp, 0  ; Free mem from local scope bc of return
+	jmp main_cln  ; ReturnNode
+.sec_2_0_cln:
 	add esp, 0  ; Free mem
-	jmp sec_2_end
-sec_2_1:  ; If node at: 71:8
+	jmp .sec_2_end
+.sec_2_1:  ; If node at: 72:8
 	mov eax, esp
 	sub eax, 16
 	push eax  ; Setup array pointer
@@ -124,10 +128,10 @@ sec_2_1:  ; If node at: 71:8
 	push eax
 	call sd_1  ; println
 	add dword esp, 20  ; Free mem from fun call
-sec_2_1_cln
+.sec_2_1_cln:
 	add esp, 0  ; Free mem
-	jmp sec_2_end
-sec_2_2:  ; Else node at: 73:3
+	jmp .sec_2_end
+.sec_2_2:  ; Else node at: 74:3
 	mov eax, esp
 	sub eax, 16
 	push eax  ; Setup array pointer
@@ -142,10 +146,10 @@ sec_2_2:  ; Else node at: 73:3
 	push eax
 	call sd_1  ; println
 	add dword esp, 20  ; Free mem from fun call
-sec_2_2_cln
+.sec_2_2_cln:
 	add esp, 0  ; Free mem
-	jmp sec_2_end
-sec_2_end:
+	jmp .sec_2_end
+.sec_2_end:
 	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local
 	jmp main_cln  ; ReturnNode
 main_cln:
@@ -224,5 +228,5 @@ section .data
 	esp_start dd 0
 	sd_11 dd 112, 114, 105, 110, 116, 108, 110, 32, 116, 104, 105, 115, 32, 115, 116, 114, 105, 110, 103, 0  ; str at 58:11
 	var_1 dd 120, 0  ; 70:13
-	var_2 dd 120, 50, 0  ; 72:13
-	var_3 dd 120, 51, 0  ; 74:13
+	var_2 dd 120, 50, 0  ; 73:13
+	var_3 dd 120, 51, 0  ; 75:13

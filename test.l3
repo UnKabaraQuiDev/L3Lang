@@ -68,6 +68,7 @@ fun int main() {
 	
 	if(x) {
 		println("x");
+		return int 69;
 	}else if(x == false) {
 		println("x2");
 	}else {

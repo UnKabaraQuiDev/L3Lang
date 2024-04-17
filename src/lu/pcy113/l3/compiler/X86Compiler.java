@@ -207,7 +207,9 @@ public class X86Compiler extends L3Compiler {
 
 		writeln(node.getAsmName() + ":  ; If container at: "
 				+ ((IfDefNode) node.getChildren().getFirst()).getToken().getPosition());
-
+		node.setAsmName("."+node.getAsmName());
+		writeln(node.getAsmName() + ":");
+		
 		for (Node n : node) {
 			if (n instanceof IfDefNode) {
 				((IfDefNode) n).setAsmName(ifContainerName + "_" + i++);
@@ -216,14 +218,14 @@ public class X86Compiler extends L3Compiler {
 			} else if (n instanceof ElseDefNode) {
 				((ElseDefNode) n).setAsmName(ifContainerName + "_" + i++);
 
-				writeinstln("jmp " + ((ElseDefNode) n).getAsmName());
+				writeinstln("jmp ." + ((ElseDefNode) n).getAsmName());
 			} else {
 				implement(n);
 			}
 		}
 
 		if (!(node.getChildren().getLast() instanceof ElseDefNode)) {
-			writeinstln("jmp " + node.getAsmName() + "_end");
+			writeinstln("jmp ." + node.getAsmName() + "_end");
 		}
 
 		for (Node n : node) {
@@ -258,14 +260,14 @@ public class X86Compiler extends L3Compiler {
 		final int startStackIndex = vStack.size() - 1;
 		body.setStartStackIndex(startStackIndex);
 
-		writeln(asmName + ":  ; " + asmNameComment);
+		writeln("."+asmName + ":  ; " + asmNameComment);
 		for (Node n : body) {
 			compile(n);
 		}
 
 		int size = getStackSize(startStackIndex);
 
-		writeln(body.getClnAsmName());
+		writeln("."+body.getClnAsmName()+":");
 		writeinstln("add esp, " + size + "  ; Free mem");
 
 		writeinstln("jmp " + container.getAsmName() + "_end");
@@ -286,7 +288,7 @@ public class X86Compiler extends L3Compiler {
 		Node expr = n.getCondition();
 		compileComputeExpr("eax", expr);
 		writeinstln("cmp eax, 0");
-		writeinstln("jne " + n.getAsmName());
+		writeinstln("jne ." + n.getAsmName());
 	}
 
 	private void compileLetTypeSet(LetTypeSetNode node) throws CompilerException {
