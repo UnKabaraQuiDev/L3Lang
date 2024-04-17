@@ -7,8 +7,8 @@ public class LetTypeSetNode extends Node {
 		add(expr);
 	}
 
-	public VarNumNode getLet() {
-		return (VarNumNode) children.get(0);
+	public Node getLet() {
+		return (Node) children.get(0);
 	}
 
 	public Node getExpr() {
@@ -17,7 +17,7 @@ public class LetTypeSetNode extends Node {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + getLet().getIdent() + ")";
+		return super.toString() + "(" + getLet() + ")";
 	}
 
 }

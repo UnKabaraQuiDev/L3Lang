@@ -14,6 +14,7 @@ import lu.pcy113.l3.parser.ast.DelocalizingNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
+import lu.pcy113.l3.parser.ast.LetTypeSetNode;
 import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
@@ -74,7 +75,8 @@ public class L3ExprParser {
 	private Node parseComparison() throws ParserException {
 		Node left = parseTerm();
 
-		while (peek(TokenType.EQUALS, TokenType.NOT_EQUALS, TokenType.LESS, TokenType.LESS_EQUALS, TokenType.GREATER, TokenType.GREATER_EQUALS)) {
+		while (peek(TokenType.EQUALS, TokenType.NOT_EQUALS, TokenType.LESS, TokenType.LESS_EQUALS, TokenType.GREATER,
+				TokenType.GREATER_EQUALS)) {
 			TokenType op = consume().getType();
 			Node right = parseTerm();
 			left = new ComparisonOpNode(left, op, right);
@@ -98,7 +100,14 @@ public class L3ExprParser {
 	private Node parseFactor() throws ParserException {
 		Node left = parsePrimary();
 
-		while (peek(TokenType.MUL, TokenType.DIV, TokenType.MODULO, TokenType.BIT_XOR, TokenType.BIT_AND, TokenType.BIT_OR)) {
+		System.out.println("fac prim: " + left);
+
+		if (peek(TokenType.ASSIGN)) {
+			left = parseLetTypeSet(left);
+		}
+
+		while (peek(TokenType.MUL, TokenType.DIV, TokenType.MODULO, TokenType.BIT_XOR, TokenType.BIT_AND,
+				TokenType.BIT_OR)) {
 			TokenType op = consume().getType();
 			Node right = parsePrimary();
 			left = new BinaryOpNode(left, op, right);
@@ -111,31 +120,7 @@ public class L3ExprParser {
 		if (peek(TokenType.NUM_LIT)) {
 			return new NumLitNode(consume());
 		} else if (peek(TokenType.IDENT)) {
-			IdentifierToken varIdent = (IdentifierToken) consume();
-			if (peek(TokenType.BRACKET_OPEN)) {
-				consume(TokenType.BRACKET_OPEN);
-				Node expr = parseExpression();
-				consume(TokenType.BRACKET_CLOSE);
-				return new VarNumNode(varIdent, expr);
-			} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
-				boolean preset = peek(TokenType.HASH);
-				if (preset)
-					consume(TokenType.HASH);
-				consume(TokenType.PAREN_OPEN);
-				FunArgsValNode args = new FunArgsValNode();
-				int index = 0;
-				while (!peek(TokenType.PAREN_CLOSE)) {
-					args.add(new FunArgValNode(index++, parseExpression()));
-					if (peek(TokenType.COMMA))
-						consume(TokenType.COMMA);
-				}
-				consume(TokenType.PAREN_CLOSE);
-				FunCallNode call = new FunCallNode(varIdent, preset);
-				call.add(args);
-				return call;
-			} else {
-				return new VarNumNode(varIdent);
-			}
+			return parseIdent();
 		} else if (peek(TokenType.PAREN_OPEN)) {
 			consume(TokenType.PAREN_OPEN);
 			Node expr = parseExpression();
@@ -143,13 +128,49 @@ public class L3ExprParser {
 			return expr;
 		} else if (peek(TokenType.DOLLAR)) {
 			consume(TokenType.DOLLAR);
-			return new LocalizingNode(parseExpression());
+			return new LocalizingNode(parseIdent());
 		} else if (peek(TokenType.COLON)) {
 			consume(TokenType.COLON);
-			return new DelocalizingNode(parseExpression());
+			return new DelocalizingNode(parseIdent());
 		} else {
 			throw new RuntimeException("Unexpected token: " + peek().getType());
 		}
+	}
+
+	private Node parseIdent() throws ParserException {
+		IdentifierToken varIdent = (IdentifierToken) consume();
+		Node var = null;
+		if (peek(TokenType.BRACKET_OPEN)) {
+			consume(TokenType.BRACKET_OPEN);
+			Node expr = parseExpression();
+			consume(TokenType.BRACKET_CLOSE);
+			var = new VarNumNode(varIdent, expr);
+		} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
+			boolean preset = peek(TokenType.HASH);
+			if (preset)
+				consume(TokenType.HASH);
+			consume(TokenType.PAREN_OPEN);
+			FunArgsValNode args = new FunArgsValNode();
+			int index = 0;
+			while (!peek(TokenType.PAREN_CLOSE)) {
+				args.add(new FunArgValNode(index++, parseExpression()));
+				if (peek(TokenType.COMMA))
+					consume(TokenType.COMMA);
+			}
+			consume(TokenType.PAREN_CLOSE);
+			FunCallNode call = new FunCallNode(varIdent, preset);
+			call.add(args);
+			return call;
+		} else {
+			var = new VarNumNode(varIdent);
+		}
+		return var;
+	}
+
+	private Node parseLetTypeSet(Node var) throws ParserException {
+		consume(TokenType.ASSIGN);
+		Node expr = parseExpression();
+		return new LetTypeSetNode(var, expr);
 	}
 
 	private boolean hasNext() {
