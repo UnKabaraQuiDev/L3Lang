@@ -842,7 +842,8 @@ public class X86Compiler extends L3Compiler {
 			if (def.isiStatic()) {
 				writeinstln("mov " + reg + ", [" + desc.getAsmName() + "]  ; compileLoadVarNum(" + node + "): static");
 			} else {
-				writeinstln("mov " + reg + ", [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "]  ; compileLoadVarNum(" + node + "): local");
+				writeinstln("mov " + reg + ", [esp + " + (getStackIndex() - def.getStackIndex() - 4)
+						+ "]  ; compileLoadVarNum(" + node + "): local");
 				// writeinstln("mov " + reg + ", [ecx - " + (def.getStackIndex()) + "] ; index =
 				// " + def.getStackIndex());
 			}
