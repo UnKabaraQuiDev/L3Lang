@@ -26,7 +26,9 @@ public enum TokenType {
 
 	COMMENT("//"),
 
-	TRUE("true"), FALSE("false"),
+	BOOLEAN(),
+	
+	TRUE(BOOLEAN, "true"), FALSE(BOOLEAN, "false"),
 
 	IF("if"), ELSE("else"),
 

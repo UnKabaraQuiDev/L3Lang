@@ -61,11 +61,14 @@ fun int main() {
 	
 	break#("stop");
 	
-	while((x == 5 || x == 4) && x != 0) {
+	while(x == 4 || x == 5 || false) {
 		break#("stop1");
 		println(str);
+		break#("stop2");
 		x = x - 1;
 	}
 	
-	return int 3;
+	x = false;
+	
+	return int x;
 }

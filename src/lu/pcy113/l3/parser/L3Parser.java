@@ -609,7 +609,7 @@ public class L3Parser {
 	}
 
 	private Node parsePrimary() throws ParserException {
-		if (peek(TokenType.NUM_LIT)) {
+		if (peek(TokenType.NUM_LIT, TokenType.TRUE, TokenType.FALSE)) {
 			return new NumLitNode(consume());
 		} else if (peek(TokenType.IDENT)) {
 			return parseIdent();
