@@ -66,13 +66,20 @@ fun int main() {
 	
 	x = 2;
 	
+	break#("stop1");
+	
 	if(x) {
 		println("x");
-		return int 69;
 	}else if(x == false) {
 		println("x2");
 	}else {
 		println("x3");
+	}
+	
+	break#("stop");
+	
+	for(let int16 i = 0; i < 2; i = i+1) {
+		println("a");
 	}
 	
 	return int x;
