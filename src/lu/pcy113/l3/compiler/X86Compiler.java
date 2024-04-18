@@ -65,16 +65,21 @@ public class X86Compiler extends L3Compiler {
 
 		File dir = outFile.getAbsoluteFile().getParentFile();
 		try {
-			exec("nasm -f elf32 -g -o " + FileUtils.replaceExtension(outFile.getName(), "o") + " " + outFile.getPath(), dir);
-			exec("ld -m elf_i386 -o " + FileUtils.removeExtension(outFile.getName()) + " " + FileUtils.replaceExtension(outFile.getName(), "o"), dir);
-			exec("./" + FileUtils.removeExtension(outFile.getName()), dir);
+
+			String oOutFile = FileUtils.replaceExtension(outFile.getName(), "o");
+			String rmExtOutFile = FileUtils.removeExtension(outFile.getName());
+			String outDirPath = outFile.getPath();
+			exec("nasm -f elf32 -g -o " + oOutFile + " " + outDirPath, dir);
+			// exec("gcc -m32 elf_i386 -o " + rmExtOutFile + " " + oOutFile, dir);
+			exec("ld -m elf_i386 -o " + rmExtOutFile + " " + oOutFile, dir);
+			exec("./" + rmExtOutFile, dir);
+
 		} catch (IOException | InterruptedException e) {
 			throw new CompilerException("Could not exec: '" + outFile + "', '" + FileUtils.removeExtension(outFile.getName()) + "' and '" + FileUtils.replaceExtension(outFile.getName(), "o") + "' in " + dir, e);
 		}
 	}
 
 	private int STACK_INDEX = 0;
-
 	private Stack<Node> vStack = new Stack<Node>();
 
 	public Node push(Node n) throws CompilerException {
@@ -155,11 +160,11 @@ public class X86Compiler extends L3Compiler {
 			compileWhileDefNode((WhileDefNode) node);
 		} else if (node instanceof ForDefNode) {
 			compileForDefNode((ForDefNode) node);
-		} else if(node instanceof ScopeBodyNode) {
-			for(Node n : node) {
+		} else if (node instanceof ScopeBodyNode) {
+			for (Node n : node) {
 				compile(n);
 			}
-		} else{
+		} else {
 			implement(node);
 		}
 	}
@@ -218,62 +223,62 @@ public class X86Compiler extends L3Compiler {
 		node.setAsmName(whileName);
 
 		ScopeBodyNode body = node.getBody();
-		
-		final String startName = "."+node.getAsmName();
-		final String elseName = startName+"_else";
-		final String finallyName = startName+"_finally";
-		final String endName = startName+"_end";
-		
+
+		final String startName = "." + node.getAsmName();
+		final String elseName = startName + "_else";
+		final String finallyName = startName + "_finally";
+		final String endName = startName + "_end";
+
 		writeln(node.getAsmName() + ":  ; While at: " + node.getToken().getPosition());
 		compileWhileDefConditionNode(node, node.hasElse() ? elseName : endName);
-		
+
 		writeln(startName + ":  ; While condition");
 		compileWhileDefConditionNode(node, node.hasFinally() ? finallyName : endName);
 
 		bodyGen: {
 			final int startStackIndex = vStack.size() - 1;
 			body.setStartStackIndex(startStackIndex);
-			body.setClnAsmName(startName+"_cln");
-	
+			body.setClnAsmName(startName + "_cln");
+
 			compile(body);
-			
+
 			int size = getStackSize(startStackIndex);
-	
+
 			writeln(body.getClnAsmName() + ":");
 			writeinstln("add esp, " + size + "  ; Free mem");
-			
+
 			for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream).filter(c -> c instanceof LetScopeDescriptor).collect(Collectors.toList())) {
 				pop();
 			}
-			
-			writeinstln("jmp "+startName);
-		}
-		
-		if(node.hasElse()) {
-			
-			ElseDefNode _else = node.getElse();
-			_else.setAsmName(elseName);
-			
-			writeln(elseName+":");
-			
-			compile(_else.getBody());
-			
-			writeln("jmp "+endName+"  ; After else");
-		}
-		
-		if(node.hasFinally()) {
-			
-			FinallyDefNode _finally = node.getFinally();
-			_finally.setAsmName(finallyName);
-			
-			writeln(finallyName+":");
-			
-			compile(_finally.getBody());
-			
-			writeln("jmp "+endName+"  ; After finally");
+
+			writeinstln("jmp " + startName);
 		}
 
-		writeln(endName+":");
+		if (node.hasElse()) {
+
+			ElseDefNode _else = node.getElse();
+			_else.setAsmName(elseName);
+
+			writeln(elseName + ":");
+
+			compile(_else.getBody());
+
+			writeln("jmp " + endName + "  ; After else");
+		}
+
+		if (node.hasFinally()) {
+
+			FinallyDefNode _finally = node.getFinally();
+			_finally.setAsmName(finallyName);
+
+			writeln(finallyName + ":");
+
+			compile(_finally.getBody());
+
+			writeln("jmp " + endName + "  ; After finally");
+		}
+
+		writeln(endName + ":");
 	}
 
 	private void compileWhileDefConditionNode(WhileDefNode node, String jumpToIfFalse) throws CompilerException {
@@ -325,7 +330,7 @@ public class X86Compiler extends L3Compiler {
 			// node.getChildren().getLast()).getAsmName());
 			((FinallyDefNode) node.getChildren().getLast()).setAsmName("." + ifContainerName + "_finally");
 			compileIfElseDefBodyNode(node.getChildren().getLast());
-		}else {
+		} else {
 			writeln("." + node.getAsmName() + "_finally:");
 		}
 
@@ -676,7 +681,7 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("push ebx");
 				push(right);
 			}
-			
+
 			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode) {
 				compileComputeExpr("eax", left);
 				writeinstln("push eax");
@@ -852,6 +857,10 @@ public class X86Compiler extends L3Compiler {
 				writeinstln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr()).getString().getValue());
 			} else if (name.equals("asmlb")) {
 				writeln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr()).getString().getValue());
+			} else if (name.equals("data")) {
+				writedataln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr()).getString().getValue());
+			} else if (name.equals("text")) {
+				writetextln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr()).getString().getValue());
 			} else {
 				throw new CompilerException("Preset function not found: " + name);
 			}

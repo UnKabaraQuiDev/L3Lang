@@ -16,8 +16,7 @@ import lu.pcy113.pclib.GlobalLogger;
 
 public class PrivateMain {
 
-	public static void main(String[] args)
-			throws FileNotFoundException, IOException, LexerException, ParserException, CompilerException {
+	public static void main(String[] args) throws FileNotFoundException, IOException, LexerException, ParserException, CompilerException {
 		GlobalLogger.init(new File("./config/logs.properties"));
 
 		System.out.println(Arrays.toString(new File("./").list()));

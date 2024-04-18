@@ -187,19 +187,19 @@ public class L3Parser {
 			parent.add(whileDef);
 
 			ScopeBodyNode body = parseScopeDefBody(whileDef);
-			
-			if(peek(TokenType.ELSE)) {
+
+			if (peek(TokenType.ELSE)) {
 				ElseDefNode elseDef = parseElseDefExpr();
 				whileDef.add(elseDef);
 			}
-			
-			if(peek(TokenType.FINALLY)) {
+
+			if (peek(TokenType.FINALLY)) {
 				FinallyDefNode finallyDef = parseFinallyDefExpr();
 				whileDef.add(finallyDef);
 			}
-			
-			if(peek(TokenType.ELSE, TokenType.FINALLY)) {
-				throw new ParserException("Unexpected token: "+peek().toString(0)+", cannot continue while-statement after final else/finally.");
+
+			if (peek(TokenType.ELSE, TokenType.FINALLY)) {
+				throw new ParserException("Unexpected token: " + peek().toString(0) + ", cannot continue while-statement after final else/finally.");
 			}
 
 			return whileDef;
@@ -227,16 +227,16 @@ public class L3Parser {
 					break;
 				}
 			}
-			
-			if(peek(TokenType.FINALLY)) {
+
+			if (peek(TokenType.FINALLY)) {
 				FinallyDefNode finallyDef = parseFinallyDefExpr();
 				container.add(finallyDef);
 			}
-			
-			if(peek(TokenType.ELSE, TokenType.FINALLY)) {
-				throw new ParserException("Unexpected token: "+peek().toString(0)+", cannot continue if-statement after final else/finally.");
+
+			if (peek(TokenType.ELSE, TokenType.FINALLY)) {
+				throw new ParserException("Unexpected token: " + peek().toString(0) + ", cannot continue if-statement after final else/finally.");
 			}
-			
+
 			return container;
 		}
 		throw new ParserException("An error occured when parsing if-statements");
@@ -415,10 +415,9 @@ public class L3Parser {
 
 		if ((fdb.getChildren().isEmpty() || !(fdb.getChildren().getLast() instanceof ReturnNode)) && !fdn.getReturnType().isVoid()) {
 			throw new ParserException("Missing final return statement: " + peek());
-		}else if(fdn.getReturnType().isVoid()) {
+		} else if (fdn.getReturnType().isVoid()) {
 			fdb.add(new ReturnNode(fdn.getReturnType(), null));
 		}
-		
 
 		consume(TokenType.CURLY_CLOSE);
 
@@ -527,15 +526,15 @@ public class L3Parser {
 
 			if (peek(TokenType.NEW)) {
 				consume(TokenType.NEW);
-				
+
 				TypeNode newType = parseType();
-				if(peek(TokenType.BRACKET_OPEN)) {
+				if (peek(TokenType.BRACKET_OPEN)) {
 					consume(TokenType.BRACKET_OPEN);
-					
+
 					int newTypeArrayLength = (int) (long) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
-					
+
 					typeDefNode.add(new ArrayInitNode(newType, newTypeArrayLength));
-					
+
 					consume(TokenType.BRACKET_CLOSE);
 				}
 			} else if (type.isPointer() && peek(TokenType.CURLY_OPEN)) {

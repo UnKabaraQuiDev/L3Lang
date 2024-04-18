@@ -95,13 +95,13 @@ fun int16 strlen(int8: str) {
 fun int main() {
 	let int16 a = 5;
 	
+	//text#("extern srand");
+	
 	if(0) {
 		println("cde");
 	} else if(1) {
 		println("123");
 	} finally {
-		println(a);
-		println(a);
 		println("why can i even do this ?");
 	}
 	
