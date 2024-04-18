@@ -216,8 +216,6 @@ public class X86Compiler extends L3Compiler {
 		ScopeBodyNode body = node.getBody();
 
 		writeln(node.getAsmName() + ":  ; While at: " + node.getToken().getPosition());
-		node.setAsmName("." + node.getAsmName());
-		writeln(node.getAsmName() + ":");
 		compileWhileDefConditionNode(node);
 
 		final int startStackIndex = vStack.size() - 1;
@@ -284,13 +282,13 @@ public class X86Compiler extends L3Compiler {
 			}
 		}
 
-		writeln("." + node.getAsmName() + "_finally:");
-
 		if (node.getChildren().getLast() instanceof FinallyDefNode) {
 			// writeinstln("jmp " + ((FinallyDefNode)
 			// node.getChildren().getLast()).getAsmName());
-			((FinallyDefNode) node.getChildren().getLast()).setAsmName("." + ifContainerName + "_" + i++);
+			((FinallyDefNode) node.getChildren().getLast()).setAsmName("." + ifContainerName + "_finally");
 			compileIfElseDefBodyNode(node.getChildren().getLast());
+		}else {
+			writeln("." + node.getAsmName() + "_finally:");
 		}
 
 		writeln("." + node.getAsmName() + "_end:");
@@ -632,18 +630,19 @@ public class X86Compiler extends L3Compiler {
 			if (left instanceof BinaryOpNode || left instanceof LogicalOpNode || left instanceof ComparisonOpNode) {
 				generateExprRecursive("eax", left);
 				writeinstln("push eax");
-				push(right);
-			}
-
-			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode) {
-				compileComputeExpr("eax", left);
-				writeinstln("push eax");
 				push(left);
 			}
+
 			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode) {
 				compileComputeExpr("ebx", right);
 				writeinstln("push ebx");
 				push(right);
+			}
+			
+			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode) {
+				compileComputeExpr("eax", left);
+				writeinstln("push eax");
+				push(left);
 			}
 
 			writeinstln("pop eax");

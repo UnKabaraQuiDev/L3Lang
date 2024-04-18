@@ -1,4 +1,4 @@
-fun void println(int8: str) {
+fun void print(int8: str) {
 	asm#("mov ecx, [esp + 4]  ; Copy the address of the string into eax");
 	
 	asmlb#(".loop:");
@@ -9,6 +9,15 @@ fun void println(int8: str) {
 	asm#("jmp .loop  ; Repeat the loop");
 	
 	asmlb#(".done:");
+}
+
+fun void println(int8: str) {
+	print(str);
+	
+	println();
+}
+
+fun void println() {
 	asm#("sub esp, 4");
 	asm#("mov ecx, esp");
 	asm#("mov dword [ecx], 10  ; Newline");
@@ -16,15 +25,17 @@ fun void println(int8: str) {
 	asm#("add esp, 4");
 }
 
-fun void println(int16 number) {
-	break#("println");
-	let int8: str = new int8[2]; // 10 digits + null-terminator
+fun void print(int16 number) {
+	let int8: str = new int8[11]; // 10 digits + null-terminator
 	
 	stringify(number, str);
 	
-	break#("println2");
-	
-	println(str);
+	print(str);
+}
+
+fun void println(int16 number) {
+	print(number);
+	println();
 }
 
 fun void stringify(int16 number, int8: str) {
@@ -45,6 +56,7 @@ fun void stringify(int16 number, int8: str) {
 	asm#("add edi, 4  ; Move buffer pointer back");
 	asm#("test eax, eax  ; Check if quotient is zero");
 	asm#("jnz .convert_loop  ; If not, continue conversion");
+	asm#("mov dword [edi], 0");
 }
 
 fun void memcpy(int32: from, int32: to, int32 length) {
@@ -80,34 +92,31 @@ fun int16 strlen(int8: str) {
 	return int16 length;
 }
 
-fun int test() {
-	println("test1");
-	return int 0;
-}
-
-fun int test(int x) {
-	println("test2");
-	return int 0;
-}
-
 fun int main() {
-	let int16 a = 2;
-	
-	break#("stop1");
-	
-	println(a);
-
-	break#("stop");
-	
-	println("abc");
+	let int16 a = 5;
 	
 	if(0) {
 		println("cde");
-	} else if(0) {
+	} else if(1) {
 		println("123");
-	} else {} finally {
+	} finally {
+		println(a);
+		println(a);
 		println("why can i even do this ?");
 	}
+	
+	while(a > 0) {
+		print(a);
+		a = a -1;
+	}
+	
+	println();
+	
+	for(let int16 x = 0; x < 10; x = x+1) {
+		print(x);
+	}
+	
+	println();
 	
 	return int a;
 }
