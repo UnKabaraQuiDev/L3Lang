@@ -119,9 +119,9 @@ public class X86Compiler extends L3Compiler {
 				desc.setAsmName("main");
 				writetextln("global main");
 
-				writeinstln("mov eax, esp");
-				writeinstln("sub eax, 8  ; Add offset for main fun call");
-				writeinstln("mov [esp_start], eax");
+				// writeinstln("mov eax, esp");
+				// writeinstln("sub eax, 8 ; Add offset for main fun call");
+				// writeinstln("mov [esp_start], eax");
 
 				writeinstln("call " + desc.getAsmName() + "  ; Call main");
 
@@ -417,15 +417,10 @@ public class X86Compiler extends L3Compiler {
 		}
 
 		if (node.getParent() instanceof ScopeBodyNode) {
-			System.err.println("RETURN " + fun);
-			printStack();
 			int size = getStackSize(fun.getStartStackIndex());
 
 			writeinstln("; return node: " + node.getReturnType());
 			writeinstln("add esp, " + size + "  ; Free mem from local scope bc of return");
-
-			// ((ScopeContainerNode)
-			// node.getParent()).getLocalDescriptors().values().forEach(c -> pop());
 		}
 
 		writeinstln("jmp " + desc.getAsmName() + "_cln  ; " + node);
@@ -480,6 +475,7 @@ public class X86Compiler extends L3Compiler {
 		FunDefNode node = desc.getNode();
 
 		final int startStackIndex = vStack.size() - 1;
+		node.setStartStackIndex(startStackIndex);
 
 		writeln(desc.getAsmName() + ":  ; " + desc.getIdentifier().getValue());
 		for (Node n : node.getBody().getChildren()) {
@@ -489,8 +485,8 @@ public class X86Compiler extends L3Compiler {
 		// remove args from stack BEFORE cleaning up local vars
 		int size = getStackSize(startStackIndex);
 
-		writeln(desc.getAsmName() + "_cln:");
 		writeinstln("add esp, " + size);
+		writeln(desc.getAsmName() + "_cln:");
 		writeinstln("ret");
 
 		for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream)
@@ -519,8 +515,8 @@ public class X86Compiler extends L3Compiler {
 
 		int size = getStackSize(startStackIndex);
 
-		writeln(desc.getAsmName() + "_cln:");
 		writeinstln("add esp, " + size);
+		writeln(desc.getAsmName() + "_cln:");
 		writeinstln("ret");
 
 		printStack();
@@ -868,7 +864,9 @@ public class X86Compiler extends L3Compiler {
 						"Argument count do not match, got " + gotArgCount + " but wanted " + wantedArgCount);
 			}
 
-			for (Node arg : node.getArgs().getChildren()) {
+			final int startStackIndex = vStack.size() - 1;
+
+			for (Node arg : node.getArgs()) {
 				if (!(arg instanceof FunArgValNode)) {
 					throw new CompilerException("Arg val should be " + FunArgValNode.class.getSimpleName());
 				}
@@ -876,14 +874,13 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("push eax");
 
 				((FunArgValNode) arg).setStackSize(getStackSize(((FunArgValNode) arg).getExpr()));
+				push(arg);
 			}
 
-			final int startStackIndex = vStack.size() - 1;
-
-			for (Node n : node.getArgs()) {
-				push((FunArgValNode) n);
-			}
 			push(node);
+			
+			printStack();
+			System.err.println(startStackIndex+" = "+vStack.get(startStackIndex));
 
 			writeinstln("call " + desc.getAsmName() + "  ; " + desc.getIdentifier().getValue());
 
@@ -937,11 +934,14 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private int getStackSize(int startStackIndex) throws CompilerException {
+		GlobalLogger.log();
 		int size = 0;
 		for (int i = vStack.size() - 1; i > startStackIndex; i--) {
 			Node stackNode = vStack.get(i);
+			System.err.println("comp: "+stackNode);
 			size += getStackSize(stackNode);
 		}
+		System.err.println(" == "+size);
 		return size;
 	}
 

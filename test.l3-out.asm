@@ -1,7 +1,4 @@
 _start:
-	mov eax, esp
-	sub eax, 8  ; Add offset for main fun call
-	mov [esp_start], eax
 	call main  ; Call main
 	; Exit program
 	mov ebx, eax  ; Move return to ebx
@@ -32,13 +29,10 @@ stop:  ; breakpoint at: 100:2
 	add dword esp, 20  ; Free mem from fun call
 	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(a, pointer=false, arrayOffset=false)): local
 	; return node: TypeNode(generic=true, INT, pointer=false)
-	add esp, 0  ; Free mem from local scope bc of return
+	add esp, 4  ; Free mem from local scope bc of return
 	jmp main_cln  ; ReturnNode
-	; return node: TypeNode(generic=true, INT, pointer=false)
-	add esp, 0  ; Free mem from local scope bc of return
-	jmp main_cln  ; ReturnNode
-main_cln:
 	add esp, 4
+main_cln:
 	ret
 sd_1:  ; println
 	mov ecx, [esp + 4]  ; Copy the address of the string into eax
@@ -65,8 +59,8 @@ sd_1:  ; println
 	; return node: TypeNode(generic=true, VOID, pointer=false)
 	add esp, 0  ; Free mem from local scope bc of return
 	jmp sd_1_cln  ; ReturnNode
-sd_1_cln:
 	add esp, 0
+sd_1_cln:
 	ret
 sd_4:  ; println
 println:  ; breakpoint at: 20:2
@@ -76,7 +70,7 @@ println:  ; breakpoint at: 20:2
 	sub esp, 8
 	mov eax, [esp + 16]  ; compileLoadVarNum(VarNumNode(number, pointer=false, arrayOffset=false)): local
 	push eax
-	mov eax, [esp + 8] ; compileLoadVarNum(VarNumNode(str, pointer=false, arrayOffset=false)): local
+	mov eax, [esp + 12] ; compileLoadVarNum(VarNumNode(str, pointer=false, arrayOffset=false)): local
 	push eax
 	call sd_7  ; stringify
 	add dword esp, 8  ; Free mem from fun call
@@ -88,8 +82,8 @@ println2:  ; breakpoint at: 25:2
 	; return node: TypeNode(generic=true, VOID, pointer=false)
 	add esp, 12  ; Free mem from local scope bc of return
 	jmp sd_4_cln  ; ReturnNode
-sd_4_cln:
 	add esp, 12
+sd_4_cln:
 	ret
 sd_7:  ; stringify
 stringify:  ; breakpoint at: 31:2
@@ -108,8 +102,8 @@ stringify:  ; breakpoint at: 31:2
 	; return node: TypeNode(generic=true, VOID, pointer=false)
 	add esp, 0  ; Free mem from local scope bc of return
 	jmp sd_7_cln  ; ReturnNode
-sd_7_cln:
 	add esp, 0
+sd_7_cln:
 	ret
 sd_11:  ; memcpy
 	mov ecx, [esp + 4]  ; Length
@@ -124,8 +118,8 @@ sd_11:  ; memcpy
 	; return node: TypeNode(generic=true, VOID, pointer=false)
 	add esp, 0  ; Free mem from local scope bc of return
 	jmp sd_11_cln  ; ReturnNode
-sd_11_cln:
 	add esp, 0
+sd_11_cln:
 	ret
 sd_14:  ; strlen
 	mov eax, [esp + 4]  ; Copy the address of the string into eax
@@ -144,11 +138,8 @@ sd_14:  ; strlen
 	; return node: TypeNode(generic=true, INT_16, pointer=false)
 	add esp, 4  ; Free mem from local scope bc of return
 	jmp sd_14_cln  ; ReturnNode
-	; return node: TypeNode(generic=true, INT_16, pointer=false)
-	add esp, 4  ; Free mem from local scope bc of return
-	jmp sd_14_cln  ; ReturnNode
-sd_14_cln:
 	add esp, 4
+sd_14_cln:
 	ret
 sd_15:  ; test
 	mov eax, esp
@@ -169,11 +160,8 @@ sd_15:  ; test
 	; return node: TypeNode(generic=true, INT, pointer=false)
 	add esp, 0  ; Free mem from local scope bc of return
 	jmp sd_15_cln  ; ReturnNode
-	; return node: TypeNode(generic=true, INT, pointer=false)
-	add esp, 0  ; Free mem from local scope bc of return
-	jmp sd_15_cln  ; ReturnNode
-sd_15_cln:
 	add esp, 0
+sd_15_cln:
 	ret
 sd_17:  ; test
 	mov eax, esp
@@ -194,11 +182,8 @@ sd_17:  ; test
 	; return node: TypeNode(generic=true, INT, pointer=false)
 	add esp, 0  ; Free mem from local scope bc of return
 	jmp sd_17_cln  ; ReturnNode
-	; return node: TypeNode(generic=true, INT, pointer=false)
-	add esp, 0  ; Free mem from local scope bc of return
-	jmp sd_17_cln  ; ReturnNode
-sd_17_cln:
 	add esp, 0
+sd_17_cln:
 	ret
 section .text
 	global _start
@@ -210,6 +195,6 @@ section .text
 	global stringify
 section .data
 	esp_start dd 0
-	var_1 dd 115, 115, 115, 0  ; 102:12
+	var_1 dd 97, 98, 99, 0  ; 102:12
 	var_2 dd 116, 101, 115, 116, 49, 0  ; 84:12
 	var_3 dd 116, 101, 115, 116, 50, 0  ; 89:12

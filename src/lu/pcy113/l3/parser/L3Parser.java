@@ -375,9 +375,9 @@ public class L3Parser {
 			parseLineExpr(fdb);
 		}
 
-		if (fdb.getChildren().isEmpty() || !(fdb.getChildren().getLast() instanceof ReturnNode) && !fdn.getReturnType().isVoid()) {
+		if ((fdb.getChildren().isEmpty() || !(fdb.getChildren().getLast() instanceof ReturnNode)) && !fdn.getReturnType().isVoid()) {
 			throw new ParserException("Missing final return statement: " + peek());
-		}else {
+		}else if(fdn.getReturnType().isVoid()) {
 			fdb.add(new ReturnNode(fdn.getReturnType(), null));
 		}
 		
@@ -453,20 +453,16 @@ public class L3Parser {
 			if (pointer)
 				consume(TokenType.COLON);
 			return new TypeNode(false, ident, pointer);
-
 		} else if (peek(TokenType.TYPE)) {
 			Token type = consume(TokenType.TYPE);
 			boolean pointer = peek(TokenType.COLON);
 			if (pointer)
 				consume(TokenType.COLON);
 			return new TypeNode(true, type, pointer);
-
 		} else if (peek(TokenType.VOID)) {
 			return new TypeNode(true, consume(TokenType.VOID));
-
 		} else {
 			throw new ParserException("Unsupported type: " + peek());
-
 		}
 	}
 
@@ -672,7 +668,7 @@ public class L3Parser {
 		} else if (peek(TokenType.STRING)) {
 			return new StringLitNode((StringLiteralToken) consume(TokenType.STRING));
 		} else {
-			throw new RuntimeException("Unexpected token: " + peek().getType());
+			throw new RuntimeException("Unexpected token: " + peek());
 		}
 	}
 

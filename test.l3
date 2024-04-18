@@ -99,7 +99,7 @@ fun int main() {
 
 	break#("stop");
 	
-	println("sss");
+	println("abc");
 	
 	return int a;
 }
