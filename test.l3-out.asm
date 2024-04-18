@@ -74,7 +74,7 @@ println:  ; breakpoint at: 20:2
 	sub eax, 12
 	push eax  ; Setup empty pointer str -> sd_3
 	sub esp, 8
-	mov eax, [esp + 12]  ; compileLoadVarNum(VarNumNode(number, pointer=false, arrayOffset=false)): local
+	mov eax, [esp + 16]  ; compileLoadVarNum(VarNumNode(number, pointer=false, arrayOffset=false)): local
 	push eax
 	mov eax, [esp + 8] ; compileLoadVarNum(VarNumNode(str, pointer=false, arrayOffset=false)): local
 	push eax

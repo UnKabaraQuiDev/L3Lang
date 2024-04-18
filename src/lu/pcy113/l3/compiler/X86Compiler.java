@@ -64,25 +64,34 @@ public class X86Compiler extends L3Compiler {
 
 		File dir = outFile.getAbsoluteFile().getParentFile();
 		try {
-			exec("nasm -f elf32 -g -o " + FileUtils.replaceExtension(outFile.getName(), "o") + " " + outFile.getPath(), dir);
-			exec("ld -m elf_i386 -o " + FileUtils.removeExtension(outFile.getName()) + " " + FileUtils.replaceExtension(outFile.getName(), "o"), dir);
+			exec("nasm -f elf32 -g -o " + FileUtils.replaceExtension(outFile.getName(), "o") + " " + outFile.getPath(),
+					dir);
+			exec("ld -m elf_i386 -o " + FileUtils.removeExtension(outFile.getName()) + " "
+					+ FileUtils.replaceExtension(outFile.getName(), "o"), dir);
 			exec("./" + FileUtils.removeExtension(outFile.getName()), dir);
 		} catch (IOException | InterruptedException e) {
-			throw new CompilerException("Could not exec: '" + outFile + "', '" + FileUtils.removeExtension(outFile.getName()) + "' and '" + FileUtils.replaceExtension(outFile.getName(), "o") + "' in " + dir, e);
+			throw new CompilerException(
+					"Could not exec: '" + outFile + "', '" + FileUtils.removeExtension(outFile.getName()) + "' and '"
+							+ FileUtils.replaceExtension(outFile.getName(), "o") + "' in " + dir,
+					e);
 		}
 	}
 
+	private int STACK_INDEX = 0;
+
 	private Stack<Node> vStack = new Stack<Node>();
 
-	public Node push(Node n) {
+	public Node push(Node n) throws CompilerException {
 		GlobalLogger.log();
 		GlobalLogger.log("push: " + n);
+		STACK_INDEX += getStackSize(n);
 		return vStack.push(n);
 	}
 
-	public Node pop() {
+	public Node pop() throws CompilerException {
 		GlobalLogger.log();
 		Node pop = vStack.pop();
+		STACK_INDEX -= getStackSize(pop);
 		GlobalLogger.log("pop: " + pop);
 		return pop;
 	}
@@ -94,7 +103,8 @@ public class X86Compiler extends L3Compiler {
 
 		if (node instanceof RuntimeNode) {
 			// Setup static vars
-			for (ScopeDescriptor desc : container.getLocalDescriptors().values().stream().flatMap(List::stream).collect(Collectors.toList())) {
+			for (ScopeDescriptor desc : container.getLocalDescriptors().values().stream().flatMap(List::stream)
+					.collect(Collectors.toList())) {
 				if (desc instanceof LetScopeDescriptor) {
 					if (((LetTypeDefNode) ((LetScopeDescriptor) desc).getNode()).isiStatic()) {
 						compileStaticLetTypeDef((LetScopeDescriptor) desc);
@@ -190,7 +200,10 @@ public class X86Compiler extends L3Compiler {
 		writeln(body.getClnAsmName() + ":");
 		writeinstln("add esp, " + size + "  ; Free mem");
 
-		node.getLocalDescriptors().values().stream().flatMap(List::stream).filter(c -> c instanceof LetScopeDescriptor).forEach(c -> pop());
+		for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream)
+				.filter(c -> c instanceof LetScopeDescriptor).collect(Collectors.toList())) {
+			pop();
+		}
 
 		writeln(node.getAsmName() + "_end:");
 	}
@@ -226,7 +239,10 @@ public class X86Compiler extends L3Compiler {
 		writeln(body.getClnAsmName() + ":");
 		writeinstln("add esp, " + size + "  ; Free mem");
 
-		node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream).filter(c -> c instanceof LetScopeDescriptor).forEach(c -> pop());
+		for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream)
+				.filter(c -> c instanceof LetScopeDescriptor).collect(Collectors.toList())) {
+			pop();
+		}
 
 		writeln(node.getAsmName() + "_end:");
 	}
@@ -244,7 +260,8 @@ public class X86Compiler extends L3Compiler {
 
 		int i = 0;
 
-		writeln(node.getAsmName() + ":  ; If container at: " + ((IfDefNode) node.getChildren().getFirst()).getToken().getPosition());
+		writeln(node.getAsmName() + ":  ; If container at: "
+				+ ((IfDefNode) node.getChildren().getFirst()).getToken().getPosition());
 		node.setAsmName("." + node.getAsmName());
 		writeln(node.getAsmName() + ":");
 
@@ -366,16 +383,20 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("imul ebx, 4");
 
 				if (def.isiStatic()) { // static
-					writeinstln("lea dword " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadVarNum(" + node + "): static");
+					writeinstln("lea dword " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadComputeExpr("
+							+ node + "): static");
 				} else { // local
-					writeinstln("lea dword " + reg + ", [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "]  ; Loading pointer, index = " + def.getStackIndex() + ", size = " + getStackIndex());
-					writeinstln("add " + reg + ", ebx  ; compileLoadVarNum(" + node + "): local");
+					writeinstln("lea dword " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - 4)
+							+ "]  ; Loading pointer, index = " + def.getStackIndex() + ", size = " + getStackIndex());
+					writeinstln("add " + reg + ", ebx  ; compileLoadComputeExpr(" + node + "): local");
 				}
 			} else {
 				if (def.isiStatic()) { // static
-					writeinstln("lea dword " + reg + ", [" + desc.getAsmName() + "]  ; compileLoadVarNum(" + node + "): static");
+					writeinstln("lea dword " + reg + ", [" + desc.getAsmName() + "]  ; compileLoadComputeExpr(" + node
+							+ "): static");
 				} else {
-					writeinstln("lea dword " + reg + ", [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "] ; compileLoadVarNum(" + node + "): local");
+					writeinstln("lea dword " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - 4)
+							+ "] ; compileLoadComputeExpr(" + node + "): local");
 				}
 			}
 		} else if (expr instanceof LocalizingNode) {
@@ -386,7 +407,8 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private void compileReturn(ReturnNode node) throws CompilerException {
-		FunScopeDescriptor desc = (FunScopeDescriptor) node.getClosestContainer().getFunDescriptor(getFunDefParent(node));
+		FunScopeDescriptor desc = (FunScopeDescriptor) node.getClosestContainer()
+				.getFunDescriptor(getFunDefParent(node));
 
 		FunDefNode fun = desc.getNode();
 
@@ -418,12 +440,18 @@ public class X86Compiler extends L3Compiler {
 			if (node.getExpr() instanceof ArrayInit) {
 				if (node.getExpr() instanceof ArrayInitNode && ((ArrayInitNode) node.getExpr()).isRaw()) {
 					writedataln(asmName + " dd "
-							+ (((ArrayInitNode) node.getExpr()).getChildren().subList(1, ((ArrayInitNode) node.getExpr()).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString())).collect(Collectors.joining(", ")) + "  ; "
-							+ name);
+							+ (((ArrayInitNode) node.getExpr()).getChildren()
+									.subList(1, ((ArrayInitNode) node.getExpr()).getChildren().size()).stream()
+									.map((c) -> ((NumLitNode) c).getValue().toString()))
+									.collect(Collectors.joining(", "))
+							+ "  ; " + name);
 				} else if (node.getExpr() instanceof StringLitNode) {
 					writedataln(asmName + " dd "
-							+ (((StringLitNode) node.getExpr()).getChildren().subList(0, ((StringLitNode) node.getExpr()).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString())).collect(Collectors.joining(", ")) + "  ; "
-							+ name);
+							+ (((StringLitNode) node.getExpr()).getChildren()
+									.subList(0, ((StringLitNode) node.getExpr()).getChildren().size()).stream()
+									.map((c) -> ((NumLitNode) c).getValue().toString()))
+									.collect(Collectors.joining(", "))
+							+ "  ; " + name);
 				}
 			} else {
 				writedataln(asmName + " dd 0  ; " + desc.getIdentifier().getValue());
@@ -465,14 +493,17 @@ public class X86Compiler extends L3Compiler {
 		writeinstln("add esp, " + size);
 		writeinstln("ret");
 
-		node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream).filter(c -> c instanceof LetScopeDescriptor).forEach(c -> pop());
+		for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream)
+				.filter(c -> c instanceof LetScopeDescriptor).collect(Collectors.toList())) {
+			pop();
+		}
 	}
 
 	private void compileFunDef(FunScopeDescriptor desc) throws CompilerException {
 		FunDefNode node = desc.getNode();
 
 		for (Node c : node.getArgs()) {
-			((FunArgDefNode) c).getLet().setStackIndex(getStackIndex());
+			((FunArgDefNode) c).getLet().setStackIndex(STACK_INDEX);
 			push(((FunArgDefNode) c).getLet());
 		}
 
@@ -494,11 +525,16 @@ public class X86Compiler extends L3Compiler {
 
 		printStack();
 
-		node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream).filter(c -> c instanceof LetScopeDescriptor).forEach(c -> pop());
+		for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream)
+				.filter(c -> c instanceof LetScopeDescriptor).collect(Collectors.toList())) {
+			pop();
+		}
 
 		pop(); // call/ret
 
-		node.getArgs().forEach(c -> pop());
+		for (Node n : node.getArgs()) {
+			pop();
+		}
 	}
 
 	private void compileLetTypeDef(LetScopeDescriptor desc) throws CompilerException {
@@ -510,7 +546,7 @@ public class X86Compiler extends L3Compiler {
 
 		final int typeSize = node.getType().getSize();
 		int size = node.getType().getSize();
-		final int currentStackIndex = getStackIndex();
+		final int currentStackIndex = STACK_INDEX;
 
 		if (node.hasExpr()) { // set
 			if (node.getExpr() instanceof ArrayInit) {
@@ -525,12 +561,21 @@ public class X86Compiler extends L3Compiler {
 
 					writeinstln("sub esp, " + arrSize);
 
-					if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
+					if (expr instanceof StringLitNode
+							|| (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
 						if (expr instanceof StringLitNode) {
-							writedataln(asmName + " dd " + (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
+							writedataln(asmName + " dd "
+									+ (((StringLitNode) expr).getChildren()
+											.subList(0, ((StringLitNode) expr).getChildren().size()).stream()
+											.map((c) -> ((NumLitNode) c).getValue().toString())
+											.collect(Collectors.joining(", ")))
 									+ "  ; " + name + " at " + pos);
 						} else if (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw()) {
-							writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
+							writedataln(asmName + " dd "
+									+ (((ArrayInitNode) expr).getChildren()
+											.subList(1, ((ArrayInitNode) expr).getChildren().size()).stream()
+											.map((c) -> ((NumLitNode) c).getValue().toString())
+											.collect(Collectors.joining(", ")))
 									+ "  ; " + name + " at " + pos);
 						}
 
@@ -690,9 +735,13 @@ public class X86Compiler extends L3Compiler {
 			writeinstln("mov " + reg + ", eax");
 		} else if (node instanceof NumLitNode) {
 			if (((NumLitNode) node).getValue() instanceof NumericLiteralToken) {
-				writeinstln("mov dword " + reg + ", " + ((NumericLiteralToken) ((NumLitNode) node).getValue()).getValue() + "  ; compileComputeExpr(" + node + ")");
+				writeinstln(
+						"mov dword " + reg + ", " + ((NumericLiteralToken) ((NumLitNode) node).getValue()).getValue()
+								+ "  ; compileComputeExpr(" + node + ")");
 			} else if (((Token) ((NumLitNode) node).getValue()).getType().softEquals(TokenType.BOOLEAN)) {
-				writeinstln("mov dword " + reg + ", " + (((Token) ((NumLitNode) node).getValue()).getType().equals(TokenType.FALSE) ? 0 : 1) + "  ; compileComputeExpr(" + node + ")");
+				writeinstln("mov dword " + reg + ", "
+						+ (((Token) ((NumLitNode) node).getValue()).getType().equals(TokenType.FALSE) ? 0 : 1)
+						+ "  ; compileComputeExpr(" + node + ")");
 			}
 		} else if (node instanceof VarNumNode) {
 			compileLoadVarNum(reg, (VarNumNode) node);
@@ -700,7 +749,8 @@ public class X86Compiler extends L3Compiler {
 			generateExprRecursive(reg, node);
 		} else if (node instanceof StringLitNode) {
 			compileArrayInit((StringLitNode) node);
-			writeinstln("mov " + reg + ", [esp + " + (((StringLitNode) node).getStackSize() - 4) + "]  ; Loading StringLitNode pointer");
+			writeinstln("mov " + reg + ", [esp + " + (((StringLitNode) node).getStackSize() - 4)
+					+ "]  ; Loading StringLitNode pointer");
 		} else if (node instanceof LocalizingNode) {
 			compileLocalizing(reg, (LocalizingNode) node);
 		} else {
@@ -731,12 +781,17 @@ public class X86Compiler extends L3Compiler {
 
 				writeinstln("sub esp, " + arrSize);
 
-				if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
+				if (expr instanceof StringLitNode
+						|| (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
 					if (expr instanceof StringLitNode) {
-						writedataln(asmName + " dd " + (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
+						writedataln(asmName + " dd " + (((StringLitNode) expr).getChildren()
+								.subList(0, ((StringLitNode) expr).getChildren().size()).stream()
+								.map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
 								+ "  ; " + name);
 					} else if (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw()) {
-						writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
+						writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren()
+								.subList(1, ((ArrayInitNode) expr).getChildren().size()).stream()
+								.map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
 								+ "  ; " + name);
 					}
 
@@ -770,24 +825,29 @@ public class X86Compiler extends L3Compiler {
 		if (node.isPreset()) {
 
 			if (name.equals("stack")) {
-				System.err.println("Stack at: " + node.getIdent().getPosition());
+				System.err.println("Stack at: " + STACK_INDEX + " = " + node.getIdent().getPosition());
 				printStack();
 			} else if (name.equals("break")) {
-				System.err.println("Stack at: " + node.getIdent().getPosition());
+				System.err.println("Stack at: " + STACK_INDEX + " = " + node.getIdent().getPosition());
 				printStack();
-				String _break = ((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().getFirst()).getExpr()).getString().getValue();
-				writeln(_break + ":  ; breakpoint at: " + node.getIdent().getLine() + ":" + node.getIdent().getColumn());
+				String _break = ((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().getFirst()).getExpr())
+						.getString().getValue();
+				writeln(_break + ":  ; breakpoint at: " + node.getIdent().getLine() + ":"
+						+ node.getIdent().getColumn());
 				writetextln("global " + _break);
 			} else if (name.equals("exit")) {
 				compileExit(((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr());
 			} else if (name.equals("printwrite")) {
 				compilePrintWrite();
 			} else if (name.equals("print")) {
-				compilePrint(((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr(), ((FunArgValNode) node.getArgs().getChildren().get(1)).getExpr());
+				compilePrint(((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr(),
+						((FunArgValNode) node.getArgs().getChildren().get(1)).getExpr());
 			} else if (name.equals("asm")) {
-				writeinstln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr()).getString().getValue());
+				writeinstln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr())
+						.getString().getValue());
 			} else if (name.equals("asmlb")) {
-				writeln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr()).getString().getValue());
+				writeln(((StringLitNode) ((FunArgValNode) node.getArgs().getChildren().get(0)).getExpr()).getString()
+						.getValue());
 			} else {
 				throw new CompilerException("Preset function not found: " + name);
 			}
@@ -804,7 +864,8 @@ public class X86Compiler extends L3Compiler {
 			int gotArgCount = node.getArgs().getChildren().size();
 
 			if (wantedArgCount != gotArgCount) {
-				throw new CompilerException("Argument count do not match, got " + gotArgCount + " but wanted " + wantedArgCount);
+				throw new CompilerException(
+						"Argument count do not match, got " + gotArgCount + " but wanted " + wantedArgCount);
 			}
 
 			for (Node arg : node.getArgs().getChildren()) {
@@ -819,7 +880,9 @@ public class X86Compiler extends L3Compiler {
 
 			final int startStackIndex = vStack.size() - 1;
 
-			node.getArgs().getChildren().forEach(c -> push((FunArgValNode) c));
+			for (Node n : node.getArgs()) {
+				push((FunArgValNode) n);
+			}
 			push(node);
 
 			writeinstln("call " + desc.getAsmName() + "  ; " + desc.getIdentifier().getValue());
@@ -828,7 +891,9 @@ public class X86Compiler extends L3Compiler {
 			int size = getStackSize(startStackIndex);
 			writeinstln("add dword esp, " + size + "  ; Free mem from fun call");
 
-			node.getArgs().getChildren().forEach(c -> pop());
+			for (Node n : node.getArgs()) {
+				pop();
+			}
 		}
 	}
 
@@ -847,7 +912,8 @@ public class X86Compiler extends L3Compiler {
 
 	private int getStackSize(Node node) throws CompilerException {
 		if (node instanceof VarNumNode) {
-			return ((LetTypeDefNode) ((LetScopeDescriptor) node.getParentContainer().getLetTypeDefDescriptor((VarNumNode) node)).getNode()).getType().getSize();
+			return ((LetTypeDefNode) ((LetScopeDescriptor) node.getParentContainer()
+					.getLetTypeDefDescriptor((VarNumNode) node)).getNode()).getType().getSize();
 		} else if (node instanceof NumLitNode) {
 			return ((NumLitNode) node).getStackSize();
 		} else if (node instanceof LetTypeDefNode) {
@@ -916,25 +982,31 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("imul ebx, 4");
 
 				if (def.isiStatic()) { // static
-					writeinstln("mov " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadVarNum(" + node + "): static");
+					writeinstln("mov " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadVarNum(" + node
+							+ "): static");
 				} else { // local
-					writeinstln("mov ecx, [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "]  ; Loading pointer, index = " + def.getStackIndex() + ", size = " + getStackIndex());
+					writeinstln("mov ecx, [esp + " + (STACK_INDEX - def.getStackIndex() - 4)
+							+ "]  ; Loading pointer, index = " + STACK_INDEX + ", size = " + getStackIndex());
 					writeinstln("add ecx, ebx");
 					writeinstln("mov " + reg + ", [ecx] ; compileLoadVarNum(" + node + "): local");
 				}
 			} else {
 				if (def.isiStatic()) { // static
-					writeinstln("mov " + reg + ", " + desc.getAsmName() + "  ; compileLoadVarNum(" + node + "): static");
+					writeinstln(
+							"mov " + reg + ", " + desc.getAsmName() + "  ; compileLoadVarNum(" + node + "): static");
 				} else {
-					System.err.println("cindex! " + def.isArg() + " = " + def.getIdent().getValue() + " = " + getStackIndex() + " & " + def.getStackIndex() + " & " + def.getStackSize());
-					writeinstln("mov " + reg + ", [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "] ; compileLoadVarNum(" + node + "): local");
+					System.err.println("cindex! " + def.isArg() + " = " + def.getIdent().getValue() + " = "
+							+ def.getStackIndex() + " & " + STACK_INDEX + " & " + def.getStackSize());
+					writeinstln("mov " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - 4)
+							+ "] ; compileLoadVarNum(" + node + "): local");
 				}
 			}
 		} else if (!def.getType().isPointer()) { // direct access
 			if (def.isiStatic()) {
 				writeinstln("mov " + reg + ", [" + desc.getAsmName() + "]  ; compileLoadVarNum(" + node + "): static");
 			} else {
-				writeinstln("mov " + reg + ", [esp + " + (getStackIndex() - def.getStackIndex() - 4) + "]  ; compileLoadVarNum(" + node + "): local");
+				writeinstln("mov " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - 4)
+						+ "]  ; compileLoadVarNum(" + node + "): local");
 			}
 		}
 	}
