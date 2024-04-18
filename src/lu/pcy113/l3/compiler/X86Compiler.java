@@ -272,8 +272,10 @@ public class X86Compiler extends L3Compiler {
 			}
 		}
 
-		if (!(node.getChildren().getLast() instanceof ElseDefNode) || !(node.getChildren().getLast() instanceof FinallyDefNode)) {
-			writeinstln("jmp ." + node.getAsmName() + "_end");
+		if (node.getChildren().stream().anyMatch(c -> c instanceof ElseDefNode)) {
+			writeinstln("jmp ." + node.getAsmName() + "_finally  ; Jump to finally if Else is present");
+		} else {
+			writeinstln("jmp ." + node.getAsmName() + "_end  ; Jump to end if Else is not present");
 		}
 
 		for (Node n : node) {
@@ -282,7 +284,7 @@ public class X86Compiler extends L3Compiler {
 			}
 		}
 
-		writeln("." + node.getAsmName() + "_end:");
+		writeln("." + node.getAsmName() + "_finally:");
 
 		if (node.getChildren().getLast() instanceof FinallyDefNode) {
 			// writeinstln("jmp " + ((FinallyDefNode)
@@ -290,6 +292,8 @@ public class X86Compiler extends L3Compiler {
 			((FinallyDefNode) node.getChildren().getLast()).setAsmName("." + ifContainerName + "_" + i++);
 			compileIfElseDefBodyNode(node.getChildren().getLast());
 		}
+
+		writeln("." + node.getAsmName() + "_end:");
 	}
 
 	private void compileIfElseDefBodyNode(Node node) throws CompilerException {
@@ -328,7 +332,7 @@ public class X86Compiler extends L3Compiler {
 		writeinstln("add esp, " + size + "  ; Free mem");
 
 		if (!(node instanceof FinallyDefNode)) {
-			writeinstln("jmp ." + container.getAsmName() + "_end");
+			writeinstln("jmp ." + container.getAsmName() + "_finally  ; Jump to final");
 		}
 	}
 

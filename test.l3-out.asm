@@ -35,7 +35,7 @@ sec_1:  ; If container at: 104:2
 	cmp eax, 0
 	jne .sec_1_1
 	jmp .sec_1_2
-	jmp .sec_1_end
+	jmp .sec_1_finally  ; Jump to finally if Else is present
 .sec_1_0:  ; If node at: 104:2
 	mov eax, esp
 	sub eax, 20
@@ -53,7 +53,7 @@ sec_1:  ; If container at: 104:2
 	add dword esp, 24  ; Free mem from fun call
 .sec_1_0_cln:
 	add esp, 0  ; Free mem
-	jmp .sec_1_end
+	jmp .sec_1_finally  ; Jump to final
 .sec_1_1:  ; If node at: 106:9
 	mov eax, esp
 	sub eax, 20
@@ -71,39 +71,19 @@ sec_1:  ; If container at: 104:2
 	add dword esp, 24  ; Free mem from fun call
 .sec_1_1_cln:
 	add esp, 0  ; Free mem
-	jmp .sec_1_end
+	jmp .sec_1_finally  ; Jump to final
 .sec_1_2:  ; Else node at: 108:4
-	mov eax, esp
-	sub eax, 20
-	push eax  ; Setup array pointer
-	sub esp, 16
-	sub esp, 12
-	mov dword [esp + 8], var_4  ; From
-	mov dword [esp + 4], eax  ; To
-	mov dword [esp + 0], 4  ; Length
-	call sd_11
-	add esp, 12
-	mov eax, [esp + 16]  ; Loading StringLitNode pointer
-	push eax
-	call sd_1  ; println
-	add dword esp, 24  ; Free mem from fun call
 .sec_1_2_cln:
 	add esp, 0  ; Free mem
-	jmp .sec_1_end
-.sec_1_end:
-.sec_1_3:  ; Finally node at: 110:4
-sec_2:  ; If container at: 111:3
-	mov dword eax, 1  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=111, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]))
-	cmp eax, 0
-	jne .sec_2_0
-	jmp .sec_2_end
-.sec_2_0:  ; If node at: 111:3
+	jmp .sec_1_finally  ; Jump to final
+.sec_1_finally:
+.sec_1_3:  ; Finally node at: 108:12
 	mov eax, esp
 	sub eax, 104
 	push eax  ; Setup array pointer
 	sub esp, 100
 	sub esp, 12
-	mov dword [esp + 8], var_5  ; From
+	mov dword [esp + 8], var_4  ; From
 	mov dword [esp + 4], eax  ; To
 	mov dword [esp + 0], 25  ; Length
 	call sd_11
@@ -112,29 +92,9 @@ sec_2:  ; If container at: 111:3
 	push eax
 	call sd_1  ; println
 	add dword esp, 108  ; Free mem from fun call
-.sec_2_0_cln:
-	add esp, 0  ; Free mem
-	jmp .sec_2_end
-.sec_2_end:
-.sec_2_1:  ; Finally node at: 113:4
-	mov eax, esp
-	sub eax, 112
-	push eax  ; Setup array pointer
-	sub esp, 108
-	sub esp, 12
-	mov dword [esp + 8], var_6  ; From
-	mov dword [esp + 4], eax  ; To
-	mov dword [esp + 0], 27  ; Length
-	call sd_11
-	add esp, 12
-	mov eax, [esp + 108]  ; Loading StringLitNode pointer
-	push eax
-	call sd_1  ; println
-	add dword esp, 116  ; Free mem from fun call
-.sec_2_1_cln:
-	add esp, 0  ; Free mem
 .sec_1_3_cln:
 	add esp, 0  ; Free mem
+.sec_1_end:
 	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(a, pointer=false, arrayOffset=false)): local
 	; return node: TypeNode(generic=true, INT, pointer=false)
 	add esp, 4  ; Free mem from local scope bc of return
@@ -255,7 +215,7 @@ sd_15:  ; test
 	push eax  ; Setup array pointer
 	sub esp, 24
 	sub esp, 12
-	mov dword [esp + 8], var_7  ; From
+	mov dword [esp + 8], var_5  ; From
 	mov dword [esp + 4], eax  ; To
 	mov dword [esp + 0], 6  ; Length
 	call sd_11
@@ -277,7 +237,7 @@ sd_17:  ; test
 	push eax  ; Setup array pointer
 	sub esp, 24
 	sub esp, 12
-	mov dword [esp + 8], var_8  ; From
+	mov dword [esp + 8], var_6  ; From
 	mov dword [esp + 4], eax  ; To
 	mov dword [esp + 0], 6  ; Length
 	call sd_11
@@ -306,8 +266,6 @@ section .data
 	var_1 dd 97, 98, 99, 0  ; 102:12
 	var_2 dd 99, 100, 101, 0  ; 105:13
 	var_3 dd 49, 50, 51, 0  ; 107:13
-	var_4 dd 97, 97, 50, 0  ; 109:13
-	var_5 dd 119, 104, 121, 32, 99, 97, 110, 32, 105, 32, 101, 118, 101, 110, 32, 100, 111, 32, 116, 104, 105, 115, 32, 63, 0  ; 112:14
-	var_6 dd 119, 104, 121, 32, 99, 97, 110, 32, 105, 32, 101, 118, 101, 110, 32, 100, 111, 32, 116, 104, 105, 115, 32, 63, 32, 50, 0  ; 114:14
-	var_7 dd 116, 101, 115, 116, 49, 0  ; 84:12
-	var_8 dd 116, 101, 115, 116, 50, 0  ; 89:12
+	var_4 dd 119, 104, 121, 32, 99, 97, 110, 32, 105, 32, 101, 118, 101, 110, 32, 100, 111, 32, 116, 104, 105, 115, 32, 63, 0  ; 109:13
+	var_5 dd 116, 101, 115, 116, 49, 0  ; 84:12
+	var_6 dd 116, 101, 115, 116, 50, 0  ; 89:12
