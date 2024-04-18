@@ -101,6 +101,10 @@ fun int main() {
 	
 	println("abc");
 	
+	if(1) {
+		println("cde");
+	}
+	
 	return int a;
 }
 

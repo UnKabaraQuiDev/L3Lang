@@ -43,7 +43,7 @@ public class FunArgValNode extends Node {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + getType() + ", " + index + ")";
+		return super.toString() + "(" + getType() + ", " + index + ", size="+getStackSize()+")";
 	}
 
 }
