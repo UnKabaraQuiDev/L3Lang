@@ -32,16 +32,17 @@ import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
+import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.StringLitNode;
 import lu.pcy113.l3.parser.ast.TypeNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
+import lu.pcy113.l3.parser.ast.scope.FileNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
-import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 import lu.pcy113.l3.parser.ast.scope.ScopeDescriptor;
 import lu.pcy113.pclib.GlobalLogger;
@@ -51,26 +52,37 @@ public class L3Parser {
 	private int index;
 	private final List<Token> input;
 
-	private RuntimeNode root;
+	private FileNode root;
 
-	public L3Parser(L3Lexer lexer) {
-		this(lexer.getTokens());
-	}
+	public L3Parser(String source, L3Lexer lexer) throws ParserException {
+		input = lexer.getTokens();
 
-	public L3Parser(List<Token> tokens) {
-		if (tokens == null || tokens.isEmpty())
-			throw new IllegalArgumentException("Tokens cannot be null or empty.");
+		if (input == null || input.isEmpty())
+			throw new ParserException("Tokens cannot be null or empty.");
 
-		this.input = tokens;
-
-		this.root = new RuntimeNode();
+		this.root = new FileNode(source);
 	}
 
 	public void parse() throws ParserException {
+		if (hasNext()) {
+			parsePackageDefExpr(root);
+		}
+
 		while (hasNext()) {
 
 			parseLineExpr(root);
 
+		}
+	}
+
+	private void parsePackageDefExpr(FileNode root) throws ParserException {
+		if (peek(TokenType.PACKAGE) && peek(1, TokenType.STRING)) {
+
+			root.add(new PackageDefNode(consume(TokenType.PACKAGE), ((StringLiteralToken) consume(TokenType.STRING)).getValue()));
+
+			consume(TokenType.SEMICOLON);
+		}else {
+			throw new ParserException("Missing package declaration");
 		}
 	}
 
@@ -84,6 +96,7 @@ public class L3Parser {
 		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))) { // function call
 			FunCallNode funCall = parseFunCall();
 			parent.add(funCall);
+
 			return funCall;
 		} else if (canParseFun()) {
 			FunDefNode ltdn = parseFunDefExpr(parent);
@@ -875,7 +888,7 @@ public class L3Parser {
 		return Arrays.stream(types).map(peek::softEquals).collect(Collectors.reducing((a, b) -> a || b)).orElse(false);
 	}
 
-	public RuntimeNode getRoot() {
+	public FileNode getRoot() {
 		return root;
 	}
 

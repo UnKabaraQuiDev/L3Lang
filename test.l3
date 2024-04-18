@@ -1,3 +1,5 @@
+package "src";
+
 fun void print(int8: str) {
 	asm#("mov ecx, [esp + 4]  ; Copy the address of the string into eax");
 	

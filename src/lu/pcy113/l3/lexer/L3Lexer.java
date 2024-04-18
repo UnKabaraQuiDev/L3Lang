@@ -50,6 +50,7 @@ import static lu.pcy113.l3.lexer.TokenType.NOT;
 import static lu.pcy113.l3.lexer.TokenType.NOT_EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.OR;
+import static lu.pcy113.l3.lexer.TokenType.PACKAGE;
 import static lu.pcy113.l3.lexer.TokenType.PAREN_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.PAREN_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.PLUS;
@@ -429,6 +430,9 @@ public class L3Lexer {
 				break;
 			case "return":
 				type = RETURN;
+				break;
+			case "package":
+				type = PACKAGE;
 				break;
 			}
 

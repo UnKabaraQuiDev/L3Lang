@@ -27,11 +27,13 @@ import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
+import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.StringLitNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
+import lu.pcy113.l3.parser.ast.scope.FileNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
@@ -104,47 +106,20 @@ public class X86Compiler extends L3Compiler {
 
 		if (node instanceof RuntimeNode) {
 			// Setup static vars
-			for (ScopeDescriptor desc : container.getLocalDescriptors().values().stream().flatMap(List::stream).collect(Collectors.toList())) {
-				if (desc instanceof LetScopeDescriptor) {
-					if (((LetTypeDefNode) ((LetScopeDescriptor) desc).getNode()).isiStatic()) {
-						compileStaticLetTypeDef((LetScopeDescriptor) desc);
-					}
-				}
-			}
+			compileMainFile(((RuntimeNode) node).getMainFile());
 
-			if (!container.localContainsDescriptor("main")) {
-				throw new CompilerException("Cannot find main function");
-			} else {
-				FunScopeDescriptor desc = (FunScopeDescriptor) container.getLocalDescriptor("main");
-				desc.setAsmName("main");
-				writetextln("global main");
-
-				// writeinstln("mov eax, esp");
-				// writeinstln("sub eax, 8 ; Add offset for main fun call");
-				// writeinstln("mov [esp_start], eax");
-
-				writeinstln("call " + desc.getAsmName() + "  ; Call main");
-
-				writeinstln("; Exit program");
-				writeinstln("mov ebx, eax  ; Move return to ebx");
-				writeinstln("mov eax, 1 ; Syscall exit");
-				writeinstln("int 0x80   ; Syscall call");
-
-				compileMainFun(desc);
-			}
-
-			for (Node n : node.getChildren()) {
-				if (n instanceof LetTypeDefNode && !((LetTypeDefNode) n).isiStatic()) {
-					throw new CompilerException("Cannot declare non-static let in RuntimeNode.");
-				} else if (n instanceof LetTypeDefNode && ((LetTypeDefNode) n).isiStatic()) {
-					continue; // already declared
-				} else if (n instanceof FunDefNode && ((FunDefNode) n).getIdent().getValue().equals("main")) {
-					continue; // already declared
-				}
-
+			for (Node n : ((RuntimeNode) node).getSecondaryFiles()) {
 				compile(n);
 			}
-		} else if (node instanceof FunDefNode) {
+		} else if (node instanceof FileNode) {
+			for (Node n : ((FileNode) node)) {
+				compile(n);
+			}
+		}else if (node instanceof FunDefNode) {
+			if(((FunDefNode) node).isMain()) {
+				return;
+			}
+			
 			compileFunDef(container.getFunDescriptor((FunDefNode) node));
 		} else if (node instanceof LetTypeDefNode) {
 			compileLetTypeDef(container.getLetTypeDefDescriptor((LetTypeDefNode) node));
@@ -164,9 +139,42 @@ public class X86Compiler extends L3Compiler {
 			for (Node n : node) {
 				compile(n);
 			}
+		} else if (node instanceof PackageDefNode) {
+			// ignore package def node
 		} else {
 			implement(node);
 		}
+	}
+
+	private void compileMainFile(FileNode node) throws CompilerException {
+		ScopeContainer container = node;
+
+		for (ScopeDescriptor desc : container.getLocalDescriptors().values().stream().flatMap(List::stream).collect(Collectors.toList())) {
+			if (desc instanceof LetScopeDescriptor) {
+				if (((LetTypeDefNode) ((LetScopeDescriptor) desc).getNode()).isiStatic()) {
+					compileStaticLetTypeDef((LetScopeDescriptor) desc);
+				}
+			}
+		}
+
+		if (!container.localContainsDescriptor("main")) {
+			throw new CompilerException("Cannot find main function");
+		} else {
+			FunScopeDescriptor desc = (FunScopeDescriptor) container.getLocalDescriptor("main");
+			desc.setAsmName("main");
+			writetextln("global main");
+
+			writeinstln("call " + desc.getAsmName() + "  ; Call main");
+
+			writeinstln("; Exit program");
+			writeinstln("mov ebx, eax  ; Move return to ebx");
+			writeinstln("mov eax, 1 ; Syscall exit");
+			writeinstln("int 0x80   ; Syscall call");
+
+			compileMainFun(desc);
+		}
+
+		compile(node);
 	}
 
 	private void compileForDefNode(ForDefNode node) throws CompilerException {
@@ -1023,7 +1031,7 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private void implement(Object obj) throws CompilerException {
-		throw new CompilerException("not implemented: " + obj.getClass().getSimpleName());
+		throw new CompilerException("not implemented: " + obj.getClass().getName());
 	}
 
 	private String getDataTypeNameBySize(int bytes) {

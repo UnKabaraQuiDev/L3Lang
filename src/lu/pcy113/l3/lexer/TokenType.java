@@ -4,6 +4,8 @@ public enum TokenType {
 
 	LET("let"), FUN("fun"),
 
+	PACKAGE("package"), CLASS("class"), INTERFACE("interface"), STRUCT("struct"), UNION("union"),
+
 	TYPE(), INT(TYPE, "int"),
 
 	INT_1(INT, "int1"), INT_8(INT, "int8"), INT_16(INT, "int16"), INT_32(TYPE, "int32"), INT_64(TYPE, "int64"),
@@ -27,7 +29,7 @@ public enum TokenType {
 	COMMENT("//"),
 
 	BOOLEAN(),
-	
+
 	TRUE(BOOLEAN, "true"), FALSE(BOOLEAN, "false"),
 
 	IF("if"), ELSE("else"),

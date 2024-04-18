@@ -1,5 +1,6 @@
 package lu.pcy113.l3.parser.ast.scope;
 
+import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.parser.ast.FunArgsDefNode;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
@@ -21,11 +22,11 @@ public class FunDefNode extends ScopeContainerNode {
 	public IdentifierToken getIdent() {
 		return ident;
 	}
-	
+
 	public FunArgsDefNode getArgs() {
 		return (FunArgsDefNode) children.get(1);
 	}
-	
+
 	public FunBodyDefNode getBody() {
 		return (FunBodyDefNode) children.get(2);
 	}
@@ -33,6 +34,10 @@ public class FunDefNode extends ScopeContainerNode {
 	@Override
 	public String toString() {
 		return super.toString() + "(" + getReturnType() + ": " + ident.getValue() + ")";
+	}
+
+	public boolean isMain() {
+		return ident.getValue().equals("main") && this.getArgs().isLeaf() && this.getReturnType().getType().softEquals(TokenType.INT);
 	}
 
 }

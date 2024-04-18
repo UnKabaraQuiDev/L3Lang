@@ -126,11 +126,6 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	public FunScopeDescriptor getFunDescriptor(FunCallNode node) throws CompilerException {
 		Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getValue());
 
-		/*col.forEach(c -> {
-			if (c instanceof FunScopeDescriptor)
-				System.out.println(c + "(" + ((FunScopeDescriptor) c).getNode().getArgs().toString(0) + ")");
-		});*/
-
 		col = col.stream().filter(c -> c instanceof FunScopeDescriptor).filter(c -> ((FunScopeDescriptor) c).getNode().getArgs().argsEquals(node.getArgs())).collect(Collectors.toCollection(ArrayList::new));
 
 		if (col.size() > 1) {

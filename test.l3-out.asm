@@ -5,17 +5,17 @@ _start:
 	mov eax, 1 ; Syscall exit
 	int 0x80   ; Syscall call
 main:  ; main
-	mov dword eax, 5  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=96, column=14, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=5, value=5]))
+	mov dword eax, 5  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=98, column=14, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=5, value=5]))
 	push dword eax  ; Push var: a
-sec_1:  ; If container at: 100:2
-	mov dword eax, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=100, column=5, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
+sec_1:  ; If container at: 102:2
+	mov dword eax, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=102, column=5, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
 	cmp eax, 0
 	jne .sec_1_0
-	mov dword eax, 1  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=102, column=12, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]))
+	mov dword eax, 1  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=104, column=12, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]))
 	cmp eax, 0
 	jne .sec_1_1
 	jmp .sec_1_end  ; Jump to end if Else is not present
-.sec_1_0:  ; If node at: 100:2
+.sec_1_0:  ; If node at: 102:2
 	mov eax, esp
 	sub eax, 20
 	push eax  ; Setup array pointer
@@ -33,7 +33,7 @@ sec_1:  ; If container at: 100:2
 .sec_1_0_cln:
 	add esp, 0  ; Free mem
 	jmp .sec_1_finally  ; Jump to final
-.sec_1_1:  ; If node at: 102:9
+.sec_1_1:  ; If node at: 104:9
 	mov eax, esp
 	sub eax, 20
 	push eax  ; Setup array pointer
@@ -51,7 +51,7 @@ sec_1:  ; If container at: 100:2
 .sec_1_1_cln:
 	add esp, 0  ; Free mem
 	jmp .sec_1_finally  ; Jump to final
-.sec_1_finally:  ; Finally node at: 104:4
+.sec_1_finally:  ; Finally node at: 106:4
 	mov eax, esp
 	sub eax, 104
 	push eax  ; Setup array pointer
@@ -69,8 +69,8 @@ sec_1:  ; If container at: 100:2
 .sec_1_finally_cln:
 	add esp, 0  ; Free mem
 .sec_1_end:
-sec_2:  ; While at: 108:2
-	mov dword ebx, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=108, column=12, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
+sec_2:  ; While at: 110:2
+	mov dword ebx, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=110, column=12, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
 	push ebx
 	mov eax, [esp + 4]  ; compileLoadVarNum(VarNumNode(a, pointer=false, arrayOffset=false)): local
 	push eax
@@ -81,7 +81,7 @@ sec_2:  ; While at: 108:2
 	cmp eax, 0
 	je .sec_2_else
 .sec_2:  ; While condition
-	mov dword ebx, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=108, column=12, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
+	mov dword ebx, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=110, column=12, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
 	push ebx
 	mov eax, [esp + 4]  ; compileLoadVarNum(VarNumNode(a, pointer=false, arrayOffset=false)): local
 	push eax
@@ -95,13 +95,13 @@ sec_2:  ; While at: 108:2
 	push eax
 	call sd_7  ; print
 	add dword esp, 4  ; Free mem from fun call
-	mov dword ebx, 1  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=110, column=10, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]))
+	mov dword ebx, 1  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=112, column=10, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]))
 	push ebx
 	mov eax, [esp + 4]  ; compileLoadVarNum(VarNumNode(a, pointer=false, arrayOffset=false)): local
 	push eax
 	pop eax
 	pop ebx
-	sub eax, ebx  ; VarNumNode(a, pointer=false, arrayOffset=false) lu.pcy113.l3.lexer.TokenType[MINUS, fixed=true, string=false, charValue=-] NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=110, column=10, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]) -> eax
+	sub eax, ebx  ; VarNumNode(a, pointer=false, arrayOffset=false) lu.pcy113.l3.lexer.TokenType[MINUS, fixed=true, string=false, charValue=-] NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=112, column=10, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]) -> eax
 	push eax
 	lea dword ecx, [esp + 4] ; compileLoadComputeExpr(VarNumNode(a, pointer=false, arrayOffset=false)): local
 	pop eax
@@ -130,11 +130,11 @@ jmp .sec_2_end  ; After else
 	add dword esp, 0  ; Free mem from fun call
 jmp .sec_2_end  ; After finally
 .sec_2_end:
-sec_3:  ; For at: 117:2
-	mov dword eax, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=117, column=18, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
+sec_3:  ; For at: 119:2
+	mov dword eax, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=119, column=18, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
 	push dword eax  ; Push var: x
 .sec_3:
-	mov dword ebx, 10  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=117, column=25, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=10, value=10]))
+	mov dword ebx, 10  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=119, column=25, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=10, value=10]))
 	push ebx
 	mov eax, [esp + 4]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local
 	push eax
@@ -148,13 +148,13 @@ sec_3:  ; For at: 117:2
 	push eax
 	call sd_7  ; print
 	add dword esp, 4  ; Free mem from fun call
-	mov dword ebx, 1  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=117, column=35, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]))
+	mov dword ebx, 1  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=119, column=35, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]))
 	push ebx
 	mov eax, [esp + 4]  ; compileLoadVarNum(VarNumNode(x, pointer=false, arrayOffset=false)): local
 	push eax
 	pop eax
 	pop ebx
-	add eax, ebx  ; VarNumNode(x, pointer=false, arrayOffset=false) lu.pcy113.l3.lexer.TokenType[PLUS, fixed=true, string=false, charValue=+] NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=117, column=35, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]) -> eax
+	add eax, ebx  ; VarNumNode(x, pointer=false, arrayOffset=false) lu.pcy113.l3.lexer.TokenType[PLUS, fixed=true, string=false, charValue=+] NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=119, column=35, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1]) -> eax
 	push eax
 	lea dword ecx, [esp + 4] ; compileLoadComputeExpr(VarNumNode(x, pointer=false, arrayOffset=false)): local
 	pop eax
@@ -165,7 +165,7 @@ sec_3:  ; For at: 117:2
 .sec_3_end:
 	call sd_4  ; println
 	add dword esp, 0  ; Free mem from fun call
-	mov eax, [esp + 4]  ; compileLoadVarNum(VarNumNode(a, pointer=false, arrayOffset=false)): local
+	mov dword eax, 3  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=125, column=12, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=3, value=3]))
 	; return node: TypeNode(generic=true, INT, pointer=false)
 	add esp, 8  ; Free mem from local scope bc of return
 	jmp main_cln  ; ReturnNode
@@ -255,7 +255,7 @@ sd_9:  ; println
 sd_9_cln:
 	ret
 sd_12:  ; stringify
-stringify:  ; breakpoint at: 42:2
+stringify:  ; breakpoint at: 44:2
 	lea esi, [esp + 8]  ; Load address of the number
 	mov edi, [esp + 4]  ; Load address of the string
 .convert_loop:
@@ -301,7 +301,7 @@ sd_19:  ; strlen
 	inc ecx  ; Increment the counter
 	jmp .loop  ; Repeat the loop
 .done:
-	mov dword eax, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=88, column=19, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
+	mov dword eax, 0  ; compileComputeExpr(NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=90, column=19, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0]))
 	push dword eax  ; Push var: length
 	mov [esp], ecx  ; Move strlen to var
 	mov eax, [esp + 0]  ; compileLoadVarNum(VarNumNode(length, pointer=false, arrayOffset=false)): local
@@ -317,7 +317,7 @@ section .text
 	global stringify
 section .data
 	esp_start dd 0
-	var_1 dd 99, 100, 101, 0  ; 101:13
-	var_2 dd 49, 50, 51, 0  ; 103:13
-	var_3 dd 119, 104, 121, 32, 99, 97, 110, 32, 105, 32, 101, 118, 101, 110, 32, 100, 111, 32, 116, 104, 105, 115, 32, 63, 0  ; 105:13
-	var_4 dd 101, 108, 115, 101, 0  ; 112:13
+	var_1 dd 99, 100, 101, 0  ; 103:13
+	var_2 dd 49, 50, 51, 0  ; 105:13
+	var_3 dd 119, 104, 121, 32, 99, 97, 110, 32, 105, 32, 101, 118, 101, 110, 32, 100, 111, 32, 116, 104, 105, 115, 32, 63, 0  ; 107:13
+	var_4 dd 101, 108, 115, 101, 0  ; 114:13

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 
 import lu.pcy113.l3.compiler.CompilerException;
@@ -12,32 +14,35 @@ import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.parser.L3Parser;
 import lu.pcy113.l3.parser.ParserException;
+import lu.pcy113.l3.parser.ast.scope.FileNode;
+import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 import lu.pcy113.pclib.GlobalLogger;
 
 public class PrivateMain {
 
-	public static void main(String[] args) throws FileNotFoundException, IOException, LexerException, ParserException, CompilerException {
+	public static void main(String[] args) throws FileNotFoundException, IOException, LexerException, ParserException, CompilerException, L3Exception {
 		GlobalLogger.init(new File("./config/logs.properties"));
 
 		System.out.println(Arrays.toString(new File("./").list()));
 
-		String file = "test.l3";
+		String mainFile = "test.l3";
 
-		L3Lexer lexer = new L3Lexer(new FileReader(new File(file)));
+		L3Lexer lexer = new L3Lexer(new FileReader(new File(mainFile)));
 		System.out.println("Input:\n" + lexer.getInput());
 		lexer.lexe();
 		lexer.getTokens().forEach(System.out::println);
 
-		/*
-		 * L3ExprParser parser = new L3ExprParser(lexer); parser.parse();
-		 * System.out.println(parser.getRoot().toString(0));
-		 */
-
-		L3Parser parser = new L3Parser(lexer);
+		L3Parser parser = new L3Parser(mainFile, lexer);
 		parser.parse();
-		System.out.println(parser.getRoot().toString(0));
 
-		X86Compiler compiler = new X86Compiler(parser.getRoot(), file + "-out.asm");
+		FileNode fileNode = parser.getRoot();
+		fileNode.containsMainFunDescriptor();
+		RuntimeNode runtimeNode = new RuntimeNode(fileNode);
+		
+		System.out.println(runtimeNode.toString(0));
+		Files.write(Paths.get(mainFile+"-ast.txt"), runtimeNode.toString(0).getBytes());
+		
+		X86Compiler compiler = new X86Compiler(runtimeNode, mainFile + "-out.asm");
 		compiler.compile();
 	}
 
