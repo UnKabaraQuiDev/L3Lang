@@ -155,7 +155,11 @@ public class X86Compiler extends L3Compiler {
 			compileWhileDefNode((WhileDefNode) node);
 		} else if (node instanceof ForDefNode) {
 			compileForDefNode((ForDefNode) node);
-		} else {
+		} else if(node instanceof ScopeBodyNode) {
+			for(Node n : node) {
+				compile(n);
+			}
+		} else{
 			implement(node);
 		}
 	}
@@ -214,35 +218,69 @@ public class X86Compiler extends L3Compiler {
 		node.setAsmName(whileName);
 
 		ScopeBodyNode body = node.getBody();
-
+		
+		final String startName = "."+node.getAsmName();
+		final String elseName = startName+"_else";
+		final String finallyName = startName+"_finally";
+		final String endName = startName+"_end";
+		
 		writeln(node.getAsmName() + ":  ; While at: " + node.getToken().getPosition());
-		compileWhileDefConditionNode(node);
+		compileWhileDefConditionNode(node, node.hasElse() ? elseName : endName);
+		
+		writeln(startName + ":  ; While condition");
+		compileWhileDefConditionNode(node, node.hasFinally() ? finallyName : endName);
 
-		final int startStackIndex = vStack.size() - 1;
-		body.setStartStackIndex(startStackIndex);
-
-		for (Node n : body) {
-			compile(n);
+		bodyGen: {
+			final int startStackIndex = vStack.size() - 1;
+			body.setStartStackIndex(startStackIndex);
+			body.setClnAsmName(startName+"_cln");
+	
+			compile(body);
+			
+			int size = getStackSize(startStackIndex);
+	
+			writeln(body.getClnAsmName() + ":");
+			writeinstln("add esp, " + size + "  ; Free mem");
+			
+			for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream).filter(c -> c instanceof LetScopeDescriptor).collect(Collectors.toList())) {
+				pop();
+			}
+			
+			writeinstln("jmp "+startName);
 		}
-		writeinstln("jmp " + node.getAsmName());
-
-		int size = getStackSize(startStackIndex);
-
-		writeln(body.getClnAsmName() + ":");
-		writeinstln("add esp, " + size + "  ; Free mem");
-
-		for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream).filter(c -> c instanceof LetScopeDescriptor).collect(Collectors.toList())) {
-			pop();
+		
+		if(node.hasElse()) {
+			
+			ElseDefNode _else = node.getElse();
+			_else.setAsmName(elseName);
+			
+			writeln(elseName+":");
+			
+			compile(_else.getBody());
+			
+			writeln("jmp "+endName+"  ; After else");
+		}
+		
+		if(node.hasFinally()) {
+			
+			FinallyDefNode _finally = node.getFinally();
+			_finally.setAsmName(finallyName);
+			
+			writeln(finallyName+":");
+			
+			compile(_finally.getBody());
+			
+			writeln("jmp "+endName+"  ; After finally");
 		}
 
-		writeln(node.getAsmName() + "_end:");
+		writeln(endName+":");
 	}
 
-	private void compileWhileDefConditionNode(WhileDefNode node) throws CompilerException {
+	private void compileWhileDefConditionNode(WhileDefNode node, String jumpToIfFalse) throws CompilerException {
 		Node expr = node.getCondition();
 		compileComputeExpr("eax", expr);
 		writeinstln("cmp eax, 0");
-		writeinstln("je " + node.getAsmName() + "_end");
+		writeinstln("je " + jumpToIfFalse);
 	}
 
 	private void compileIfContainerNode(IfContainerNode node) throws CompilerException {

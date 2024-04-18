@@ -108,9 +108,11 @@ fun int main() {
 	while(a > 0) {
 		print(a);
 		a = a -1;
+	}else {
+		println("else");
+	}finally {
+		println();
 	}
-	
-	println();
 	
 	for(let int16 x = 0; x < 10; x = x+1) {
 		print(x);

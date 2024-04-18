@@ -187,6 +187,20 @@ public class L3Parser {
 			parent.add(whileDef);
 
 			ScopeBodyNode body = parseScopeDefBody(whileDef);
+			
+			if(peek(TokenType.ELSE)) {
+				ElseDefNode elseDef = parseElseDefExpr();
+				whileDef.add(elseDef);
+			}
+			
+			if(peek(TokenType.FINALLY)) {
+				FinallyDefNode finallyDef = parseFinallyDefExpr();
+				whileDef.add(finallyDef);
+			}
+			
+			if(peek(TokenType.ELSE, TokenType.FINALLY)) {
+				throw new ParserException("Unexpected token: "+peek().toString(0)+", cannot continue while-statement after final else/finally.");
+			}
 
 			return whileDef;
 		}
