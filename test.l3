@@ -101,8 +101,18 @@ fun int main() {
 	
 	println("abc");
 	
-	if(1) {
+	if(0) {
 		println("cde");
+	} else if(0) {
+		println("123");
+	} else {
+		println("aa2");
+	} finally {
+		if(1) {
+			println("why can i even do this ?");
+		}finally {
+			println("why can i even do this ? 2");
+		}
 	}
 	
 	return int a;

@@ -25,5 +25,9 @@ public class Token {
 	public String toString() {
 		return Token.class.getName()+"["+getPosition()+", type="+type+"]";
 	}
+
+	public String toString(int i) {
+		return "'"+type.name()+"' at "+getPosition();
+	}
 	
 }

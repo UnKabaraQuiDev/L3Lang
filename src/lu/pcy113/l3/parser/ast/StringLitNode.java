@@ -1,7 +1,11 @@
 package lu.pcy113.l3.parser.ast;
 
+import java.util.stream.Collectors;
+
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
+import lu.pcy113.l3.utils.StringUtils;
 
 public class StringLitNode extends Node implements ArrayInit {
 
@@ -54,6 +58,13 @@ public class StringLitNode extends Node implements ArrayInit {
 	@Override
 	public String toString() {
 		return super.toString()+"('"+string.getValue()+"')";
+	}
+	
+	@Override
+	public String toString(int indent) {
+		String tab = StringUtils.repeat("\t", indent);
+		String ret = tab + toString();
+		return ret;
 	}
 
 }

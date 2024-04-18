@@ -16,6 +16,7 @@ import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.DelocalizingNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
+import lu.pcy113.l3.parser.ast.FinallyDefNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
 import lu.pcy113.l3.parser.ast.FunArgDefNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
@@ -209,12 +210,35 @@ public class L3Parser {
 				} else {
 					ElseDefNode elseDef = parseElseDefExpr();
 					container.add(elseDef);
+					break;
 				}
 			}
-
+			
+			if(peek(TokenType.FINALLY)) {
+				FinallyDefNode finallyDef = parseFinallyDefExpr();
+				container.add(finallyDef);
+			}
+			
+			if(peek(TokenType.ELSE, TokenType.FINALLY)) {
+				throw new ParserException("Unexpected token: "+peek().toString(0)+", cannot continue if-statement after final else/finally.");
+			}
+			
 			return container;
 		}
 		throw new ParserException("An error occured when parsing if-statements");
+	}
+
+	private FinallyDefNode parseFinallyDefExpr() throws ParserException {
+		if (peek(TokenType.FINALLY)) {
+			Token elseToken = consume(TokenType.FINALLY);
+
+			FinallyDefNode finallyDef = new FinallyDefNode(elseToken);
+
+			ScopeBodyNode body = parseScopeDefBody(finallyDef);
+
+			return finallyDef;
+		}
+		throw new ParserException("An error occured when parsing finally-statement");
 	}
 
 	private ElseDefNode parseElseDefExpr() throws ParserException {
