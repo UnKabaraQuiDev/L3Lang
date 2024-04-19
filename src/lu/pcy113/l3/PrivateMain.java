@@ -16,6 +16,7 @@ import lu.pcy113.l3.parser.L3Parser;
 import lu.pcy113.l3.parser.ParserException;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
+import lu.pcy113.l3.utils.FileUtils;
 import lu.pcy113.pclib.GlobalLogger;
 
 public class PrivateMain {
@@ -25,10 +26,13 @@ public class PrivateMain {
 
 		System.out.println(Arrays.toString(new File("./").list()));
 
-		String mainFile = "l3/src/test.l3";
-		String sysoutFile = "l3/src/sys/sysout.l3";
+		File l3Dir = new File("./l3/");
+		File srcDir = new File(l3Dir, "src/");
 
-		L3Lexer lexer = new L3Lexer(new FileReader(new File(mainFile)));
+		String mainFile = "test.l3";
+		String sysoutFile = "sys/sysout.l3";
+
+		L3Lexer lexer = new L3Lexer(new FileReader(new File(srcDir, mainFile)));
 		System.out.println("Input:\n" + lexer.getInput());
 		lexer.lexe();
 		lexer.getTokens().forEach(System.out::println);
@@ -38,23 +42,23 @@ public class PrivateMain {
 
 		FileNode fileNode = parser.getRoot();
 		fileNode.containsMainFunDescriptor();
-		
-		lexer = new L3Lexer(new FileReader(new File(sysoutFile)));
+
+		lexer = new L3Lexer(new FileReader(new File(srcDir, sysoutFile)));
 		System.out.println("Input:\n" + lexer.getInput());
 		lexer.lexe();
 		lexer.getTokens().forEach(System.out::println);
 
 		parser = new L3Parser(sysoutFile, lexer);
 		parser.parse();
-		
+
 		FileNode sysoutFileNode = parser.getRoot();
-		
+
 		RuntimeNode runtimeNode = new RuntimeNode(fileNode, sysoutFileNode);
-		
+
 		System.out.println(runtimeNode.toString(0));
-		Files.write(Paths.get(mainFile+"-ast.txt"), runtimeNode.toString(0).getBytes());
-		
-		X86Compiler compiler = new X86Compiler(runtimeNode, mainFile + "-out.asm");
+		Files.write(Paths.get(l3Dir + "/" + FileUtils.removeExtension(mainFile) + "-ast.txt"), runtimeNode.toString(0).getBytes());
+
+		X86Compiler compiler = new X86Compiler(runtimeNode, l3Dir, "test");
 		compiler.compile();
 	}
 

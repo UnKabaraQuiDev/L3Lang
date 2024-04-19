@@ -41,15 +41,13 @@ import lu.pcy113.l3.parser.ast.scope.ImportScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
-import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeDescriptor;
-import lu.pcy113.l3.utils.FileUtils;
 import lu.pcy113.pclib.GlobalLogger;
 
 public class X86Compiler extends L3Compiler {
 
-	public X86Compiler(RuntimeNode env, String outPath) {
-		super(env, outPath);
+	public X86Compiler(RuntimeNode env, File dirPath, String fileName) {
+		super(env, new File(dirPath, fileName));
 	}
 
 	@Override
@@ -68,19 +66,19 @@ public class X86Compiler extends L3Compiler {
 
 		flushAndClose();
 
-		File dir = outFile.getAbsoluteFile().getParentFile();
 		try {
 
-			String oOutFile = FileUtils.replaceExtension(outFile.getName(), "o");
-			String rmExtOutFile = FileUtils.removeExtension(outFile.getName());
-			String outDirPath = outFile.getPath();
-			exec("nasm -f elf32 -g -o " + oOutFile + " " + outDirPath, dir);
+			String oOutFile = outFileObj.getPath();
+			String execOutFile = outFileExec.getPath();
+			String outAsmPath = outFileAsm.getPath();
+
+			exec("nasm -f elf32 -g -o " + oOutFile + " " + outAsmPath, outDir);
 			// exec("gcc -m32 elf_i386 -o " + rmExtOutFile + " " + oOutFile, dir);
-			exec("ld -m elf_i386 -o " + rmExtOutFile + " " + oOutFile, dir);
-			exec("./" + rmExtOutFile, dir);
+			exec("ld -m elf_i386 -o " + execOutFile + " " + oOutFile, outDir);
+			exec("./" + execOutFile, outDir);
 
 		} catch (IOException | InterruptedException e) {
-			throw new CompilerException("Could not exec: '" + outFile + "', '" + FileUtils.removeExtension(outFile.getName()) + "' and '" + FileUtils.replaceExtension(outFile.getName(), "o") + "' in " + dir, e);
+			throw new CompilerException("Could not exec: '" + outFileAsm.getPath() + "', '" + outFileExec.getPath() + "' and '" + outFileObj.getPath() + "' in " + outDir.getParent(), e);
 		}
 	}
 
@@ -118,11 +116,11 @@ public class X86Compiler extends L3Compiler {
 			for (Node n : ((FileNode) node)) {
 				compile(n);
 			}
-		}else if (node instanceof FunDefNode) {
-			if(((FunDefNode) node).isMain()) {
+		} else if (node instanceof FunDefNode) {
+			if (((FunDefNode) node).isMain()) {
 				return;
 			}
-			
+
 			compileFunDef(container.getFunDescriptor((FunDefNode) node));
 		} else if (node instanceof LetTypeDefNode) {
 			compileLetTypeDef(container.getLetTypeDefDescriptor((LetTypeDefNode) node));
@@ -881,18 +879,18 @@ public class X86Compiler extends L3Compiler {
 			}
 
 		} else {
-			
+
 			ScopeContainer funDefContainer = container;
-			
-			if(node.hasSource()) {
+
+			if (node.hasSource()) {
 				// get source from imports
-				if(!container.containsDescriptor(node.getSource().getValue())) {
-					throw new CompilerException("Cannot find import for: "+node.getSource().getValue());
+				if (!container.containsDescriptor(node.getSource().getValue())) {
+					throw new CompilerException("Cannot find import for: " + node.getSource().getValue());
 				}
 				String _import = ((ImportScopeDescriptor) container.getClosestDescriptor(node.getSource().getValue())).getNode().getPath().getValue();
 				funDefContainer = root.getFileDescriptor(_import).getNode();
 			}
-			
+
 			FunScopeDescriptor desc = funDefContainer.getFunDescriptor(node);
 			if (desc == null) {
 				throw new CompilerException("Couldn't find descriptor for: " + name);
