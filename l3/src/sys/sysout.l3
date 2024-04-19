@@ -1,4 +1,38 @@
-package "src";
+package "sys";
+
+fun void memcpy(int32: from, int32: to, int32 length) {
+	asm#("mov ecx, [esp + 4]  ; Length");
+	asm#("mov edi, [esp + 8]  ; To");
+	asm#("mov esi, [esp + 12]  ; From");
+	
+	asmlb#(".copy_loop:");
+	asm#("mov eax, [esi]");
+	asm#("mov [edi], eax");
+	asm#("add esi, 4");
+	asm#("add edi, 4");
+	asm#("loop .copy_loop");
+}
+
+fun int16 strlen(int8: str) {
+	asm#("mov eax, [esp + 4]  ; Copy the address of the string into eax");
+	asm#("xor ecx, ecx  ; Clear ecx (counter register)");
+	
+	asmlb#(".loop:");
+	asm#("cmp dword [eax], 0  ; Compare the byte at the current address with null terminator");
+	asm#("je .done  ; If null terminator is found, exit loop");
+	asm#("add dword eax, 4  ; Move to the next byte in the string");
+	asm#("inc ecx  ; Increment the counter");
+	asm#("jmp .loop  ; Repeat the loop");
+	
+	asmlb#(".done:");
+	
+	let int16 length = 0;
+	
+	asm#("mov [esp], ecx  ; Move strlen to var");
+	
+	return int16 length;
+}
+
 
 fun void print(int8: str) {
 	asm#("mov ecx, [esp + 4]  ; Copy the address of the string into eax");
@@ -60,68 +94,3 @@ fun void stringify(int16 number, int8: str) {
 	asm#("jnz .convert_loop  ; If not, continue conversion");
 	asm#("mov dword [edi], 0");
 }
-
-fun void memcpy(int32: from, int32: to, int32 length) {
-	asm#("mov ecx, [esp + 4]  ; Length");
-	asm#("mov edi, [esp + 8]  ; To");
-	asm#("mov esi, [esp + 12]  ; From");
-	
-	asmlb#(".copy_loop:");
-	asm#("mov eax, [esi]");
-	asm#("mov [edi], eax");
-	asm#("add esi, 4");
-	asm#("add edi, 4");
-	asm#("loop .copy_loop");
-}
-
-fun int16 strlen(int8: str) {
-	asm#("mov eax, [esp + 4]  ; Copy the address of the string into eax");
-	asm#("xor ecx, ecx  ; Clear ecx (counter register)");
-	
-	asmlb#(".loop:");
-	asm#("cmp dword [eax], 0  ; Compare the byte at the current address with null terminator");
-	asm#("je .done  ; If null terminator is found, exit loop");
-	asm#("add dword eax, 4  ; Move to the next byte in the string");
-	asm#("inc ecx  ; Increment the counter");
-	asm#("jmp .loop  ; Repeat the loop");
-	
-	asmlb#(".done:");
-	
-	let int16 length = 0;
-	
-	asm#("mov [esp], ecx  ; Move strlen to var");
-	
-	return int16 length;
-}
-
-fun int main() {
-	let int16 a = 5;
-	
-	//text#("extern srand");
-	
-	if(0) {
-		println("cde");
-	} else if(1) {
-		println("123");
-	} finally {
-		println("why can i even do this ?");
-	}
-	
-	while(a > 0) {
-		print(a);
-		a = a -1;
-	}else {
-		println("else");
-	}finally {
-		println();
-	}
-	
-	for(let int16 x = 0; x < 10; x = x+1) {
-		print(x);
-	}
-	
-	println();
-	
-	return int a;
-}
-

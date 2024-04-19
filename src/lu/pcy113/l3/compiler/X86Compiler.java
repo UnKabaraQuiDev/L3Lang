@@ -34,11 +34,14 @@ import lu.pcy113.l3.parser.ast.StringLitNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
+import lu.pcy113.l3.parser.ast.scope.FileScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
+import lu.pcy113.l3.parser.ast.scope.ImportScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeDescriptor;
 import lu.pcy113.l3.utils.FileUtils;
 import lu.pcy113.pclib.GlobalLogger;
@@ -821,7 +824,7 @@ public class X86Compiler extends L3Compiler {
 					writeinstln("mov dword [esp + 8], " + asmName + "  ; From");
 					writeinstln("mov dword [esp + 4], eax  ; To");
 					writeinstln("mov dword [esp + 0], " + expr.getArraySize() + "  ; Length");
-					writeinstln("call " + node.getClosestContainer().getClosestDescriptor("memcpy").getAsmName());
+					writeinstln("call " + getFile("sys.sysout").getNode().getClosestDescriptor("memcpy").getAsmName());
 					writeinstln("add esp, 12");
 				} else {
 					for (int i = 0; i < expr.getArraySize(); i++) {
@@ -838,6 +841,10 @@ public class X86Compiler extends L3Compiler {
 		} else {
 			implement(node);
 		}
+	}
+
+	private FileScopeDescriptor getFile(String string) throws CompilerException {
+		return root.getFileDescriptor(string);
 	}
 
 	private void compileFunCall(FunCallNode node) throws CompilerException {
@@ -874,8 +881,19 @@ public class X86Compiler extends L3Compiler {
 			}
 
 		} else {
-
-			FunScopeDescriptor desc = container.getFunDescriptor(node);
+			
+			ScopeContainer funDefContainer = container;
+			
+			if(node.hasSource()) {
+				// get source from imports
+				if(!container.containsDescriptor(node.getSource().getValue())) {
+					throw new CompilerException("Cannot find import for: "+node.getSource().getValue());
+				}
+				String _import = ((ImportScopeDescriptor) container.getClosestDescriptor(node.getSource().getValue())).getNode().getPath().getValue();
+				funDefContainer = root.getFileDescriptor(_import).getNode();
+			}
+			
+			FunScopeDescriptor desc = funDefContainer.getFunDescriptor(node);
 			if (desc == null) {
 				throw new CompilerException("Couldn't find descriptor for: " + name);
 			}

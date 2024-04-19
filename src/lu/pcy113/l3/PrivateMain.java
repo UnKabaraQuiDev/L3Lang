@@ -25,7 +25,8 @@ public class PrivateMain {
 
 		System.out.println(Arrays.toString(new File("./").list()));
 
-		String mainFile = "test.l3";
+		String mainFile = "l3/src/test.l3";
+		String sysoutFile = "l3/src/sys/sysout.l3";
 
 		L3Lexer lexer = new L3Lexer(new FileReader(new File(mainFile)));
 		System.out.println("Input:\n" + lexer.getInput());
@@ -37,7 +38,18 @@ public class PrivateMain {
 
 		FileNode fileNode = parser.getRoot();
 		fileNode.containsMainFunDescriptor();
-		RuntimeNode runtimeNode = new RuntimeNode(fileNode);
+		
+		lexer = new L3Lexer(new FileReader(new File(sysoutFile)));
+		System.out.println("Input:\n" + lexer.getInput());
+		lexer.lexe();
+		lexer.getTokens().forEach(System.out::println);
+
+		parser = new L3Parser(sysoutFile, lexer);
+		parser.parse();
+		
+		FileNode sysoutFileNode = parser.getRoot();
+		
+		RuntimeNode runtimeNode = new RuntimeNode(fileNode, sysoutFileNode);
 		
 		System.out.println(runtimeNode.toString(0));
 		Files.write(Paths.get(mainFile+"-ast.txt"), runtimeNode.toString(0).getBytes());

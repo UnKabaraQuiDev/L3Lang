@@ -4,7 +4,9 @@ public enum TokenType {
 
 	LET("let"), FUN("fun"),
 
-	PACKAGE("package"), CLASS("class"), INTERFACE("interface"), STRUCT("struct"), UNION("union"),
+	IMPORT("import") , PACKAGE("package"), AS("as"),
+	
+	CLASS("class"), INTERFACE("interface"), STRUCT("struct"), UNION("union"),
 
 	TYPE(), INT(TYPE, "int"),
 

@@ -2,6 +2,7 @@ package lu.pcy113.l3.lexer;
 
 import static lu.pcy113.l3.lexer.TokenType.AND;
 import static lu.pcy113.l3.lexer.TokenType.ARROW;
+import static lu.pcy113.l3.lexer.TokenType.AS;
 import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIN_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_AND;
@@ -33,6 +34,7 @@ import static lu.pcy113.l3.lexer.TokenType.HASH;
 import static lu.pcy113.l3.lexer.TokenType.HEX_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.IDENT;
 import static lu.pcy113.l3.lexer.TokenType.IF;
+import static lu.pcy113.l3.lexer.TokenType.IMPORT;
 import static lu.pcy113.l3.lexer.TokenType.INT;
 import static lu.pcy113.l3.lexer.TokenType.INT_1;
 import static lu.pcy113.l3.lexer.TokenType.INT_16;
@@ -433,6 +435,12 @@ public class L3Lexer {
 				break;
 			case "package":
 				type = PACKAGE;
+				break;
+			case "import":
+				type = IMPORT;
+				break;
+			case "as":
+				type = AS;
 				break;
 			}
 

@@ -19,5 +19,10 @@ public class PackageDefNode extends Node {
 	public String getValue() {
 		return value;
 	}
+	
+	@Override
+	public String toString() {
+		return super.toString()+"('"+value+"' "+token.getPosition()+")";
+	}
 
 }

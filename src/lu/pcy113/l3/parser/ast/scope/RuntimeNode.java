@@ -2,6 +2,7 @@ package lu.pcy113.l3.parser.ast.scope;
 
 import java.util.stream.Collectors;
 
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.Node;
 
 public class RuntimeNode extends ScopeContainerNode {
@@ -9,6 +10,8 @@ public class RuntimeNode extends ScopeContainerNode {
 	public RuntimeNode(FileNode... root) {
 		for(FileNode n : root) {
 			add(n);
+			
+			addDescriptor(n.getSource(), new FileScopeDescriptor(n));
 		}
 	}
 	
@@ -18,6 +21,10 @@ public class RuntimeNode extends ScopeContainerNode {
 	
 	public Iterable<Node> getSecondaryFiles() {
 		return children.stream().skip(1).collect(Collectors.toSet());
+	}
+
+	public FileScopeDescriptor getFileDescriptor(String name) throws CompilerException {
+		return (FileScopeDescriptor) getDescriptors(name).stream().filter(c -> c instanceof FileScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Couldn't find file: "+name));
 	}
 
 }

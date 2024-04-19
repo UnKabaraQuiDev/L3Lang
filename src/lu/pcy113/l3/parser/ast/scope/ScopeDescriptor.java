@@ -6,8 +6,8 @@ public class ScopeDescriptor {
 
 	private static int index = 0;
 
-	private IdentifierToken ident;
-	private String asmName = "sd_" + index++;
+	protected IdentifierToken ident;
+	protected String asmName = "sd_" + index++;
 	
 	public ScopeDescriptor(IdentifierToken ident) {
 		this.ident = ident;
