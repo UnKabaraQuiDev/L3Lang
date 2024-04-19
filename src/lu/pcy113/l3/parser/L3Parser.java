@@ -47,6 +47,7 @@ import lu.pcy113.l3.parser.ast.scope.ImportScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 import lu.pcy113.l3.parser.ast.scope.ScopeDescriptor;
+import lu.pcy113.l3.utils.FileUtils;
 import lu.pcy113.pclib.GlobalLogger;
 
 public class L3Parser {
@@ -62,7 +63,8 @@ public class L3Parser {
 		if (input == null || input.isEmpty())
 			throw new ParserException("Tokens cannot be null or empty.");
 
-		this.root = new FileNode(source.substring(source.indexOf("src")+4, source.lastIndexOf(".l3")).replace('/', '.'));
+		this.root = new FileNode(
+				source.substring(source.indexOf("src") + 4, source.lastIndexOf(".l3")).replace('/', '.'));
 	}
 
 	public void parse() throws ParserException {
@@ -80,8 +82,17 @@ public class L3Parser {
 	private void parsePackageDefExpr(FileNode root) throws ParserException {
 		if (peek(TokenType.PACKAGE) && peek(1, TokenType.STRING)) {
 
-			root.add(new PackageDefNode(consume(TokenType.PACKAGE),
-					((StringLiteralToken) consume(TokenType.STRING)).getValue()));
+			PackageDefNode packageDef = new PackageDefNode(consume(TokenType.PACKAGE),
+					((StringLiteralToken) consume(TokenType.STRING)).getValue());
+
+			if (!root.getSource().replaceAll("^" + packageDef.getValue()+"\\.", "")
+					.equals(FileUtils.getExtension(root.getSource()))) {
+				throw new ParserException("Package declaration not matching with file path: " + root.getSource() + " ("
+						+ root.getSource().replaceAll("^" + packageDef.getValue()+"\\.", "") + ") & "
+						+ packageDef.getValue());
+			}
+
+			root.add(packageDef);
 
 			consume(TokenType.SEMICOLON);
 		} else {
@@ -145,9 +156,9 @@ public class L3Parser {
 			return forDef;
 		} else if (peek(TokenType.IMPORT)) {
 			ImportDefNode importDef = parseImportDefNode(parent);
-			
+
 			container.addDescriptor(importDef.getIdentValue(), new ImportScopeDescriptor(importDef));
-			
+
 			return importDef;
 		} else {
 			throw new ParserException("Expression not implemented: (" + parent.getClass().getSimpleName() + ") "
@@ -161,16 +172,16 @@ public class L3Parser {
 		consume(TokenType.IMPORT);
 
 		StringLiteralToken strLit = (StringLiteralToken) consume(TokenType.STRING);
-		
+
 		IdentifierToken ident = null;
-		
-		if(peek(TokenType.AS)) {
+
+		if (peek(TokenType.AS)) {
 			consume(TokenType.AS);
 			ident = (IdentifierToken) consume(TokenType.IDENT);
 		}
-		
+
 		consume(TokenType.SEMICOLON);
-		
+
 		return new ImportDefNode(strLit, ident);
 	}
 
