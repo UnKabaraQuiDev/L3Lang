@@ -13,6 +13,14 @@ fun int main() {
 
 	let Person person = new Person(17, 1);
 
-	return int 1;
+	break#("mem");
+	
+	person.age = 12;
+	
+	break#("mem2");
+	
+	let Person: p2 = :person;
+
+	return int :person.secondAge;
 }
 

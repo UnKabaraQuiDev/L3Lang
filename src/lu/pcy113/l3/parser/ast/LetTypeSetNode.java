@@ -27,12 +27,12 @@ public class LetTypeSetNode extends Node {
 		if (let instanceof LocalizingNode) {
 			LocalizingNode llet = (LocalizingNode) let;
 			if (llet.getNode() instanceof VarNumNode) {
-				return (IdentifierToken) ((VarNumNode) (llet).getNode()).getIdent();
+				return (IdentifierToken) ((VarNumNode) (llet).getNode()).getMainIdent();
 			} else if (llet.getNode() instanceof FunCallNode) {
 				return (IdentifierToken) ((FunCallNode) (llet).getNode()).getIdent();
 			}
 		} else if (let instanceof VarNumNode) {
-			return ((VarNumNode) let).getIdent();
+			return ((VarNumNode) let).getMainIdent();
 		}
 		return null;
 	}

@@ -1,7 +1,10 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.Token;
+import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
 
 public class TypeNode extends Node {
 
@@ -31,8 +34,10 @@ public class TypeNode extends Node {
 		this.pointer = pointer;
 	}
 
-	public int getSize() {
-		return 4;
+	public int getSize() throws CompilerException {
+		int size = generic ? 4 : ((StructScopeDescriptor) getClosestContainer().getStructScopeDescriptor(((IdentifierToken) token).getValue())).getNode().getSize();
+		System.err.println("size: "+size);
+		return size;
 	}
 
 	public boolean isVoid() {
@@ -40,12 +45,12 @@ public class TypeNode extends Node {
 	}
 
 	public TokenType getType() {
-		if(type == null && token != null) {
+		if (type == null && token != null) {
 			return token.getType();
 		}
 		return type;
 	}
-	
+
 	public boolean isGeneric() {
 		return generic;
 	}
@@ -60,19 +65,16 @@ public class TypeNode extends Node {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof TypeNode))
+		if (!(obj instanceof TypeNode))
 			return false;
-		
+
 		TypeNode tn = (TypeNode) obj;
-		return tn.generic == generic &&
-				tn.pointer == pointer &&
-				tn.isVoid() == isVoid() &&
-				tn.getType().equals(getType());
+		return tn.generic == generic && tn.pointer == pointer && tn.isVoid() == isVoid() && tn.getType().equals(getType());
 	}
-	
+
 	@Override
 	public String toString() {
-		return super.toString() + "(generic=" + generic + ", " + getType().name() + ", pointer=" + isPointer() + ")";
+		return super.toString() + "(generic=" + generic + ", " + getType().name() + ", pointer=" + isPointer() + (generic ? "" : (", ident=" + ((IdentifierToken) token).getValue())) + ")";
 	}
 
 }

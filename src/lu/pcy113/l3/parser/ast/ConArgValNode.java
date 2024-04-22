@@ -18,7 +18,7 @@ public class ConArgValNode extends Node {
 		if (expr instanceof NumLitNode) {
 			return new TypeNode(true, TokenType.NUM_LIT);
 		} else if (expr instanceof VarNumNode) {
-			return ((LetScopeDescriptor) expr.getClosestContainer().getClosestDescriptor(((VarNumNode) expr).getIdent().getValue())).getNode().getType();
+			return ((LetScopeDescriptor) expr.getClosestContainer().getClosestDescriptor(((VarNumNode) expr).getMainIdent().getValue())).getNode().getType();
 		} else if (expr instanceof FunCallNode) {
 			return ((FunScopeDescriptor) expr.getClosestContainer().getClosestDescriptor(((FunCallNode) expr).getIdent().getValue())).getNode().getReturnType();
 		} else if (expr instanceof StringLitNode) {

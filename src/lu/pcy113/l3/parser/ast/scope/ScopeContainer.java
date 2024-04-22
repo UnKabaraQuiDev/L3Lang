@@ -31,10 +31,14 @@ public interface ScopeContainer {
 	boolean containsLetTypeDefDescriptor(LetTypeDefNode node);
 	boolean containsFunDescriptor(FunDefNode node);
 	boolean containsLetTypeDefDescriptor(VarNumNode node);
+	boolean containsStructScopeDescriptor(StructDefNode node) throws CompilerException;
 	
 	FunScopeDescriptor getFunDescriptor(FunCallNode node) throws CompilerException;
 	LetScopeDescriptor getLetTypeDefDescriptor(LetTypeDefNode node) throws CompilerException;
 	FunScopeDescriptor getFunDescriptor(FunDefNode node) throws CompilerException;
 	LetScopeDescriptor getLetTypeDefDescriptor(VarNumNode node) throws CompilerException;
+	LetScopeDescriptor getLetTypeDefDescriptor(String ident) throws CompilerException;
+	StructScopeDescriptor getStructScopeDescriptor(StructDefNode node) throws CompilerException;
+	StructScopeDescriptor getStructScopeDescriptor(String ident) throws CompilerException;
 	
 }

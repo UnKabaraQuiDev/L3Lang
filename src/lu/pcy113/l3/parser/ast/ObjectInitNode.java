@@ -6,4 +6,12 @@ public class ObjectInitNode extends Node {
 		add(type);
 	}
 
+	public TypeNode getType() {
+		return (TypeNode) children.get(0);
+	}
+
+	public ConArgsValNode getArgs() {
+		return (ConArgsValNode) children.get(1);
+	}
+
 }

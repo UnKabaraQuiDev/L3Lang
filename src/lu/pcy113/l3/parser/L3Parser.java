@@ -133,7 +133,8 @@ public class L3Parser {
 			return rtn;
 		} else if (peek(TokenType.COMMENT)) {
 			consume(TokenType.COMMENT); // ignore
-		} else if (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)) || (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT))) {
+		} else if (canParseLetTypeSet()) {
+
 			LetTypeSetNode set = parseLetTypeSet();
 			if (!container.containsDescriptor(set.getLetIdent().getValue())) {
 				throw new ParserException("let " + set.getLetIdent().getValue() + " isn't defined: " + set.getLetIdent().getPosition());
@@ -164,6 +165,10 @@ public class L3Parser {
 		}
 
 		return null;
+	}
+
+	private boolean canParseLetTypeSet() {
+		return (peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)) || (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT))) || (peek(TokenType.IDENT) && peek(1, TokenType.DOT) && peek(2, TokenType.IDENT));
 	}
 
 	private StructDefNode parseStructDef(Node parent) throws ParserException {
@@ -385,6 +390,7 @@ public class L3Parser {
 	private LetTypeSetNode parseLetTypeSet() throws ParserException {
 		if ((peek(TokenType.IDENT) && (peek(1, TokenType.ASSIGN, TokenType.BRACKET_OPEN)))) {
 			// generic type
+
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 
 			boolean array = peek(TokenType.BRACKET_OPEN);
@@ -408,11 +414,43 @@ public class L3Parser {
 			LetTypeSetNode typeDefNode = new LetTypeSetNode(val, newValue);
 
 			return typeDefNode;
+
 		} else if (peek(TokenType.BIT_AND) && peek(1, TokenType.IDENT)) {
+
 			consume(TokenType.BIT_AND);
 			LetTypeSetNode typeSet = parseLetTypeSet();
 			typeSet.getLet().add(new NumLitNode(0));
 			return typeSet;
+
+		} else if (peek(TokenType.IDENT) && peek(1, TokenType.DOT) && peek(2, TokenType.IDENT) && peek(3, TokenType.ASSIGN)) {
+			// struct type
+
+			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
+			consume(TokenType.DOT);
+			IdentifierToken ident2 = (IdentifierToken) consume(TokenType.IDENT);
+
+			boolean array = peek(TokenType.BRACKET_OPEN);
+			Node arrayIndex = null;
+			Node val = null;
+			if (array) {
+				consume(TokenType.BRACKET_OPEN);
+				arrayIndex = parseExpression();
+				consume(TokenType.BRACKET_CLOSE);
+
+				val = new VarNumNode(ident, ident2, arrayIndex);
+			} else {
+				val = new VarNumNode(ident, ident2);
+			}
+
+			Token assign = consume(TokenType.ASSIGN);
+
+			Node newValue = parseExpression();
+			// TODO array parsing
+
+			LetTypeSetNode typeDefNode = new LetTypeSetNode(val, newValue);
+
+			return typeDefNode;
+
 		}
 		throw new ParserException("Undefined Var def");
 	}
@@ -565,8 +603,8 @@ public class L3Parser {
 			TypeNode typeNode = parseType();
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 
-			LetTypeDefNode typeDefNode = new LetTypeDefNode(typeNode, (IdentifierToken) ident, false, true); // TODO:
-																												// Array
+			LetTypeDefNode typeDefNode = new LetTypeDefNode(typeNode, (IdentifierToken) ident, false, true);
+			// TODO: Array
 
 			return new FunArgDefNode(typeDefNode);
 		} else if (peek(TokenType.IDENT)) {
@@ -604,11 +642,11 @@ public class L3Parser {
 			consume(TokenType.STATIC);
 		}
 		TypeNode type = parseType();
-		
+
 		IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
-		
+
 		LetTypeDefNode typeDefNode = new LetTypeDefNode(type, ident, iStatic, false);
-		
+
 		if (container.containsDescriptor(ident.getValue())) {
 			throw new ParserException("let " + ident.getValue() + " already defined: " + ident.getPosition());
 		}
@@ -640,37 +678,36 @@ public class L3Parser {
 				consume(TokenType.PAREN_OPEN);
 
 				ObjectInitNode objInit = new ObjectInitNode(newType);
-				objInit.add(parseConsArgsVal(objInit));
+				parseConArgsVal(objInit);
 				typeDefNode.add(objInit);
 
 				consume(TokenType.PAREN_CLOSE);
 
 			}
 		} else if (type.isPointer() && peek(TokenType.CURLY_OPEN)) {
-			
+
 			if (peek(TokenType.CURLY_OPEN)) {
 				consume(TokenType.CURLY_OPEN);
 				parseArrayArgs().forEach(typeDefNode::add);
 				consume(TokenType.CURLY_CLOSE);
 			}
-			
+
 		} else {
-			
+
 			typeDefNode.add(parseExpression());
 		}
-		
 
 		return typeDefNode;
-		
+
 		// throw new ParserException("Undefined Var def");
 	}
 
-	private ConArgsValNode parseConsArgsVal(ObjectInitNode fcn) throws ParserException {
+	private ConArgsValNode parseConArgsVal(ObjectInitNode fcn) throws ParserException {
 		ConArgsValNode fargs = new ConArgsValNode();
 		fcn.add(fargs);
 		int index = 0;
 		while (!peek(TokenType.PAREN_CLOSE)) {
-			fargs.add(parseFunArgVal(index++));
+			fargs.add(parseConArgVal(index++));
 			if (peek(TokenType.COMMA)) {
 				consume();
 			}
@@ -678,7 +715,7 @@ public class L3Parser {
 		return fargs;
 	}
 
-	private Node parseConsArgVal(int index) throws ParserException {
+	private Node parseConArgVal(int index) throws ParserException {
 		Node exprNode = parseExpression();
 		return new ConArgValNode(index, exprNode);
 	}
@@ -811,36 +848,53 @@ public class L3Parser {
 
 	private Node parsePrimary() throws ParserException {
 		if (peek(TokenType.NUM_LIT, TokenType.TRUE, TokenType.FALSE)) {
+
 			return new NumLitNode(consume());
+
 		} else if (peek(TokenType.IDENT)) {
+
 			return parseIdent();
+
 		} else if (peek(TokenType.PAREN_OPEN)) {
+
 			consume(TokenType.PAREN_OPEN);
 			Node expr = parseExpression();
 			consume(TokenType.PAREN_CLOSE);
 			return expr;
+
 		} else if (peek(TokenType.DOLLAR)) {
+
 			consume(TokenType.DOLLAR);
 			return new LocalizingNode(parseIdent());
+
 		} else if (peek(TokenType.COLON)) {
+
 			consume(TokenType.COLON);
 			return new DelocalizingNode(parseIdent());
+
 		} else if (peek(TokenType.STRING)) {
+
 			return new StringLitNode((StringLiteralToken) consume(TokenType.STRING));
+
 		} else {
+
 			throw new RuntimeException("Unexpected token: " + peek());
+
 		}
 	}
 
 	private Node parseIdent() throws ParserException {
-		IdentifierToken varIdent = (IdentifierToken) consume();
+		IdentifierToken varIdent = (IdentifierToken) consume(TokenType.IDENT);
 		Node var = null;
 		if (peek(TokenType.BRACKET_OPEN)) {
+
 			consume(TokenType.BRACKET_OPEN);
 			Node expr = parseExpression();
 			consume(TokenType.BRACKET_CLOSE);
 			var = new VarNumNode(varIdent, expr);
+
 		} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
+
 			boolean preset = peek(TokenType.HASH);
 			if (preset)
 				consume(TokenType.HASH);
@@ -856,8 +910,16 @@ public class L3Parser {
 			FunCallNode call = new FunCallNode(varIdent, preset);
 			call.add(args);
 			return call;
+
+		} else if (peek(TokenType.DOT) && peek(1, TokenType.IDENT) && !peek(2, TokenType.PAREN_OPEN)) {
+
+			consume(TokenType.DOT);
+			var = new VarNumNode(varIdent, (IdentifierToken) consume(TokenType.IDENT));
+
 		} else {
+
 			var = new VarNumNode(varIdent);
+
 		}
 		return var;
 	}

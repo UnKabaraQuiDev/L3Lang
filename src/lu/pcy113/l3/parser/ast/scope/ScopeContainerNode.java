@@ -152,9 +152,16 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 
 	@Override
 	public LetScopeDescriptor getLetTypeDefDescriptor(VarNumNode node) throws CompilerException {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((VarNumNode) node).getIdent().getValue());
+		Collection<ScopeDescriptor> col = this.getDescriptors(((VarNumNode) node).getMainIdent().getValue());
 
 		return (LetScopeDescriptor) col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("LetTypeDef: " + node + ", not defined."));
+	}
+	
+	@Override
+	public LetScopeDescriptor getLetTypeDefDescriptor(String ident) throws CompilerException {
+		Collection<ScopeDescriptor> col = this.getDescriptors(ident);
+
+		return (LetScopeDescriptor) col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Let: " + ident + ", not defined."));
 	}
 
 	@Override
@@ -182,9 +189,28 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 
 	@Override
 	public boolean containsLetTypeDefDescriptor(VarNumNode node) {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((VarNumNode) node).getIdent().getValue());
+		Collection<ScopeDescriptor> col = this.getDescriptors(((VarNumNode) node).getMainIdent().getValue());
 
 		return col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().isPresent();
+	}
+	
+	@Override
+	public StructScopeDescriptor getStructScopeDescriptor(StructDefNode node) throws CompilerException {
+		Collection<ScopeDescriptor> col = this.getDescriptors(node.getIdent().getValue());
+
+		return (StructScopeDescriptor) col.stream().filter(c -> c instanceof StructScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("StructDefNode: " + node + ", not defined."));
+	}
+	
+	@Override
+	public boolean containsStructScopeDescriptor(StructDefNode node) {
+		Collection<ScopeDescriptor> col = this.getDescriptors(node.getIdent().getValue());
+
+		return col.stream().filter(c -> c instanceof StructScopeDescriptor).findFirst().isPresent();
+	}
+	
+	@Override
+	public StructScopeDescriptor getStructScopeDescriptor(String ident) throws CompilerException {
+		return (StructScopeDescriptor) this.getDescriptors(ident).stream().filter(c -> c instanceof StructScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Struct: " + ident + ", not defined."));
 	}
 
 }
