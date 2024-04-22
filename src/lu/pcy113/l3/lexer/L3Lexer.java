@@ -60,6 +60,7 @@ import static lu.pcy113.l3.lexer.TokenType.RETURN;
 import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
 import static lu.pcy113.l3.lexer.TokenType.STATIC;
 import static lu.pcy113.l3.lexer.TokenType.STRING;
+import static lu.pcy113.l3.lexer.TokenType.STRUCT;
 import static lu.pcy113.l3.lexer.TokenType.SWITCH;
 import static lu.pcy113.l3.lexer.TokenType.TRUE;
 import static lu.pcy113.l3.lexer.TokenType.TYPE;
@@ -441,6 +442,9 @@ public class L3Lexer {
 				break;
 			case "as":
 				type = AS;
+				break;
+			case "struct":
+				type = STRUCT;
 				break;
 			}
 

@@ -2,6 +2,13 @@ package "";
 
 import "sys.sysout" as console;
 
+struct Person {
+	
+	let int age;
+	let int secondAge;
+	
+}
+
 fun int main() {
 	let int16 a = 5;
 	
