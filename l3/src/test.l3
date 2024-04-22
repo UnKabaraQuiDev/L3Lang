@@ -10,33 +10,9 @@ struct Person {
 }
 
 fun int main() {
-	let int16 a = 5;
-	
-	//text#("extern srand");
-	
-	if(0) {
-		console.println("cde");
-	} else if(1) {
-		console.println("123");
-	} finally {
-		console.println("why can i even do this ?");
-	}
-	
-	while(a > 0) {
-		console.print(a);
-		a = a -1;
-	}else {
-		console.println("else");
-	}finally {
-		console.println();
-	}
-	
-	for(let int16 x = 0; x < 10; x = x+1) {
-		console.print(x);
-	}
-	
-	console.println();
-	
-	return int a;
+
+	let Person person = new Person(17, 1);
+
+	return int 1;
 }
 

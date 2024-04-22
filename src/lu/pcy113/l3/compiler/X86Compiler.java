@@ -42,6 +42,7 @@ import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 import lu.pcy113.l3.parser.ast.scope.ScopeDescriptor;
+import lu.pcy113.l3.parser.ast.scope.StructDefNode;
 import lu.pcy113.pclib.GlobalLogger;
 
 public class X86Compiler extends L3Compiler {
@@ -142,6 +143,8 @@ public class X86Compiler extends L3Compiler {
 			}
 		} else if (node instanceof PackageDefNode) {
 			// ignore package def node
+		} else if (node instanceof StructDefNode) {
+			// ignore struct def node
 		} else {
 			implement(node);
 		}
