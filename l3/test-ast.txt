@@ -1,41 +1,15 @@
 RuntimeNode{
-	test = [FileScopeDescriptor(test -> sd_27 1:1)], 
-	sys.sysout = [FileScopeDescriptor(sys.sysout -> sd_28 1:1)]}[
+	test = [FileScopeDescriptor(test -> sd_23 1:1)], 
+	sys.sysout = [FileScopeDescriptor(sys.sysout -> sd_24 1:1)]}[
 	FileNode(test){
 		console = [ImportScopeDescriptor(console (sys.sysout) -> sd_0 3:24)], 
-		main = [FunScopeDescriptor(main -> sd_6 12:8)], 
-		Person = [StructScopeDescriptor(Person -> sd_3 5:8)]}[
+		main = [FunScopeDescriptor(main -> sd_2 5:8)]}[
 		PackageDefNode('' 1:1),
-		StructDefNode{
-			secondAge = [LetScopeDescriptor(secondAge -> sd_2 8:9)], 
-			age = [LetScopeDescriptor(age -> sd_1 7:9)]}[
-			LetTypeDefNode(TypeNode(generic=true, INT, pointer=false), age, index=0, size=4)[
-				TypeNode(generic=true, INT, pointer=false)
-			],
-			LetTypeDefNode(TypeNode(generic=true, INT, pointer=false), secondAge, index=0, size=4)[
-				TypeNode(generic=true, INT, pointer=false)
-			]
-		],
 		FunDefNode(TypeNode(generic=true, INT, pointer=false): main){}[
 			TypeNode(generic=true, INT, pointer=false),
 			FunArgsDefNode,
 			FunBodyDefNode{
-				p2 = [LetScopeDescriptor(p2 -> sd_5 22:14)], 
-				person = [LetScopeDescriptor(person -> sd_4 14:13)]}[
-				LetTypeDefNode(TypeNode(generic=false, IDENT, pointer=false, ident=Person), person, index=0, size=4)[
-					TypeNode(generic=false, IDENT, pointer=false, ident=Person),
-					ObjectInitNode[
-						TypeNode(generic=false, IDENT, pointer=false, ident=Person),
-						ConArgsValNode[
-							ConArgValNode(TypeNode(generic=true, NUM_LIT, pointer=false), 0, size=0)[
-								NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=14, column=33, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=17, value=17])
-							],
-							ConArgValNode(TypeNode(generic=true, NUM_LIT, pointer=false), 1, size=0)[
-								NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=14, column=37, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1])
-							]
-						]
-					]
-				],
+				arr = [LetScopeDescriptor(arr -> sd_1 9:11)]}[
 				FunCallNode(.break, preset)[
 					FunArgsValNode[
 						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
@@ -43,9 +17,30 @@ RuntimeNode{
 						]
 					]
 				],
-				LetTypeSetNode(VarNumNode(person.age, pointer=false, arrayOffset=false))[
-					VarNumNode(person.age, pointer=false, arrayOffset=false),
-					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=18, column=15, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=12, value=12])
+				LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), arr, index=0, size=4)[
+					TypeNode(generic=true, INT_8, pointer=true),
+					ArrayInitNode(2, true)[
+						TypeNode(generic=true, INT_8, pointer=false)
+					]
+				],
+				FunCallNode(.break, preset)[
+					FunArgsValNode[
+						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+							StringLitNode('mem1')
+						]
+					]
+				],
+				LetTypeSetNode(VarNumNode(arr, pointer=true, arrayOffset=true))[
+					VarNumNode(arr, pointer=true, arrayOffset=true)[
+						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=13, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0])
+					],
+					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=13, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=2, value=2])
+				],
+				LetTypeSetNode(VarNumNode(arr, pointer=true, arrayOffset=true))[
+					VarNumNode(arr, pointer=true, arrayOffset=true)[
+						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=14, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1])
+					],
+					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=14, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=3, value=3])
 				],
 				FunCallNode(.break, preset)[
 					FunArgsValNode[
@@ -54,30 +49,26 @@ RuntimeNode{
 						]
 					]
 				],
-				LetTypeDefNode(TypeNode(generic=false, IDENT, pointer=true, ident=Person), p2, index=0, size=4)[
-					TypeNode(generic=false, IDENT, pointer=true, ident=Person),
-					DelocalizingNode[
-						VarNumNode(person, pointer=false, arrayOffset=false)
-					]
-				],
 				ReturnNode[
-					TypeNode(generic=true, INT, pointer=true),
-					VarNumNode(person.secondAge, pointer=false, arrayOffset=false)
+					TypeNode(generic=true, INT, pointer=false),
+					VarNumNode(arr, pointer=true, arrayOffset=true)[
+						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=18, column=16, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1])
+					]
 				]
 			]
 		]
 	],
 	FileNode(sys.sysout){
-		strlen = [FunScopeDescriptor(strlen -> sd_13 16:9)], 
-		print = [FunScopeDescriptor(print -> sd_15 37:10), FunScopeDescriptor(print -> sd_21 64:10)], 
-		println = [FunScopeDescriptor(println -> sd_17 50:10), FunScopeDescriptor(println -> sd_18 56:10), FunScopeDescriptor(println -> sd_23 72:10)], 
-		memcpy = [FunScopeDescriptor(memcpy -> sd_10 3:10)], 
-		stringify = [FunScopeDescriptor(stringify -> sd_26 77:10)]}[
+		strlen = [FunScopeDescriptor(strlen -> sd_9 16:9)], 
+		print = [FunScopeDescriptor(print -> sd_11 37:10), FunScopeDescriptor(print -> sd_17 64:10)], 
+		println = [FunScopeDescriptor(println -> sd_13 50:10), FunScopeDescriptor(println -> sd_14 56:10), FunScopeDescriptor(println -> sd_19 72:10)], 
+		memcpy = [FunScopeDescriptor(memcpy -> sd_6 3:10)], 
+		stringify = [FunScopeDescriptor(stringify -> sd_22 77:10)]}[
 		PackageDefNode('sys' 1:1),
 		FunDefNode(TypeNode(generic=true, VOID, pointer=false): memcpy){
-			length = [LetScopeDescriptor(length -> sd_9 3:41)], 
-			from = [LetScopeDescriptor(from -> sd_7 3:22)], 
-			to = [LetScopeDescriptor(to -> sd_8 3:33)]}[
+			length = [LetScopeDescriptor(length -> sd_5 3:41)], 
+			from = [LetScopeDescriptor(from -> sd_3 3:22)], 
+			to = [LetScopeDescriptor(to -> sd_4 3:33)]}[
 			TypeNode(generic=true, VOID, pointer=false),
 			FunArgsDefNode[
 				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_32, pointer=true), from, index=0, size=4))[
@@ -166,7 +157,7 @@ RuntimeNode{
 			]
 		],
 		FunDefNode(TypeNode(generic=true, INT_16, pointer=false): strlen){
-			str = [LetScopeDescriptor(str -> sd_11 16:21)]}[
+			str = [LetScopeDescriptor(str -> sd_7 16:21)]}[
 			TypeNode(generic=true, INT_16, pointer=false),
 			FunArgsDefNode[
 				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4))[
@@ -176,7 +167,7 @@ RuntimeNode{
 				]
 			],
 			FunBodyDefNode{
-				length = [LetScopeDescriptor(length -> sd_12 29:10)]}[
+				length = [LetScopeDescriptor(length -> sd_8 29:10)]}[
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
 						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
@@ -258,7 +249,7 @@ RuntimeNode{
 			]
 		],
 		FunDefNode(TypeNode(generic=true, VOID, pointer=false): print){
-			str = [LetScopeDescriptor(str -> sd_14 37:21)]}[
+			str = [LetScopeDescriptor(str -> sd_10 37:21)]}[
 			TypeNode(generic=true, VOID, pointer=false),
 			FunArgsDefNode[
 				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4))[
@@ -326,7 +317,7 @@ RuntimeNode{
 			]
 		],
 		FunDefNode(TypeNode(generic=true, VOID, pointer=false): println){
-			str = [LetScopeDescriptor(str -> sd_16 50:23)]}[
+			str = [LetScopeDescriptor(str -> sd_12 50:23)]}[
 			TypeNode(generic=true, VOID, pointer=false),
 			FunArgsDefNode[
 				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4))[
@@ -392,7 +383,7 @@ RuntimeNode{
 			]
 		],
 		FunDefNode(TypeNode(generic=true, VOID, pointer=false): print){
-			number = [LetScopeDescriptor(number -> sd_19 64:20)]}[
+			number = [LetScopeDescriptor(number -> sd_15 64:20)]}[
 			TypeNode(generic=true, VOID, pointer=false),
 			FunArgsDefNode[
 				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), number, index=0, size=4))[
@@ -402,7 +393,7 @@ RuntimeNode{
 				]
 			],
 			FunBodyDefNode{
-				str = [LetScopeDescriptor(str -> sd_20 65:11)]}[
+				str = [LetScopeDescriptor(str -> sd_16 65:11)]}[
 				LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4)[
 					TypeNode(generic=true, INT_8, pointer=true),
 					ArrayInitNode(11, true)[
@@ -432,7 +423,7 @@ RuntimeNode{
 			]
 		],
 		FunDefNode(TypeNode(generic=true, VOID, pointer=false): println){
-			number = [LetScopeDescriptor(number -> sd_22 72:22)]}[
+			number = [LetScopeDescriptor(number -> sd_18 72:22)]}[
 			TypeNode(generic=true, VOID, pointer=false),
 			FunArgsDefNode[
 				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), number, index=0, size=4))[
@@ -458,8 +449,8 @@ RuntimeNode{
 			]
 		],
 		FunDefNode(TypeNode(generic=true, VOID, pointer=false): stringify){
-			str = [LetScopeDescriptor(str -> sd_25 77:37)], 
-			number = [LetScopeDescriptor(number -> sd_24 77:24)]}[
+			str = [LetScopeDescriptor(str -> sd_21 77:37)], 
+			number = [LetScopeDescriptor(number -> sd_20 77:24)]}[
 			TypeNode(generic=true, VOID, pointer=false),
 			FunArgsDefNode[
 				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), number, index=0, size=4))[
