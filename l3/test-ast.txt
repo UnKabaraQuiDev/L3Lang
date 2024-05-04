@@ -6,7 +6,7 @@ RuntimeNode{
 		SIZE_INT8 = [LetScopeDescriptor(SIZE_INT8 -> sd_1 5:16)], 
 		main = [FunScopeDescriptor(main -> sd_4 7:8)]}[
 		PackageDefNode('' 1:1),
-		LetTypeDefNode(TypeNode(generic=true, type=INT_8, pointer=false), SIZE_INT8, index=0, size=4)[
+		LetTypeDefNode(SIZE_INT8, TypeNode(generic=true, type=INT_8, pointer=false), index=0, size=4)[
 			TypeNode(generic=true, type=INT_8, pointer=false),
 			NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=5, column=28, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=4, value=4])
 		],
@@ -15,7 +15,7 @@ RuntimeNode{
 			FunArgsDefNode,
 			FunBodyDefNode{
 				arr = [LetScopeDescriptor(arr -> sd_2 11:11)], 
-				string = [LetScopeDescriptor(string -> sd_3 20:11)]}[
+				string = [LetScopeDescriptor(string -> sd_3 22:11)]}[
 				FunCallNode(.break, preset)[
 					FunArgsValNode[
 						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
@@ -23,11 +23,14 @@ RuntimeNode{
 						]
 					]
 				],
-				LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), arr, index=0, size=4)[
+				LetTypeDefNode(arr, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4)[
 					TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)),
 					ArrayInitNode(2, true)[
 						TypeNode(generic=true, type=INT_8, pointer=false)
 					]
+				],
+				FunCallNode(.stack, preset)[
+					FunArgsValNode
 				],
 				FunCallNode(.break, preset)[
 					FunArgsValNode[
@@ -38,15 +41,15 @@ RuntimeNode{
 				],
 				LetTypeSetNode(VarNumNode(arr, pointer=true, arrayOffset=true))[
 					VarNumNode(arr, pointer=true, arrayOffset=true)[
-						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=15, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0])
+						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=17, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0])
 					],
-					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=15, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=2, value=2])
+					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=17, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=2, value=2])
 				],
 				LetTypeSetNode(VarNumNode(arr, pointer=true, arrayOffset=true))[
 					VarNumNode(arr, pointer=true, arrayOffset=true)[
-						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=16, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1])
+						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=18, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1])
 					],
-					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=16, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=3, value=3])
+					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=18, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=3, value=3])
 				],
 				FunCallNode(.break, preset)[
 					FunArgsValNode[
@@ -55,9 +58,12 @@ RuntimeNode{
 						]
 					]
 				],
-				LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), string, index=0, size=4)[
+				LetTypeDefNode(string, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4)[
 					TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)),
 					StringLitNode('test :(')
+				],
+				FunCallNode(.stack, preset)[
+					FunArgsValNode
 				],
 				FunCallNode(console.println, def)[
 					FunArgsValNode[
@@ -66,13 +72,16 @@ RuntimeNode{
 						]
 					]
 				],
+				FunCallNode(.stack, preset)[
+					FunArgsValNode
+				],
 				ReturnNode[
 					TypeNode(generic=true, type=INT, pointer=false),
-					DelocalizingNode[
-						BinaryOpNode(+)[
-							VarNumNode(arr, pointer=false, arrayOffset=false),
-							VarNumNode(SIZE_INT8, pointer=false, arrayOffset=false)
-						]
+					BinaryOpNode(+)[
+						DelocalizingNode[
+							VarNumNode(arr, pointer=false, arrayOffset=false)
+						],
+						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=34, column=17, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1])
 					]
 				]
 			]
@@ -91,18 +100,18 @@ RuntimeNode{
 			to = [LetScopeDescriptor(to -> sd_6 3:33)]}[
 			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), from, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), from, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(from, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), index=0, size=4))[
+					LetTypeDefNode(from, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), index=0, size=4)[
 						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false))
 					]
 				],
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), to, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), to, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(to, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), index=0, size=4))[
+					LetTypeDefNode(to, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), index=0, size=4)[
 						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false))
 					]
 				],
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=INT_32, pointer=false), length, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=INT_32, pointer=false), length, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(length, TypeNode(generic=true, type=INT_32, pointer=false), index=0, size=4))[
+					LetTypeDefNode(length, TypeNode(generic=true, type=INT_32, pointer=false), index=0, size=4)[
 						TypeNode(generic=true, type=INT_32, pointer=false)
 					]
 				]
@@ -180,8 +189,8 @@ RuntimeNode{
 			str = [LetScopeDescriptor(str -> sd_9 16:21)]}[
 			TypeNode(generic=true, type=INT_16, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(str, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4))[
+					LetTypeDefNode(str, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4)[
 						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false))
 					]
 				]
@@ -251,7 +260,7 @@ RuntimeNode{
 						]
 					]
 				],
-				LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), length, index=0, size=4)[
+				LetTypeDefNode(length, TypeNode(generic=true, type=INT_16, pointer=false), index=0, size=4)[
 					TypeNode(generic=true, type=INT_16, pointer=false),
 					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=29, column=19, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0])
 				],
@@ -272,8 +281,8 @@ RuntimeNode{
 			str = [LetScopeDescriptor(str -> sd_12 37:21)]}[
 			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(str, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4))[
+					LetTypeDefNode(str, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4)[
 						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false))
 					]
 				]
@@ -340,8 +349,8 @@ RuntimeNode{
 			str = [LetScopeDescriptor(str -> sd_14 50:23)]}[
 			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(str, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4))[
+					LetTypeDefNode(str, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4)[
 						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false))
 					]
 				]
@@ -406,15 +415,15 @@ RuntimeNode{
 			number = [LetScopeDescriptor(number -> sd_17 64:20)]}[
 			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(number, TypeNode(generic=true, type=INT_16, pointer=false), index=0, size=4))[
+					LetTypeDefNode(number, TypeNode(generic=true, type=INT_16, pointer=false), index=0, size=4)[
 						TypeNode(generic=true, type=INT_16, pointer=false)
 					]
 				]
 			],
 			FunBodyDefNode{
 				str = [LetScopeDescriptor(str -> sd_18 65:11)]}[
-				LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+				LetTypeDefNode(str, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4)[
 					TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)),
 					ArrayInitNode(11, true)[
 						TypeNode(generic=true, type=INT_8, pointer=false)
@@ -446,8 +455,8 @@ RuntimeNode{
 			number = [LetScopeDescriptor(number -> sd_20 72:22)]}[
 			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(number, TypeNode(generic=true, type=INT_16, pointer=false), index=0, size=4))[
+					LetTypeDefNode(number, TypeNode(generic=true, type=INT_16, pointer=false), index=0, size=4)[
 						TypeNode(generic=true, type=INT_16, pointer=false)
 					]
 				]
@@ -473,13 +482,13 @@ RuntimeNode{
 			number = [LetScopeDescriptor(number -> sd_22 77:24)]}[
 			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(number, TypeNode(generic=true, type=INT_16, pointer=false), index=0, size=4))[
+					LetTypeDefNode(number, TypeNode(generic=true, type=INT_16, pointer=false), index=0, size=4)[
 						TypeNode(generic=true, type=INT_16, pointer=false)
 					]
 				],
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+				FunArgDefNode(LetTypeDefNode(str, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4))[
+					LetTypeDefNode(str, TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), index=0, size=4)[
 						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false))
 					]
 				]

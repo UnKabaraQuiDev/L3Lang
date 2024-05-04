@@ -617,7 +617,7 @@ public class L3Parser {
 		if (peek(TokenType.IDENT)) {
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 			TypeNode node = new TypeNode(false, ident);
-			while(peek(TokenType.COLON)) {
+			while (peek(TokenType.COLON)) {
 				node = new TypeNode(node);
 				consume(TokenType.COLON);
 			}
@@ -625,7 +625,7 @@ public class L3Parser {
 		} else if (peek(TokenType.TYPE)) {
 			Token type = consume(TokenType.TYPE);
 			TypeNode node = new TypeNode(true, type.getType());
-			while(peek(TokenType.COLON)) {
+			while (peek(TokenType.COLON)) {
 				node = new TypeNode(node);
 				consume(TokenType.COLON);
 			}
@@ -869,7 +869,18 @@ public class L3Parser {
 		} else if (peek(TokenType.DOLLAR)) {
 
 			consume(TokenType.DOLLAR);
-			return new DelocalizingNode(parseExpression());
+
+			Node expr = null;
+
+			if (peek(TokenType.PAREN_OPEN)) {
+				expr = parseExpression();
+			} else if (peek(TokenType.IDENT)) {
+				expr = parseIdent();
+			} else {
+				throw new RuntimeException("Unexpected token: " + peek());
+			}
+
+			return new DelocalizingNode(expr);
 
 		} else if (peek(TokenType.COLON)) {
 

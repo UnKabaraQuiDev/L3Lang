@@ -10,6 +10,8 @@ fun int main() {
 	
 	let int8: arr = new int8[2];
 	
+	stack#();
+	
 	break#("mem1");
 	
 	arr[0] = 2;
@@ -19,8 +21,16 @@ fun int main() {
 	
 	let int8: string = "test :(";
 
+	stack#();
+
 	console.println(string);
 
-	return int $arr+SIZE_INT8;
+	stack#();
+	
+	//let Person p = new {};
+	//let Person: p_point = :p;
+	//let Person b = $p;
+
+	return int $arr+1;
 }
 

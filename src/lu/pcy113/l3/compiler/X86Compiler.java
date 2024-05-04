@@ -562,7 +562,7 @@ public class X86Compiler extends L3Compiler {
 		writeinstln("ret");
 
 		for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream).filter(c -> c instanceof LetScopeDescriptor).collect(Collectors.toList())) {
-			pop();
+			System.err.println("poping from main: "+pop());
 		}
 	}
 
@@ -742,13 +742,13 @@ public class X86Compiler extends L3Compiler {
 				push(left);
 			}
 
-			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode) {
+			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode  || right instanceof DelocalizingNode) {
 				compileComputeExpr("ebx", right);
 				writeinstln("push ebx");
 				push(right);
 			}
 
-			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode) {
+			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode || left instanceof DelocalizingNode) {
 				compileComputeExpr("eax", left);
 				writeinstln("push eax");
 				push(left);
@@ -808,6 +808,11 @@ public class X86Compiler extends L3Compiler {
 				throw new CompilerException("Operation not supported: " + operator);
 			}
 
+			if(TokenType.OR.equals(operator) || TokenType.AND.equals(operator) || (node instanceof LogicalOpNode && TokenType.XOR.equals(operator))) {
+				writeinstln("cmp eax, 0");
+				writeinstln("setg al");
+			}
+			
 			if (TokenType.MODULO.equals(operator)) {
 				writeinstln("mov " + reg + ", edx");
 			} else if (reg != "eax") {
@@ -992,8 +997,8 @@ public class X86Compiler extends L3Compiler {
 
 			push(node);
 
-			printStack();
-			System.err.println(startStackIndex + " = " + vStack.get(startStackIndex) + "size: " + (getStackSize(startStackIndex) - 4) + " last: " + vStack.peek());
+			// printStack();
+			// System.err.println(startStackIndex + " = " + vStack.get(startStackIndex) + "size: " + (getStackSize(startStackIndex) - 4) + " last: " + vStack.peek());
 
 			writeinstln("call " + desc.getAsmName() + "  ; " + desc.getIdentifier().getValue());
 
@@ -1031,7 +1036,9 @@ public class X86Compiler extends L3Compiler {
 			return ((ArrayInit) node).getStackSize();
 		} else if (node instanceof BinaryOpNode || node instanceof LogicalOpNode || node instanceof ComparisonOpNode) {
 			return 4;
-		} else {
+		} else if(node instanceof DelocalizingNode) {
+			return 4; // depends on the type but type info missing.
+		}else {
 			implement(node);
 		}
 		return 0;
@@ -1042,10 +1049,10 @@ public class X86Compiler extends L3Compiler {
 		int size = 0;
 		for (int i = vStack.size() - 1; i > startStackIndex; i--) {
 			Node stackNode = vStack.get(i);
-			System.err.println("comp: " + stackNode);
+			// System.err.println("comp: " + stackNode);
 			size += getStackSize(stackNode);
 		}
-		System.err.println(" == " + size);
+		// System.err.println(" == " + size);
 		return size;
 	}
 
