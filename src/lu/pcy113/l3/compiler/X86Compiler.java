@@ -562,7 +562,7 @@ public class X86Compiler extends L3Compiler {
 		writeinstln("ret");
 
 		for (ScopeDescriptor n : node.getBody().getLocalDescriptors().values().stream().flatMap(List::stream).filter(c -> c instanceof LetScopeDescriptor).collect(Collectors.toList())) {
-			System.err.println("poping from main: "+pop());
+			System.err.println("poping from main: " + pop());
 		}
 	}
 
@@ -632,7 +632,7 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("lea eax, [esp+" + arrSize + "]");
 				writeinstln("sub eax, " + arrSize);
 				writeinstln("mov dword [esp+" + arrSize + "], eax  ; Setup empty pointer " + name + " -> " + asmName);
-				
+
 				if (expr.hasExpr()) { // init
 
 					if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
@@ -658,9 +658,9 @@ public class X86Compiler extends L3Compiler {
 						}
 					}
 				} else { // alloc
-					
+
 					// skip because pointer already allocated
-					
+
 				}
 
 			} else if (node.getExpr() instanceof ObjectInitNode) {
@@ -671,7 +671,12 @@ public class X86Compiler extends L3Compiler {
 
 				int stackPos = 0;
 				ConArgsValNode args = init.getArgs();
-				for (int index = 0; index < init.getChildren().size(); index++) {
+
+				int neededArgCount = (int) structDef.getChildren().stream().filter(t -> t instanceof LetTypeDefNode).count();
+				if (args.getChildren().size() != neededArgCount)
+					throw new CompilerException("Struct: " + structDef + " awaits: " + neededArgCount + ", only got: " + args.getChildren().size());
+
+				for (int index = 0; index < args.getChildren().size(); index++) {
 					ConArgValNode arg = (ConArgValNode) args.getChildren().get(index);
 
 					compileComputeExpr("eax", arg.getExpr());
@@ -742,7 +747,7 @@ public class X86Compiler extends L3Compiler {
 				push(left);
 			}
 
-			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode  || right instanceof DelocalizingNode) {
+			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode || right instanceof DelocalizingNode) {
 				compileComputeExpr("ebx", right);
 				writeinstln("push ebx");
 				push(right);
@@ -808,11 +813,11 @@ public class X86Compiler extends L3Compiler {
 				throw new CompilerException("Operation not supported: " + operator);
 			}
 
-			if(TokenType.OR.equals(operator) || TokenType.AND.equals(operator) || (node instanceof LogicalOpNode && TokenType.XOR.equals(operator))) {
+			if (TokenType.OR.equals(operator) || TokenType.AND.equals(operator) || (node instanceof LogicalOpNode && TokenType.XOR.equals(operator))) {
 				writeinstln("cmp eax, 0");
 				writeinstln("setg al");
 			}
-			
+
 			if (TokenType.MODULO.equals(operator)) {
 				writeinstln("mov " + reg + ", edx");
 			} else if (reg != "eax") {
@@ -845,6 +850,8 @@ public class X86Compiler extends L3Compiler {
 			compileDelocalizing(reg, (DelocalizingNode) node);
 		} else if (node instanceof LocalizingNode) {
 			compileLocalizing(reg, (LocalizingNode) node);
+		} else if (node instanceof ArrayInitNode) {
+			compileArrayInit(node);
 		} else {
 			implement(node);
 		}
@@ -864,38 +871,43 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private void compileArrayInit(Node node) throws CompilerException {
-		if (node instanceof StringLitNode) {
+		if (node instanceof ArrayInit) {
 			ArrayInit expr = (ArrayInit) node;
+			
+			final String asmName = super.newVar();
+			final String name = "otf";
 
-			String asmName = newVar();
-			String name = ((StringLitNode) node).getString().getPosition();
+			final int currentStackIndex = STACK_INDEX;
 
-			int typeSize = 4;
-			int arrSize = expr.getArraySize() * typeSize;
-			int size = typeSize; // pointer size
+			// allocating memory for the type
+			final int typeSize = expr.getType().getSize();
+			int dataSize = expr.getArraySize() * expr.getType().getSize();
+			final int totalSize = allocMemory(dataSize + typeSize, "size: " + typeSize + " + " + dataSize + ", LetTypeDef: " + node);
 
-			if (expr.hasExpr()) {
-				writeinstln("mov eax, esp");
-				writeinstln("sub eax, " + (arrSize + 4));
-				writeinstln("push eax  ; Setup array pointer");
+			final int arrLength = expr.getArraySize();
+			final int arrSize = dataSize;
 
-				writeinstln("sub esp, " + arrSize);
+			writeinstln("lea eax, [esp+" + arrSize + "]");
+			writeinstln("sub eax, " + arrSize);
+			writeinstln("mov dword [esp+" + arrSize + "], eax  ; Setup empty pointer " + name + " -> " + asmName);
+
+			if (expr.hasExpr()) { // init
 
 				if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
 					if (expr instanceof StringLitNode) {
 						writedataln(asmName + " dd " + (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
-								+ "  ; " + name);
+								+ "  ; " + name+" str");
 					} else if (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw()) {
-						writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
-								+ "  ; " + name);
+						writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream().map((c) -> ((NumericLiteralToken) ((NumLitNode) c).getValue()).getValue().toString()).collect(Collectors.joining(", ")))
+								+ "  ; " + name+" arr");
 					}
 
-					writeinstln("sub esp, 12");
-					writeinstln("mov dword [esp + 8], " + asmName + "  ; From");
-					writeinstln("mov dword [esp + 4], eax  ; To");
-					writeinstln("mov dword [esp + 0], " + expr.getArraySize() + "  ; Length");
-					writeinstln("call " + getFile("sys.sysout").getNode().getClosestDescriptor("memcpy").getAsmName());
-					writeinstln("add esp, 12");
+					writeinstln("mov esi, " + asmName + "  ; From");
+					writeinstln("mov edi, [esp+" + (arrSize) + "]  ; To");
+					writeinstln("cld");
+					writeinstln("mov ecx, " + arrLength);
+					writeinstln("rep movsd");
+
 				} else {
 					for (int i = 0; i < expr.getArraySize(); i++) {
 						Node child = expr.getExpr(i);
@@ -903,11 +915,11 @@ public class X86Compiler extends L3Compiler {
 						writeinstln("mov [esp + " + (i * typeSize) + "], eax");
 					}
 				}
-			} else {
-				throw new CompilerException("Cannot compile empty array.");
-			}
+			} else { // alloc
 
-			expr.setStackSize(arrSize + size);
+				// skip because pointer already allocated
+
+			}
 		} else {
 			implement(node);
 		}
@@ -998,7 +1010,8 @@ public class X86Compiler extends L3Compiler {
 			push(node);
 
 			// printStack();
-			// System.err.println(startStackIndex + " = " + vStack.get(startStackIndex) + "size: " + (getStackSize(startStackIndex) - 4) + " last: " + vStack.peek());
+			// System.err.println(startStackIndex + " = " + vStack.get(startStackIndex) +
+			// "size: " + (getStackSize(startStackIndex) - 4) + " last: " + vStack.peek());
 
 			writeinstln("call " + desc.getAsmName() + "  ; " + desc.getIdentifier().getValue());
 
@@ -1036,9 +1049,9 @@ public class X86Compiler extends L3Compiler {
 			return ((ArrayInit) node).getStackSize();
 		} else if (node instanceof BinaryOpNode || node instanceof LogicalOpNode || node instanceof ComparisonOpNode) {
 			return 4;
-		} else if(node instanceof DelocalizingNode) {
+		} else if (node instanceof DelocalizingNode) {
 			return 4; // depends on the type but type info missing.
-		}else {
+		} else {
 			implement(node);
 		}
 		return 0;

@@ -16,7 +16,7 @@ import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.ConArgValNode;
 import lu.pcy113.l3.parser.ast.ConArgsValNode;
-import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.DelocalizingNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FinallyDefNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
@@ -31,7 +31,7 @@ import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.ImportDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.DelocalizingNode;
+import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
@@ -663,32 +663,11 @@ public class L3Parser {
 
 		Token assign = consume(TokenType.ASSIGN);
 
-		if (peek(TokenType.NEW)) {
-			consume(TokenType.NEW);
-
-			TypeNode newType = parseType();
-
-			if (peek(TokenType.BRACKET_OPEN)) { // array init
-
-				consume(TokenType.BRACKET_OPEN);
-
-				int newTypeArrayLength = (int) (long) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
-				typeDefNode.add(new ArrayInitNode(newType, newTypeArrayLength));
-
-				consume(TokenType.BRACKET_CLOSE);
-
-			} else if (peek(TokenType.PAREN_OPEN)) { // constructor
-
-				consume(TokenType.PAREN_OPEN);
-
-				ObjectInitNode objInit = new ObjectInitNode(newType);
-				parseConArgsVal(objInit);
-				typeDefNode.add(objInit);
-
-				consume(TokenType.PAREN_CLOSE);
-
-			}
-		} else if (type.isPointer() && peek(TokenType.CURLY_OPEN)) {
+		/*if (peek(TokenType.NEW)) {
+			
+			
+			
+		} *//*else if (type.isPointer() && peek(TokenType.CURLY_OPEN)) {
 
 			if (peek(TokenType.CURLY_OPEN)) {
 				consume(TokenType.CURLY_OPEN);
@@ -696,14 +675,14 @@ public class L3Parser {
 				consume(TokenType.CURLY_CLOSE);
 			}
 
-		} else {
+		} else*/ /*{
 
 			typeDefNode.add(parseExpression());
-		}
+		}*/
+		
+		typeDefNode.add(parseExpression());
 
 		return typeDefNode;
-
-		// throw new ParserException("Undefined Var def");
 	}
 
 	private ConArgsValNode parseConArgsVal(ObjectInitNode fcn) throws ParserException {
@@ -891,11 +870,51 @@ public class L3Parser {
 
 			return new StringLitNode((StringLiteralToken) consume(TokenType.STRING));
 
-		} else {
+		} else if(peek(TokenType.NEW)) {
+			
+			consume(TokenType.NEW);
 
-			throw new RuntimeException("Unexpected token: " + peek());
+			TypeNode newType = parseType();
 
+			if (peek(TokenType.BRACKET_OPEN)) { // array init
+
+				consume(TokenType.BRACKET_OPEN);
+
+				ArrayInitNode arr = new ArrayInitNode(newType);
+
+				if (peek(TokenType.NUM_LIT)) {
+					int newTypeArrayLength = (int) (long) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
+					arr.setArraySize(newTypeArrayLength);
+				}
+
+				consume(TokenType.BRACKET_CLOSE);
+
+				if (peek(TokenType.CURLY_OPEN)) {
+					consume(TokenType.CURLY_OPEN);
+
+					parseArrayArgs().forEach(arr::add);
+
+					consume(TokenType.CURLY_CLOSE);
+				}
+
+				return arr;
+
+			} else if (peek(TokenType.PAREN_OPEN)) { // constructor
+
+				consume(TokenType.PAREN_OPEN);
+
+				ObjectInitNode objInit = new ObjectInitNode(newType);
+				parseConArgsVal(objInit);
+
+				consume(TokenType.PAREN_CLOSE);
+				
+				return objInit;
+
+			}
+			
 		}
+		
+		throw new RuntimeException("Unexpected token: " + peek());
 	}
 
 	private Node parseIdent() throws ParserException {

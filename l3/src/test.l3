@@ -2,22 +2,12 @@ package "";
 
 import "sys.sysout" as console;
 
-let static int8 SIZE_INT8 = 4;
+struct Person {
+	let int8 age = 5;
+	let int8: arr = new int8[2];
+}
 
 fun int main() {
-	
-	break#("mem");
-	
-	let int8: arr = new int8[2];
-	
-	stack#();
-	
-	break#("mem1");
-	
-	arr[0] = 2;
-	arr[1] = 3;
-	
-	break#("mem2");
 	
 	let int8: string = "test :(";
 
@@ -27,10 +17,12 @@ fun int main() {
 
 	stack#();
 	
-	//let Person p = new {};
-	//let Person: p_point = :p;
-	//let Person b = $p;
-
-	return int $arr+1;
+	break#("init");
+	
+	let Person person = new Person(6, new int8[] {2, 6});
+	
+	break#("return");
+	
+	return int person.age;
 }
 

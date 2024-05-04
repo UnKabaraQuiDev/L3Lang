@@ -11,6 +11,19 @@ public class ArrayInitNode extends Node implements ArrayInit {
 		this.arraySize = arraySize;
 	}
 
+	public ArrayInitNode(TypeNode type) {
+		add(type);
+		this.empty = true;
+	}
+
+	@Override
+	public Node add(Node child) {
+		if(children.size()+1 > 2) {
+			empty = false;
+		}
+		return super.add(child);
+	}
+	
 	public boolean isEmpty() {
 		return empty;
 	}
@@ -30,6 +43,10 @@ public class ArrayInitNode extends Node implements ArrayInit {
 		return children.size() > 2;
 	}
 
+	public void setArraySize(int arraySize) {
+		this.arraySize = arraySize;
+	}
+	
 	@Override
 	public int getArraySize() {
 		return arraySize;
@@ -40,6 +57,11 @@ public class ArrayInitNode extends Node implements ArrayInit {
 		return children.get(i);
 	}
 
+	@Override
+	public TypeNode getType() {
+		return (TypeNode) children.get(0);
+	}
+	
 	@Override
 	public String toString() {
 		return super.toString() + "(" + arraySize + ", " + empty + ")";
