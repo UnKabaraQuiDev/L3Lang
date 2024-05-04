@@ -1,288 +1,308 @@
 RuntimeNode{
-	test = [FileScopeDescriptor(test -> sd_23 1:1)], 
-	sys.sysout = [FileScopeDescriptor(sys.sysout -> sd_24 1:1)]}[
+	test = [FileScopeDescriptor(test -> sd_25 1:1)], 
+	sys.sysout = [FileScopeDescriptor(sys.sysout -> sd_26 1:1)]}[
 	FileNode(test){
 		console = [ImportScopeDescriptor(console (sys.sysout) -> sd_0 3:24)], 
-		main = [FunScopeDescriptor(main -> sd_2 5:8)]}[
+		SIZE_INT8 = [LetScopeDescriptor(SIZE_INT8 -> sd_1 5:16)], 
+		main = [FunScopeDescriptor(main -> sd_4 7:8)]}[
 		PackageDefNode('' 1:1),
-		FunDefNode(TypeNode(generic=true, INT, pointer=false): main){}[
-			TypeNode(generic=true, INT, pointer=false),
+		LetTypeDefNode(TypeNode(generic=true, type=INT_8, pointer=false), SIZE_INT8, index=0, size=4)[
+			TypeNode(generic=true, type=INT_8, pointer=false),
+			NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=5, column=28, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=4, value=4])
+		],
+		FunDefNode(TypeNode(generic=true, type=INT, pointer=false): main){}[
+			TypeNode(generic=true, type=INT, pointer=false),
 			FunArgsDefNode,
 			FunBodyDefNode{
-				arr = [LetScopeDescriptor(arr -> sd_1 9:11)]}[
+				arr = [LetScopeDescriptor(arr -> sd_2 11:11)], 
+				string = [LetScopeDescriptor(string -> sd_3 20:11)]}[
 				FunCallNode(.break, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mem')
 						]
 					]
 				],
-				LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), arr, index=0, size=4)[
-					TypeNode(generic=true, INT_8, pointer=true),
+				LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), arr, index=0, size=4)[
+					TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)),
 					ArrayInitNode(2, true)[
-						TypeNode(generic=true, INT_8, pointer=false)
+						TypeNode(generic=true, type=INT_8, pointer=false)
 					]
 				],
 				FunCallNode(.break, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mem1')
 						]
 					]
 				],
 				LetTypeSetNode(VarNumNode(arr, pointer=true, arrayOffset=true))[
 					VarNumNode(arr, pointer=true, arrayOffset=true)[
-						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=13, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0])
+						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=15, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0])
 					],
-					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=13, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=2, value=2])
+					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=15, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=2, value=2])
 				],
 				LetTypeSetNode(VarNumNode(arr, pointer=true, arrayOffset=true))[
 					VarNumNode(arr, pointer=true, arrayOffset=true)[
-						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=14, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1])
+						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=16, column=6, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1])
 					],
-					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=14, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=3, value=3])
+					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=16, column=11, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=3, value=3])
 				],
 				FunCallNode(.break, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mem2')
 						]
 					]
 				],
+				LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), string, index=0, size=4)[
+					TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)),
+					StringLitNode('test :(')
+				],
+				FunCallNode(console.println, def)[
+					FunArgsValNode[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
+							VarNumNode(string, pointer=false, arrayOffset=false)
+						]
+					]
+				],
 				ReturnNode[
-					TypeNode(generic=true, INT, pointer=false),
-					VarNumNode(arr, pointer=true, arrayOffset=true)[
-						NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=18, column=16, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=1, value=1])
+					TypeNode(generic=true, type=INT, pointer=false),
+					DelocalizingNode[
+						BinaryOpNode(+)[
+							VarNumNode(arr, pointer=false, arrayOffset=false),
+							VarNumNode(SIZE_INT8, pointer=false, arrayOffset=false)
+						]
 					]
 				]
 			]
 		]
 	],
 	FileNode(sys.sysout){
-		strlen = [FunScopeDescriptor(strlen -> sd_9 16:9)], 
-		print = [FunScopeDescriptor(print -> sd_11 37:10), FunScopeDescriptor(print -> sd_17 64:10)], 
-		println = [FunScopeDescriptor(println -> sd_13 50:10), FunScopeDescriptor(println -> sd_14 56:10), FunScopeDescriptor(println -> sd_19 72:10)], 
-		memcpy = [FunScopeDescriptor(memcpy -> sd_6 3:10)], 
-		stringify = [FunScopeDescriptor(stringify -> sd_22 77:10)]}[
+		strlen = [FunScopeDescriptor(strlen -> sd_11 16:9)], 
+		print = [FunScopeDescriptor(print -> sd_13 37:10), FunScopeDescriptor(print -> sd_19 64:10)], 
+		println = [FunScopeDescriptor(println -> sd_15 50:10), FunScopeDescriptor(println -> sd_16 56:10), FunScopeDescriptor(println -> sd_21 72:10)], 
+		memcpy = [FunScopeDescriptor(memcpy -> sd_8 3:10)], 
+		stringify = [FunScopeDescriptor(stringify -> sd_24 77:10)]}[
 		PackageDefNode('sys' 1:1),
-		FunDefNode(TypeNode(generic=true, VOID, pointer=false): memcpy){
-			length = [LetScopeDescriptor(length -> sd_5 3:41)], 
-			from = [LetScopeDescriptor(from -> sd_3 3:22)], 
-			to = [LetScopeDescriptor(to -> sd_4 3:33)]}[
-			TypeNode(generic=true, VOID, pointer=false),
+		FunDefNode(TypeNode(generic=true, type=VOID, pointer=false): memcpy){
+			length = [LetScopeDescriptor(length -> sd_7 3:41)], 
+			from = [LetScopeDescriptor(from -> sd_5 3:22)], 
+			to = [LetScopeDescriptor(to -> sd_6 3:33)]}[
+			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_32, pointer=true), from, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_32, pointer=true), from, index=0, size=4)[
-						TypeNode(generic=true, INT_32, pointer=true)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), from, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), from, index=0, size=4)[
+						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false))
 					]
 				],
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_32, pointer=true), to, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_32, pointer=true), to, index=0, size=4)[
-						TypeNode(generic=true, INT_32, pointer=true)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), to, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false)), to, index=0, size=4)[
+						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_32, pointer=false))
 					]
 				],
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_32, pointer=false), length, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_32, pointer=false), length, index=0, size=4)[
-						TypeNode(generic=true, INT_32, pointer=false)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=INT_32, pointer=false), length, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=INT_32, pointer=false), length, index=0, size=4)[
+						TypeNode(generic=true, type=INT_32, pointer=false)
 					]
 				]
 			],
 			FunBodyDefNode{}[
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov ecx, [esp + 4]  ; Length')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov edi, [esp + 8]  ; To')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov esi, [esp + 12]  ; From')
 						]
 					]
 				],
 				FunCallNode(.asmlb, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('.copy_loop:')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov eax, [esi]')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov [edi], eax')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('add esi, 4')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('add edi, 4')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('loop .copy_loop')
 						]
 					]
 				],
 				ReturnNode[
-					TypeNode(generic=true, VOID, pointer=false)
+					TypeNode(generic=true, type=VOID, pointer=false)
 				]
 			]
 		],
-		FunDefNode(TypeNode(generic=true, INT_16, pointer=false): strlen){
-			str = [LetScopeDescriptor(str -> sd_7 16:21)]}[
-			TypeNode(generic=true, INT_16, pointer=false),
+		FunDefNode(TypeNode(generic=true, type=INT_16, pointer=false): strlen){
+			str = [LetScopeDescriptor(str -> sd_9 16:21)]}[
+			TypeNode(generic=true, type=INT_16, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4)[
-						TypeNode(generic=true, INT_8, pointer=true)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false))
 					]
 				]
 			],
 			FunBodyDefNode{
-				length = [LetScopeDescriptor(length -> sd_8 29:10)]}[
+				length = [LetScopeDescriptor(length -> sd_10 29:10)]}[
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov eax, [esp + 4]  ; Copy the address of the string into eax')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('xor ecx, ecx  ; Clear ecx (counter register)')
 						]
 					]
 				],
 				FunCallNode(.asmlb, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('.loop:')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('cmp dword [eax], 0  ; Compare the byte at the current address with null terminator')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('je .done  ; If null terminator is found, exit loop')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('add dword eax, 4  ; Move to the next byte in the string')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('inc ecx  ; Increment the counter')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('jmp .loop  ; Repeat the loop')
 						]
 					]
 				],
 				FunCallNode(.asmlb, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('.done:')
 						]
 					]
 				],
-				LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), length, index=0, size=4)[
-					TypeNode(generic=true, INT_16, pointer=false),
+				LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), length, index=0, size=4)[
+					TypeNode(generic=true, type=INT_16, pointer=false),
 					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=29, column=19, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=0, value=0])
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov [esp], ecx  ; Move strlen to var')
 						]
 					]
 				],
 				ReturnNode[
-					TypeNode(generic=true, INT_16, pointer=false),
+					TypeNode(generic=true, type=INT_16, pointer=false),
 					VarNumNode(length, pointer=false, arrayOffset=false)
 				]
 			]
 		],
-		FunDefNode(TypeNode(generic=true, VOID, pointer=false): print){
-			str = [LetScopeDescriptor(str -> sd_10 37:21)]}[
-			TypeNode(generic=true, VOID, pointer=false),
+		FunDefNode(TypeNode(generic=true, type=VOID, pointer=false): print){
+			str = [LetScopeDescriptor(str -> sd_12 37:21)]}[
+			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4)[
-						TypeNode(generic=true, INT_8, pointer=true)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false))
 					]
 				]
 			],
 			FunBodyDefNode{}[
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov ecx, [esp + 4]  ; Copy the address of the string into eax')
 						]
 					]
 				],
 				FunCallNode(.asmlb, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('.loop:')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('cmp dword [ecx], 0  ; Compare the byte at the current address with null terminator')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('je .done  ; If null terminator is found, exit loop')
 						]
 					]
@@ -292,44 +312,44 @@ RuntimeNode{
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('add dword ecx, 4  ; Move to the next byte in the string')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('jmp .loop  ; Repeat the loop')
 						]
 					]
 				],
 				FunCallNode(.asmlb, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('.done:')
 						]
 					]
 				],
 				ReturnNode[
-					TypeNode(generic=true, VOID, pointer=false)
+					TypeNode(generic=true, type=VOID, pointer=false)
 				]
 			]
 		],
-		FunDefNode(TypeNode(generic=true, VOID, pointer=false): println){
-			str = [LetScopeDescriptor(str -> sd_12 50:23)]}[
-			TypeNode(generic=true, VOID, pointer=false),
+		FunDefNode(TypeNode(generic=true, type=VOID, pointer=false): println){
+			str = [LetScopeDescriptor(str -> sd_14 50:23)]}[
+			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4)[
-						TypeNode(generic=true, INT_8, pointer=true)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false))
 					]
 				]
 			],
 			FunBodyDefNode{}[
 				FunCallNode(.print, def)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							VarNumNode(str, pointer=false, arrayOffset=false)
 						]
 					]
@@ -338,31 +358,31 @@ RuntimeNode{
 					FunArgsValNode
 				],
 				ReturnNode[
-					TypeNode(generic=true, VOID, pointer=false)
+					TypeNode(generic=true, type=VOID, pointer=false)
 				]
 			]
 		],
-		FunDefNode(TypeNode(generic=true, VOID, pointer=false): println){}[
-			TypeNode(generic=true, VOID, pointer=false),
+		FunDefNode(TypeNode(generic=true, type=VOID, pointer=false): println){}[
+			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode,
 			FunBodyDefNode{}[
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('sub esp, 4')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov ecx, esp')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov dword [ecx], 10  ; Newline')
 						]
 					]
@@ -372,70 +392,70 @@ RuntimeNode{
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('add esp, 4')
 						]
 					]
 				],
 				ReturnNode[
-					TypeNode(generic=true, VOID, pointer=false)
+					TypeNode(generic=true, type=VOID, pointer=false)
 				]
 			]
 		],
-		FunDefNode(TypeNode(generic=true, VOID, pointer=false): print){
-			number = [LetScopeDescriptor(number -> sd_15 64:20)]}[
-			TypeNode(generic=true, VOID, pointer=false),
+		FunDefNode(TypeNode(generic=true, type=VOID, pointer=false): print){
+			number = [LetScopeDescriptor(number -> sd_17 64:20)]}[
+			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), number, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), number, index=0, size=4)[
-						TypeNode(generic=true, INT_16, pointer=false)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4)[
+						TypeNode(generic=true, type=INT_16, pointer=false)
 					]
 				]
 			],
 			FunBodyDefNode{
-				str = [LetScopeDescriptor(str -> sd_16 65:11)]}[
-				LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4)[
-					TypeNode(generic=true, INT_8, pointer=true),
+				str = [LetScopeDescriptor(str -> sd_18 65:11)]}[
+				LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+					TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)),
 					ArrayInitNode(11, true)[
-						TypeNode(generic=true, INT_8, pointer=false)
+						TypeNode(generic=true, type=INT_8, pointer=false)
 					]
 				],
 				FunCallNode(.stringify, def)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_16, pointer=false), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=INT_16, pointer=false), 0, size=0)[
 							VarNumNode(number, pointer=false, arrayOffset=false)
 						],
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 1, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 1, size=0)[
 							VarNumNode(str, pointer=false, arrayOffset=false)
 						]
 					]
 				],
 				FunCallNode(.print, def)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							VarNumNode(str, pointer=false, arrayOffset=false)
 						]
 					]
 				],
 				ReturnNode[
-					TypeNode(generic=true, VOID, pointer=false)
+					TypeNode(generic=true, type=VOID, pointer=false)
 				]
 			]
 		],
-		FunDefNode(TypeNode(generic=true, VOID, pointer=false): println){
-			number = [LetScopeDescriptor(number -> sd_18 72:22)]}[
-			TypeNode(generic=true, VOID, pointer=false),
+		FunDefNode(TypeNode(generic=true, type=VOID, pointer=false): println){
+			number = [LetScopeDescriptor(number -> sd_20 72:22)]}[
+			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), number, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), number, index=0, size=4)[
-						TypeNode(generic=true, INT_16, pointer=false)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4)[
+						TypeNode(generic=true, type=INT_16, pointer=false)
 					]
 				]
 			],
 			FunBodyDefNode{}[
 				FunCallNode(.print, def)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_16, pointer=false), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=INT_16, pointer=false), 0, size=0)[
 							VarNumNode(number, pointer=false, arrayOffset=false)
 						]
 					]
@@ -444,127 +464,127 @@ RuntimeNode{
 					FunArgsValNode
 				],
 				ReturnNode[
-					TypeNode(generic=true, VOID, pointer=false)
+					TypeNode(generic=true, type=VOID, pointer=false)
 				]
 			]
 		],
-		FunDefNode(TypeNode(generic=true, VOID, pointer=false): stringify){
-			str = [LetScopeDescriptor(str -> sd_21 77:37)], 
-			number = [LetScopeDescriptor(number -> sd_20 77:24)]}[
-			TypeNode(generic=true, VOID, pointer=false),
+		FunDefNode(TypeNode(generic=true, type=VOID, pointer=false): stringify){
+			str = [LetScopeDescriptor(str -> sd_23 77:37)], 
+			number = [LetScopeDescriptor(number -> sd_22 77:24)]}[
+			TypeNode(generic=true, type=VOID, pointer=false),
 			FunArgsDefNode[
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), number, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_16, pointer=false), number, index=0, size=4)[
-						TypeNode(generic=true, INT_16, pointer=false)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=INT_16, pointer=false), number, index=0, size=4)[
+						TypeNode(generic=true, type=INT_16, pointer=false)
 					]
 				],
-				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4))[
-					LetTypeDefNode(TypeNode(generic=true, INT_8, pointer=true), str, index=0, size=4)[
-						TypeNode(generic=true, INT_8, pointer=true)
+				FunArgDefNode(LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4))[
+					LetTypeDefNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), str, index=0, size=4)[
+						TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false))
 					]
 				]
 			],
 			FunBodyDefNode{}[
 				FunCallNode(.break, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('stringify')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('lea esi, [esp + 8]  ; Load address of the number')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov edi, [esp + 4]  ; Load address of the string')
 						]
 					]
 				],
 				FunCallNode(.asmlb, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('.convert_loop:')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov eax, dword [esi]  ; Load the 32-bit number')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov edx, 0  ; Clear EDX for division')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov ecx, 10  ; Set divisor to 10')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('div ecx  ; Divide EAX by 10')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('add dl, '0'  ; Convert remainder to ASCII')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov [edi], dl  ; Store ASCII digit in buffer')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('add edi, 4  ; Move buffer pointer back')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('test eax, eax  ; Check if quotient is zero')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('jnz .convert_loop  ; If not, continue conversion')
 						]
 					]
 				],
 				FunCallNode(.asm, preset)[
 					FunArgsValNode[
-						FunArgValNode(TypeNode(generic=true, INT_8, pointer=true), 0, size=0)[
+						FunArgValNode(TypeNode(generic=true, type=TYPE, pointer=true, pointed=TypeNode(generic=true, type=INT_8, pointer=false)), 0, size=0)[
 							StringLitNode('mov dword [edi], 0')
 						]
 					]
 				],
 				ReturnNode[
-					TypeNode(generic=true, VOID, pointer=false)
+					TypeNode(generic=true, type=VOID, pointer=false)
 				]
 			]
 		]

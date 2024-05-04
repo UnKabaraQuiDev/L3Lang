@@ -8,6 +8,10 @@ import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
 
 public class TypeNode extends Node {
 
+	public static final int POINTER_SIZE = 4;
+
+	private TypeNode pointed;
+
 	private boolean generic = true, pointer = false;
 	private Token token;
 	private TokenType type;
@@ -17,27 +21,19 @@ public class TypeNode extends Node {
 		this.token = token;
 	}
 
-	public TypeNode(boolean generic, Token token, boolean pointer) {
-		this.generic = generic;
-		this.token = token;
-		this.pointer = pointer;
+	public TypeNode(TypeNode pointed) {
+		this.pointed = pointed;
+		this.pointer = true;
 	}
 
-	public TypeNode(boolean generic, TokenType numLit) {
+	public TypeNode(boolean generic, TokenType type) {
 		this.generic = generic;
-		this.type = numLit;
-	}
-
-	public TypeNode(boolean generic, TokenType numLit, boolean pointer) {
-		this.generic = generic;
-		this.type = numLit;
-		this.pointer = pointer;
+		this.type = type;
 	}
 
 	public int getSize() throws CompilerException {
 		int size = generic ? 4 : ((StructScopeDescriptor) getClosestContainer().getStructScopeDescriptor(((IdentifierToken) token).getValue())).getNode().getSize();
-		System.err.println("size: "+size);
-		return size;
+		return pointer ? POINTER_SIZE : size;
 	}
 
 	public boolean isVoid() {
@@ -47,8 +43,18 @@ public class TypeNode extends Node {
 	public TokenType getType() {
 		if (type == null && token != null) {
 			return token.getType();
+		}else if(type == null) {
+			return TokenType.TYPE;
 		}
 		return type;
+	}
+
+	public TypeNode getPointedType() throws CompilerException {
+		if (pointer) {
+			return pointed;
+		} else {
+			throw new CompilerException("Type: "+token+" ("+type+"), not a pointer, cannot get subtype");
+		}
 	}
 
 	public boolean isGeneric() {
@@ -74,7 +80,8 @@ public class TypeNode extends Node {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(generic=" + generic + ", " + getType().name() + ", pointer=" + isPointer() + (generic ? "" : (", ident=" + ((IdentifierToken) token).getValue())) + ")";
+		return super.toString() + "(generic=" + generic + ", type=" + (getType() != null ? getType().name() : null) + ", pointer=" + isPointer() + (pointer ? ", pointed=" + pointed : "")
+				+ (generic ? "" : (", ident=" + ((IdentifierToken) token).getValue())) + ")";
 	}
 
 }

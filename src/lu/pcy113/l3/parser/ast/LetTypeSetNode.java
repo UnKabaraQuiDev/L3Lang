@@ -24,8 +24,8 @@ public class LetTypeSetNode extends Node {
 
 	public IdentifierToken getLetIdent() {
 		Node let = getLet();
-		if (let instanceof LocalizingNode) {
-			LocalizingNode llet = (LocalizingNode) let;
+		if (let instanceof DelocalizingNode) {
+			DelocalizingNode llet = (DelocalizingNode) let;
 			if (llet.getNode() instanceof VarNumNode) {
 				return (IdentifierToken) ((VarNumNode) (llet).getNode()).getMainIdent();
 			} else if (llet.getNode() instanceof FunCallNode) {

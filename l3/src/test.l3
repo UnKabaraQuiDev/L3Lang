@@ -2,6 +2,8 @@ package "";
 
 import "sys.sysout" as console;
 
+let static int8 SIZE_INT8 = 4;
+
 fun int main() {
 	
 	break#("mem");
@@ -14,7 +16,11 @@ fun int main() {
 	arr[1] = 3;
 	
 	break#("mem2");
+	
+	let int8: string = "test :(";
 
-	return int arr[1];
+	console.println(string);
+
+	return int $arr+SIZE_INT8;
 }
 

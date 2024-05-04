@@ -381,7 +381,7 @@ public class L3Lexer {
 		if (type == null && Character.isLetter(current)) {
 			type = IDENT;
 			strValue = "" + current;
-			while (Character.isLetterOrDigit(peek())) {
+			while (Character.isLetterOrDigit(peek()) || peek() == '_') {
 				strValue += consume();
 			}
 

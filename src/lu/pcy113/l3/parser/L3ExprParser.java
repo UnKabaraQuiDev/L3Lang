@@ -10,12 +10,12 @@ import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
-import lu.pcy113.l3.parser.ast.DelocalizingNode;
+import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.DelocalizingNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
@@ -126,10 +126,10 @@ public class L3ExprParser {
 			return expr;
 		} else if (peek(TokenType.DOLLAR)) {
 			consume(TokenType.DOLLAR);
-			return new LocalizingNode(parseIdent());
+			return new DelocalizingNode(parseIdent());
 		} else if (peek(TokenType.COLON)) {
 			consume(TokenType.COLON);
-			return new DelocalizingNode(parseIdent());
+			return new LocalizingNode(parseIdent());
 		} else {
 			throw new RuntimeException("Unexpected token: " + peek().getType());
 		}

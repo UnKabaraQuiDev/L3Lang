@@ -2,8 +2,8 @@
 
 import none;
 
-// :IDENT -> value to pointer (deloc)
-// $IDENT -> pointer to value (loc)
+// :IDENT -> value to pointer (loc)
+// $IDENT -> pointer to value (deloc)
 // var: IDENT -> pointer variable
 // var IDENT -> value variable
 

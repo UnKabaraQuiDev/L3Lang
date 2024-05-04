@@ -16,7 +16,7 @@ import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.ConArgValNode;
 import lu.pcy113.l3.parser.ast.ConArgsValNode;
-import lu.pcy113.l3.parser.ast.DelocalizingNode;
+import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FinallyDefNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
@@ -31,7 +31,7 @@ import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.ImportDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.DelocalizingNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
@@ -616,16 +616,20 @@ public class L3Parser {
 	private TypeNode parseType() throws ParserException {
 		if (peek(TokenType.IDENT)) {
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
-			boolean pointer = peek(TokenType.COLON);
-			if (pointer)
+			TypeNode node = new TypeNode(false, ident);
+			while(peek(TokenType.COLON)) {
+				node = new TypeNode(node);
 				consume(TokenType.COLON);
-			return new TypeNode(false, ident, pointer);
+			}
+			return node;
 		} else if (peek(TokenType.TYPE)) {
 			Token type = consume(TokenType.TYPE);
-			boolean pointer = peek(TokenType.COLON);
-			if (pointer)
+			TypeNode node = new TypeNode(true, type.getType());
+			while(peek(TokenType.COLON)) {
+				node = new TypeNode(node);
 				consume(TokenType.COLON);
-			return new TypeNode(true, type, pointer);
+			}
+			return node;
 		} else if (peek(TokenType.VOID)) {
 			return new TypeNode(true, consume(TokenType.VOID));
 		} else {
@@ -865,12 +869,12 @@ public class L3Parser {
 		} else if (peek(TokenType.DOLLAR)) {
 
 			consume(TokenType.DOLLAR);
-			return new LocalizingNode(parseIdent());
+			return new DelocalizingNode(parseExpression());
 
 		} else if (peek(TokenType.COLON)) {
 
 			consume(TokenType.COLON);
-			return new DelocalizingNode(parseIdent());
+			return new LocalizingNode(parseIdent());
 
 		} else if (peek(TokenType.STRING)) {
 

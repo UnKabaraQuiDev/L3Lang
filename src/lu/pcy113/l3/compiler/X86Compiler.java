@@ -16,7 +16,7 @@ import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.ConArgValNode;
 import lu.pcy113.l3.parser.ast.ConArgsValNode;
-import lu.pcy113.l3.parser.ast.DelocalizingNode;
+import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FinallyDefNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
@@ -27,7 +27,7 @@ import lu.pcy113.l3.parser.ast.IfContainerNode;
 import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.DelocalizingNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
@@ -36,6 +36,7 @@ import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.StringLitNode;
+import lu.pcy113.l3.parser.ast.TypeNode;
 import lu.pcy113.l3.parser.ast.VarNumNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
@@ -464,7 +465,7 @@ public class X86Compiler extends L3Compiler {
 				if (def.isiStatic()) { // static
 					writeinstln("lea dword " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadComputeExpr(" + node + "): static");
 				} else { // local
-					writeinstln("lea dword " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - 4) + "]  ; Loading pointer, index = " + def.getStackIndex() + ", size = " + STACK_INDEX);
+					writeinstln("mov dword " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - TypeNode.POINTER_SIZE) + "]  ; Loading pointer 2, index = " + def.getStackIndex() + ", size = " + STACK_INDEX);
 					writeinstln("add " + reg + ", ebx  ; compileLoadComputeExpr(" + node + "): local");
 				}
 
@@ -477,8 +478,8 @@ public class X86Compiler extends L3Compiler {
 				}
 
 			}
-		} else if (expr instanceof LocalizingNode) {
-			compileLocalizing(reg, (LocalizingNode) expr);
+		} else if (expr instanceof DelocalizingNode) {
+			compileDelocalizing(reg, (DelocalizingNode) expr);
 		} else {
 			implement(expr);
 		}
@@ -609,22 +610,30 @@ public class X86Compiler extends L3Compiler {
 		final String name = node.getIdent().getValue();
 		final String pos = node.getIdent().getPosition();
 
-		final int typeSize = node.getType().getSize();
-		int size = node.getType().getSize();
 		final int currentStackIndex = STACK_INDEX;
+
+		// allocating memory for the type
+		final int typeSize = node.getType().getSize();
+		int dataSize = 0;
+		if (node.hasExpr() && node.getExpr() instanceof ArrayInit) {
+			dataSize = ((ArrayInit) node.getExpr()).getArraySize() * node.getType().getPointedType().getSize();
+		} else {
+			dataSize = 0;
+		}
+		final int totalSize = allocMemory(dataSize + typeSize, "size: " + typeSize + " + " + dataSize + ", LetTypeDef: " + node);
 
 		if (node.hasExpr()) { // set
 			if (node.getExpr() instanceof ArrayInit) {
 				ArrayInit expr = (ArrayInit) node.getExpr();
 
-				int arrSize = expr.getArraySize() * typeSize;
+				final int arrLength = expr.getArraySize();
+				final int arrSize = dataSize;
 
+				writeinstln("lea eax, [esp+" + arrSize + "]");
+				writeinstln("sub eax, " + arrSize);
+				writeinstln("mov dword [esp+" + arrSize + "], eax  ; Setup empty pointer " + name + " -> " + asmName);
+				
 				if (expr.hasExpr()) { // init
-					writeinstln("mov eax, esp");
-					writeinstln("sub eax, " + (arrSize + 4));
-					writeinstln("push eax  ; Setup array pointer");
-
-					writeinstln("sub esp, " + arrSize);
 
 					if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
 						if (expr instanceof StringLitNode) {
@@ -635,12 +644,12 @@ public class X86Compiler extends L3Compiler {
 									+ "  ; " + name + " at " + pos);
 						}
 
-						writeinstln("sub esp, 12");
-						writeinstln("mov dword [esp + 8], " + asmName + "  ; From");
-						writeinstln("mov dword [esp + 4], eax  ; To");
-						writeinstln("mov dword [esp + 0], " + expr.getArraySize() + "  ; Length");
-						writeinstln("call " + node.getClosestContainer().getClosestDescriptor("memcpy").getAsmName());
-						writeinstln("add esp, 12");
+						writeinstln("mov esi, " + asmName + "  ; From");
+						writeinstln("mov edi, [esp+" + (arrSize) + "]  ; To");
+						writeinstln("cld");
+						writeinstln("mov ecx, " + arrLength);
+						writeinstln("rep movsd");
+
 					} else {
 						for (int i = 0; i < expr.getArraySize(); i++) {
 							Node child = expr.getExpr(i);
@@ -649,21 +658,16 @@ public class X86Compiler extends L3Compiler {
 						}
 					}
 				} else { // alloc
-					writeinstln("lea eax, [esp]");
-					writeinstln("sub eax, " + (arrSize + size));
-					writeinstln("push eax  ; Setup empty pointer " + name + " -> " + asmName);
-					writeinstln("sub esp, " + arrSize);
+					
+					// skip because pointer already allocated
+					
 				}
 
-				size += arrSize;
-				// node.setStackSize(arrSize + size);
 			} else if (node.getExpr() instanceof ObjectInitNode) {
 
 				ObjectInitNode init = (ObjectInitNode) node.getExpr();
 				StructScopeDescriptor structDesc = node.getClosestContainer().getStructScopeDescriptor(((IdentifierToken) node.getType().getIdent()).getValue());
 				StructDefNode structDef = structDesc.getNode();
-
-				writeinstln("sub esp, " + size + "  ; Init from ObjectInitNode");
 
 				int stackPos = 0;
 				ConArgsValNode args = init.getArgs();
@@ -680,25 +684,31 @@ public class X86Compiler extends L3Compiler {
 			} else {
 
 				compileComputeExpr("eax", node.getExpr());
-				writeinstln("push dword eax  ; Push var: " + desc.getIdentifier().getValue());
+				writeinstln("mov dword [esp+" + dataSize + "], eax  ; Push var: " + desc.getIdentifier().getValue());
 
-				// node.setStackSize(size);
 			}
 		} else { // alloc only
 
-			writeinstln("sub esp, " + size);
-
-			// node.setStackSize(size);
+			// skip because already allocated
 
 		}
 
-		node.setStackSize(size);
+		node.setStackSize(totalSize);
 		node.setStackIndex(currentStackIndex);
 
 		push(node);
 
 		System.err.println("after: " + node.getIdent().getValue());
 		printStack();
+	}
+
+	private int allocMemory(int size, String comment) throws CompilerException {
+		writeinstln("sub esp, " + size + "  ; Alloc for: " + comment);
+		return size;
+	}
+
+	private int allocMemory(TypeNode type, String comment) throws CompilerException {
+		return allocMemory(type.getSize(), comment);
 	}
 
 	private void generateExprRecursive(String reg, Node node) throws CompilerException {
@@ -826,24 +836,24 @@ public class X86Compiler extends L3Compiler {
 		} else if (node instanceof StringLitNode) {
 			compileArrayInit((StringLitNode) node);
 			writeinstln("mov " + reg + ", [esp + " + (((StringLitNode) node).getStackSize() - 4) + "]  ; Loading StringLitNode pointer");
-		} else if (node instanceof LocalizingNode) {
-			compileLocalizing(reg, (LocalizingNode) node);
 		} else if (node instanceof DelocalizingNode) {
 			compileDelocalizing(reg, (DelocalizingNode) node);
+		} else if (node instanceof LocalizingNode) {
+			compileLocalizing(reg, (LocalizingNode) node);
 		} else {
 			implement(node);
 		}
 	}
 
-	private void compileDelocalizing(String reg, DelocalizingNode node) throws CompilerException {
-		if(true)
+	private void compileLocalizing(String reg, LocalizingNode node) throws CompilerException {
+		if (true)
 			throw new CompilerException("To do somehow");
-		
+
 		compileComputeExpr(reg, node.getNode());
 		writeinstln("lea " + reg + ", [" + reg + "]  ; Loading " + node.getNode());
 	}
 
-	private void compileLocalizing(String reg, LocalizingNode node) throws CompilerException {
+	private void compileDelocalizing(String reg, DelocalizingNode node) throws CompilerException {
 		compileComputeExpr(reg, node.getNode());
 		writeinstln("mov " + reg + ", [" + reg + "]  ; Loading " + node.getNode());
 	}
@@ -1078,7 +1088,7 @@ public class X86Compiler extends L3Compiler {
 				if (def.isiStatic()) { // static
 					writeinstln("mov " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadVarNum(" + node + "): static");
 				} else { // local
-					writeinstln("mov ecx, [esp + " + (STACK_INDEX - def.getStackIndex() - 4) + "]  ; Loading pointer, index = " + STACK_INDEX + ", size = " + STACK_INDEX);
+					writeinstln("mov ecx, [esp + " + (STACK_INDEX - def.getStackIndex() - 4) + "]  ; Loading pointer 1, index = " + STACK_INDEX + ", size = " + def.getStackSize());
 					writeinstln("add ecx, ebx");
 					writeinstln("mov " + reg + ", [ecx] ; compileLoadVarNum(" + node + "): local");
 				}
