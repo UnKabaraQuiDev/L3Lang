@@ -1,6 +1,7 @@
 package lu.pcy113.l3.parser.ast;
 
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.lexer.tokens.CharLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.utils.StringUtils;
 
@@ -14,9 +15,19 @@ public class StringLitNode extends Node implements ArrayInit {
 		this.length = stringToken.getValue().length() + 1;
 
 		for (int i = 0; i < length - 1; i++) {
-			add(new NumLitNode((int) string.getValue().charAt(i)));
+			add(new NumLitNode((int) stringToken.getValue().charAt(i)));
 		}
-		add(new NumLitNode(0)); // null-terminatory
+		add(new NumLitNode(0)); // null-terminator
+	}
+
+	@Deprecated
+	public StringLitNode(CharLiteralToken charToken) {
+		throw new RuntimeException("Deprecated");
+		
+		/*this.string = charToken;
+		this.length = 1;
+
+		add(new NumLitNode((int) charToken.getValue()));*/
 	}
 
 	public StringLiteralToken getString() {
@@ -24,7 +35,7 @@ public class StringLitNode extends Node implements ArrayInit {
 	}
 
 	public TypeNode getType() {
-		return new TypeNode(new TypeNode(true, TokenType.INT_8));
+		return new TypeNode(new TypeNode(TokenType.CHAR));
 	}
 
 	@Override

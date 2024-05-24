@@ -4,9 +4,10 @@ public enum ValueType {
 	
 	DECIMAL,
 	STRING,
-	INTEGER,
-	BYTE,
-	SHORT,
-	LONG;
+	INT_8,
+	INT_16,
+	INT_32,
+	INT_64,
+	CHAR;
 	
 }

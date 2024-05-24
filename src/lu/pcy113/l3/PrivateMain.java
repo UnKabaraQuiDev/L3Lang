@@ -30,7 +30,6 @@ public class PrivateMain {
 		File srcDir = new File(l3Dir, "src/");
 
 		String mainFile = "test.l3";
-		String sysoutFile = "sys/sysout.l3";
 
 		L3Lexer lexer = new L3Lexer(new FileReader(new File(srcDir, mainFile)));
 		System.out.println("Input:\n" + lexer.getInput());
@@ -43,22 +42,12 @@ public class PrivateMain {
 		FileNode fileNode = parser.getRoot();
 		fileNode.containsMainFunDescriptor();
 
-		lexer = new L3Lexer(new FileReader(new File(srcDir, sysoutFile)));
-		System.out.println("Input:\n" + lexer.getInput());
-		lexer.lexe();
-		lexer.getTokens().forEach(System.out::println);
-
-		parser = new L3Parser(sysoutFile, lexer);
-		parser.parse();
-
-		FileNode sysoutFileNode = parser.getRoot();
-
-		RuntimeNode runtimeNode = new RuntimeNode(fileNode, sysoutFileNode);
+		RuntimeNode runtimeNode = new RuntimeNode(fileNode);
 
 		System.out.println(runtimeNode.toString(0));
 		Files.write(Paths.get(l3Dir + "/" + FileUtils.removeExtension(mainFile) + "-ast.txt"), runtimeNode.toString(0).getBytes());
-
-		X86Compiler compiler = new X86Compiler(runtimeNode, l3Dir, "test");
+		
+		X86Compiler compiler = new X86Compiler(runtimeNode, l3Dir, mainFile);
 		compiler.compile();
 	}
 

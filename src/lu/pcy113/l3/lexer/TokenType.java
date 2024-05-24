@@ -4,19 +4,33 @@ public enum TokenType {
 
 	LET("let"), FUN("fun"),
 
-	IMPORT("import") , PACKAGE("package"), AS("as"),
-	
+	RETURN("return"),
+
+	IMPORT("import"), PACKAGE("package"), AS("as"),
+
 	CLASS("class"), INTERFACE("interface"), STRUCT("struct"), UNION("union"),
 
-	TYPE(), INT(TYPE, "int"),
+	TYPE(), USER_TYPE(TYPE), PRIMITIVE_TYPE(TYPE),
 
-	INT_1(INT, "int1"), INT_8(INT, "int8"), INT_16(INT, "int16"), INT_32(TYPE, "int32"), INT_64(TYPE, "int64"),
+	INT(PRIMITIVE_TYPE, "int"),
 
-	INT_8_S(INT, "int8s"), INT_16_S(INT, "int16s"), INT_32_S(INT, "int32s"), INT_64_S(INT, "int64s"),
+	INT_1(INT, "int1"), INT_8(INT, "int8"), INT_16(INT, "int16"), INT_32(INT, "int32"), INT_64(INT, "int64"), INT_128(INT, "int128"),
+
+	INT_8_S(INT, "int8s"), INT_16_S(INT, "int16s"), INT_32_S(INT, "int32s"), INT_64_S(INT, "int64s"), INT_128_S(INT, "int128s"),
+
+	BYTE(INT_8, "byte"), CHAR(BYTE, "char"), SHORT(INT_16, "short"), LONG(INT_64, "long"),
+
+	FLOAT(PRIMITIVE_TYPE, "float"),
+
+	FLOAT_32(FLOAT, "float32"), FLOAT_64(FLOAT, "float64"), FLOAT_128(FLOAT, "float128"),
+
+	BOOLEAN(PRIMITIVE_TYPE),
+
+	TRUE("true"), FALSE("false"),
 
 	VOID("void"), NEW("new"),
 
-	NUM_LIT(), DEC_NUM_LIT(NUM_LIT), HEX_NUM_LIT(NUM_LIT), BIN_NUM_LIT(NUM_LIT),
+	NUM_LIT(), DEC_NUM_LIT(NUM_LIT), HEX_NUM_LIT(NUM_LIT), BIN_NUM_LIT(NUM_LIT), CHAR_LIT(NUM_LIT),
 
 	IDENT(),
 
@@ -26,13 +40,9 @@ public enum TokenType {
 
 	PAREN_OPEN('('), PAREN_CLOSE(')'), BRACKET_OPEN('['), BRACKET_CLOSE(']'), CURLY_OPEN('{'), CURLY_CLOSE('}'),
 
-	STRING(),
+	STRING_LIT(),
 
 	COMMENT("//"),
-
-	BOOLEAN(),
-
-	TRUE(BOOLEAN, "true"), FALSE(BOOLEAN, "false"),
 
 	IF("if"), ELSE("else"),
 
@@ -42,7 +52,9 @@ public enum TokenType {
 
 	FOR("for"), WHILE("while"), BREAK("break"),
 
-	RETURN("return"), DO("do"), FINALLY("finally"),
+	DO("do"), FINALLY("finally"),
+
+	GOTO("goto"), YIELD("yield"),
 
 	BIT_OR('|'), BIT_AND('&'), BIT_XOR('^'), BIT_NOT('~'),
 

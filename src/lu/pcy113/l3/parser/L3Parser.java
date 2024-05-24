@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.lexer.tokens.CharLiteralToken;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
@@ -83,9 +84,9 @@ public class L3Parser {
 	}
 
 	private void parsePackageDefExpr(FileNode root) throws ParserException {
-		if (peek(TokenType.PACKAGE) && peek(1, TokenType.STRING)) {
+		if (peek(TokenType.PACKAGE) && peek(1, TokenType.STRING_LIT)) {
 
-			PackageDefNode packageDef = new PackageDefNode(consume(TokenType.PACKAGE), ((StringLiteralToken) consume(TokenType.STRING)).getValue());
+			PackageDefNode packageDef = new PackageDefNode(consume(TokenType.PACKAGE), ((StringLiteralToken) consume(TokenType.STRING_LIT)).getValue());
 
 			if (!root.getSource().replaceAll("^" + packageDef.getValue() + "\\.", "").equals(FileUtils.getExtension(root.getSource()))) {
 				throw new ParserException("Package declaration not matching with file path: " + root.getSource() + " (" + root.getSource().replaceAll("^" + packageDef.getValue() + "\\.", "") + ") & " + packageDef.getValue());
@@ -196,7 +197,7 @@ public class L3Parser {
 	private ImportDefNode parseImportDefNode(Node parent) throws ParserException {
 		consume(TokenType.IMPORT);
 
-		StringLiteralToken strLit = (StringLiteralToken) consume(TokenType.STRING);
+		StringLiteralToken strLit = (StringLiteralToken) consume(TokenType.STRING_LIT);
 
 		IdentifierToken ident = null;
 
@@ -212,7 +213,7 @@ public class L3Parser {
 
 	private Node parseLineExpr(Node parent) throws ParserException {
 		Node node = parseFunctionalExpr(parent);
-		if (node instanceof LetTypeDefNode || node instanceof FunCallNode || node instanceof ReturnNode || node instanceof LetTypeSetNode || node instanceof FunCallNode) {
+		if (node instanceof LetTypeDefNode || node instanceof FunCallNode || node instanceof ReturnNode || node instanceof LetTypeSetNode) {
 			consume(TokenType.SEMICOLON);
 		}
 		return node;
@@ -458,12 +459,12 @@ public class L3Parser {
 	private ReturnNode parseReturnExpr() throws ParserException {
 		consume(TokenType.RETURN);
 
-		TypeNode type = parseType();
 		if (peek(TokenType.SEMICOLON))
-			return new ReturnNode(type, null);
+			return new ReturnNode();
 
 		Node expr = parseExpression();
-		return new ReturnNode(type, expr);
+		
+		return new ReturnNode(expr);
 	}
 
 	private boolean canParseFun() {
@@ -532,7 +533,7 @@ public class L3Parser {
 		if ((fdb.getChildren().isEmpty() || !(fdb.getChildren().getLast() instanceof ReturnNode)) && !fdn.getReturnType().isVoid()) {
 			throw new ParserException("Missing final return statement: " + peek());
 		} else if (fdn.getReturnType().isVoid()) {
-			fdb.add(new ReturnNode(fdn.getReturnType(), null));
+			fdb.add(new ReturnNode());
 		}
 
 		consume(TokenType.CURLY_CLOSE);
@@ -616,22 +617,22 @@ public class L3Parser {
 	private TypeNode parseType() throws ParserException {
 		if (peek(TokenType.IDENT)) {
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
-			TypeNode node = new TypeNode(false, ident);
+			TypeNode node = new TypeNode(ident);
 			while (peek(TokenType.COLON)) {
 				node = new TypeNode(node);
 				consume(TokenType.COLON);
 			}
 			return node;
-		} else if (peek(TokenType.TYPE)) {
-			Token type = consume(TokenType.TYPE);
-			TypeNode node = new TypeNode(true, type.getType());
+		} else if (peek(TokenType.PRIMITIVE_TYPE)) {
+			Token type = consume(TokenType.PRIMITIVE_TYPE);
+			TypeNode node = new TypeNode(type.getType());
 			while (peek(TokenType.COLON)) {
 				node = new TypeNode(node);
 				consume(TokenType.COLON);
 			}
 			return node;
 		} else if (peek(TokenType.VOID)) {
-			return new TypeNode(true, consume(TokenType.VOID));
+			return new TypeNode(consume(TokenType.VOID));
 		} else {
 			throw new ParserException("Unsupported type: " + peek());
 		}
@@ -663,23 +664,24 @@ public class L3Parser {
 
 		Token assign = consume(TokenType.ASSIGN);
 
-		/*if (peek(TokenType.NEW)) {
-			
-			
-			
-		} *//*else if (type.isPointer() && peek(TokenType.CURLY_OPEN)) {
+		/*
+		 * if (peek(TokenType.NEW)) {
+		 * 
+		 * 
+		 * 
+		 * }
+		 *//*
+			 * else if (type.isPointer() && peek(TokenType.CURLY_OPEN)) {
+			 * 
+			 * if (peek(TokenType.CURLY_OPEN)) { consume(TokenType.CURLY_OPEN); parseArrayArgs().forEach(typeDefNode::add); consume(TokenType.CURLY_CLOSE); }
+			 * 
+			 * } else
+			 */ /*
+				 * {
+				 * 
+				 * typeDefNode.add(parseExpression()); }
+				 */
 
-			if (peek(TokenType.CURLY_OPEN)) {
-				consume(TokenType.CURLY_OPEN);
-				parseArrayArgs().forEach(typeDefNode::add);
-				consume(TokenType.CURLY_CLOSE);
-			}
-
-		} else*/ /*{
-
-			typeDefNode.add(parseExpression());
-		}*/
-		
 		typeDefNode.add(parseExpression());
 
 		return typeDefNode;
@@ -866,12 +868,12 @@ public class L3Parser {
 			consume(TokenType.COLON);
 			return new LocalizingNode(parseIdent());
 
-		} else if (peek(TokenType.STRING)) {
+		} else if (peek(TokenType.STRING_LIT)) {
 
-			return new StringLitNode((StringLiteralToken) consume(TokenType.STRING));
+			return new StringLitNode((StringLiteralToken) consume(TokenType.STRING_LIT));
 
-		} else if(peek(TokenType.NEW)) {
-			
+		} else if (peek(TokenType.NEW)) {
+
 			consume(TokenType.NEW);
 
 			TypeNode newType = parseType();
@@ -907,13 +909,13 @@ public class L3Parser {
 				parseConArgsVal(objInit);
 
 				consume(TokenType.PAREN_CLOSE);
-				
+
 				return objInit;
 
 			}
-			
+
 		}
-		
+
 		throw new RuntimeException("Unexpected token: " + peek());
 	}
 
@@ -1040,7 +1042,7 @@ public class L3Parser {
 
 	private Token consume(TokenType t) throws ParserException {
 		if (!hasNext())
-			throw new ParserException("Expected %s but got end of input.", t);
+			throw new ParserException("Expected %s but got end of input at: " + peek(-1).getPosition() + "->" + peek().getPosition(), t);
 
 		if (peek(t)) {
 			return consume();

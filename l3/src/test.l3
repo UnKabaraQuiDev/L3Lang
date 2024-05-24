@@ -1,28 +1,6 @@
 package "";
 
-import "sys.sysout" as console;
-
-struct Person {
-	let int8 age = 5;
-	let int8: arr = new int8[2];
-}
-
-fun int main() {
-	
-	let int8: string = "test :(";
-
-	stack#();
-
-	console.println(string);
-
-	stack#();
-	
-	break#("init");
-	
-	let Person person = new Person(6, new int8[] {2, 6});
-	
-	break#("return");
-	
-	return int person.age;
+fun int8 main() {
+	return 256;
 }
 

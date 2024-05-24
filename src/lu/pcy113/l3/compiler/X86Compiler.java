@@ -2,6 +2,7 @@ package lu.pcy113.l3.compiler;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.MemoryType;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
+import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.ArrayInit;
 import lu.pcy113.l3.parser.ast.ArrayInitNode;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
@@ -139,7 +141,7 @@ public class X86Compiler extends L3Compiler {
 		} else if (node instanceof IfContainerNode) {
 			compileIfContainerNode((IfContainerNode) node);
 		} else if (node instanceof ReturnNode) {
-			compileReturn((ReturnNode) node);
+			compileReturnNode((ReturnNode) node);
 		} else if (node instanceof WhileDefNode) {
 			compileWhileDefNode((WhileDefNode) node);
 		} else if (node instanceof ForDefNode) {
@@ -465,7 +467,7 @@ public class X86Compiler extends L3Compiler {
 				if (def.isiStatic()) { // static
 					writeinstln("lea dword " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadComputeExpr(" + node + "): static");
 				} else { // local
-					writeinstln("mov dword " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - TypeNode.POINTER_SIZE) + "]  ; Loading pointer 2, index = " + def.getStackIndex() + ", size = " + STACK_INDEX);
+					writeinstln("mov dword " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE)) + "]  ; Loading pointer 2, index = " + def.getStackIndex() + ", size = " + STACK_INDEX);
 					writeinstln("add " + reg + ", ebx  ; compileLoadComputeExpr(" + node + "): local");
 				}
 
@@ -485,19 +487,20 @@ public class X86Compiler extends L3Compiler {
 		}
 	}
 
-	private void compileReturn(ReturnNode node) throws CompilerException {
+	private void compileReturnNode(ReturnNode node) throws CompilerException {
 		FunScopeDescriptor desc = (FunScopeDescriptor) node.getClosestContainer().getFunDescriptor(getFunDefParent(node));
 
 		FunDefNode fun = desc.getNode();
 
-		if (!fun.getReturnType().isVoid() && node.hasExpr()) {
+		if (!fun.getReturnType().isVoid()) {
+			writeinstln("; return node (expr compute)");
 			compileComputeExpr("eax", node.getExpr());
 		}
 
 		if (node.getParent() instanceof ScopeBodyNode) {
 			int size = getStackSize(fun.getStartStackIndex());
 
-			writeinstln("; return node: " + node.getReturnType());
+			writeinstln("; return node (free)");
 			writeinstln("add esp, " + size + "  ; Free mem from local scope bc of return");
 		}
 

@@ -2,25 +2,26 @@ package lu.pcy113.l3.parser.ast;
 
 public class ReturnNode extends Node {
 	
-	public ReturnNode(TypeNode type, Node expr) {
-		add(type);
+	private boolean _void;
+	
+	public ReturnNode() {
+		this._void = true;
+	}
+	public ReturnNode(Node expr) {
 		add(expr);
+		this._void = false;
 	}
 
 	public Node getExpr() {
-		return children.get(1);
+		return children.get(0);
 	}
 
 	public boolean returnsVoid() {
-		return getReturnType().isVoid();
-	}
-
-	public TypeNode getReturnType() {
-		return (TypeNode) children.get(0);
+		return _void;
 	}
 
 	public boolean hasExpr() {
-		return children.size() > 1;
+		return !_void;
 	}
 
 }

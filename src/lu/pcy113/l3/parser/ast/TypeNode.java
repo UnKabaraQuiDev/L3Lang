@@ -4,11 +4,10 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.Token;
+import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
 
 public class TypeNode extends Node {
-
-	public static final int POINTER_SIZE = 4;
 
 	private TypeNode pointed;
 
@@ -16,24 +15,28 @@ public class TypeNode extends Node {
 	private Token token;
 	private TokenType type;
 
-	public TypeNode(boolean generic, Token token) {
-		this.generic = generic;
+	/**
+	 * struct
+	 */
+	public TypeNode(Token token) {
+		this.generic = false;
 		this.token = token;
 	}
 
 	public TypeNode(TypeNode pointed) {
-		this.pointed = pointed;
 		this.pointer = true;
+		this.generic = true;
+		this.pointed = pointed;
 	}
 
-	public TypeNode(boolean generic, TokenType type) {
-		this.generic = generic;
+	public TypeNode(TokenType type) {
+		this.generic = true;
 		this.type = type;
 	}
 
 	public int getSize() throws CompilerException {
-		int size = generic ? 4 : ((StructScopeDescriptor) getClosestContainer().getStructScopeDescriptor(((IdentifierToken) token).getValue())).getNode().getSize();
-		return pointer ? POINTER_SIZE : size;
+		return pointer ? MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE)
+				: generic ? MemoryUtil.getPrimitiveSize(type) : ((StructScopeDescriptor) getClosestContainer().getStructScopeDescriptor(((IdentifierToken) token).getValue())).getNode().getSize();
 	}
 
 	public boolean isVoid() {
@@ -41,19 +44,21 @@ public class TypeNode extends Node {
 	}
 
 	public TokenType getType() {
-		if (type == null && token != null) {
-			return token.getType();
-		}else if(type == null) {
-			return TokenType.TYPE;
+		if(generic) {
+			if(pointer) {
+				return pointed.getType();
+			}
+			return type;
+		}else {
+			return TokenType.USER_TYPE;
 		}
-		return type;
 	}
 
 	public TypeNode getPointedType() throws CompilerException {
 		if (pointer) {
 			return pointed;
 		} else {
-			throw new CompilerException("Type: "+token+" ("+type+"), not a pointer, cannot get subtype");
+			throw new CompilerException("Type: " + token + " (" + type + "), not a pointer, cannot get subtype");
 		}
 	}
 

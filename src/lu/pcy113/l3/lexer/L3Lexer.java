@@ -11,7 +11,10 @@ import static lu.pcy113.l3.lexer.TokenType.BIT_OR;
 import static lu.pcy113.l3.lexer.TokenType.BIT_XOR;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_OPEN;
+import static lu.pcy113.l3.lexer.TokenType.BYTE;
 import static lu.pcy113.l3.lexer.TokenType.CASE;
+import static lu.pcy113.l3.lexer.TokenType.CHAR;
+import static lu.pcy113.l3.lexer.TokenType.CHAR_LIT;
 import static lu.pcy113.l3.lexer.TokenType.COLON;
 import static lu.pcy113.l3.lexer.TokenType.COMMA;
 import static lu.pcy113.l3.lexer.TokenType.COMMENT;
@@ -44,6 +47,7 @@ import static lu.pcy113.l3.lexer.TokenType.INT_8;
 import static lu.pcy113.l3.lexer.TokenType.LESS;
 import static lu.pcy113.l3.lexer.TokenType.LESS_EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.LET;
+import static lu.pcy113.l3.lexer.TokenType.LONG;
 import static lu.pcy113.l3.lexer.TokenType.MINUS;
 import static lu.pcy113.l3.lexer.TokenType.MODULO;
 import static lu.pcy113.l3.lexer.TokenType.MUL;
@@ -58,8 +62,9 @@ import static lu.pcy113.l3.lexer.TokenType.PAREN_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.PLUS;
 import static lu.pcy113.l3.lexer.TokenType.RETURN;
 import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
+import static lu.pcy113.l3.lexer.TokenType.SHORT;
 import static lu.pcy113.l3.lexer.TokenType.STATIC;
-import static lu.pcy113.l3.lexer.TokenType.STRING;
+import static lu.pcy113.l3.lexer.TokenType.STRING_LIT;
 import static lu.pcy113.l3.lexer.TokenType.STRUCT;
 import static lu.pcy113.l3.lexer.TokenType.SWITCH;
 import static lu.pcy113.l3.lexer.TokenType.TRUE;
@@ -156,25 +161,21 @@ public class L3Lexer {
 					break next;
 
 				case '\"':
-					type = STRING;
+					type = STRING_LIT;
 					strValue = "";
 					int cl = line, cc = column;
 					while (hasNext() && peek() != '\"') {
 						if (peek("\\")) {
 							consume();
-							if(peek('0', 'e', 'f', 'v', 'b', 't', 'n', 'r')) {
-								String strV = ("\\"+consume())
-										.replace("\\n", "\n")
-										.replace("\\r", "\r")
-										.replace("\\t", "\t")
-										.replace("\\b", "\b")
-										//.replace("\\v", "\v")
+							if (peek('0', 'e', 'f', 'v', 'b', 't', 'n', 'r')) {
+								String strV = ("\\" + consume()).replace("\\n", "\n").replace("\\r", "\r").replace("\\t", "\t").replace("\\b", "\b")
+										// .replace("\\v", "\v")
 										.replace("\\f", "\f")
-										//.replace("\\e", "\e")
+										// .replace("\\e", "\e")
 										.replace("\\0", "\0");
 								strValue += strV;
 							}
-						}else {
+						} else {
 							strValue += consume();
 						}
 					}
@@ -185,11 +186,23 @@ public class L3Lexer {
 					flushToken();
 					break next;
 
+				case '\'':
+					type = CHAR_LIT;
+					cl = line;
+					cc = column;
+					strValue = consume() + "";
+					if (!peek("'") || !hasNext()) {
+						throw new LexerException("Unterminated string, starting at: " + cl + ":" + cc);
+					}
+					consume();
+					flushToken();
+					break next;
+
 				case '$':
 					type = DOLLAR;
 					flushToken();
 					break next;
-					
+
 				case ':':
 					type = COLON;
 					flushToken();
@@ -446,6 +459,18 @@ public class L3Lexer {
 			case "struct":
 				type = STRUCT;
 				break;
+			case "byte":
+				type = BYTE;
+				break;
+			case "short":
+				type = SHORT;
+				break;
+			case "char":
+				type = CHAR;
+				break;
+			case "long":
+				type = LONG;
+				break;
 			}
 
 			flushToken();
@@ -467,9 +492,11 @@ public class L3Lexer {
 
 		if (IDENT.equals(type)) {
 			tokens.add(new IdentifierToken(type, line, column - strValue.length(), strValue));
-		} else if (NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type)) {
+		} else if (NUM_LIT.equals(type) || CHAR_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type)) {
 			tokens.add(new NumericLiteralToken(type, line, column - strValue.length(), strValue));
-		} else if (STRING.equals(type)) {
+		} /*
+			 * else if (CHAR_LIT.equals(type)) { tokens.add(new CharLiteralToken(type, line, column - strValue.length(), strValue.charAt(0))); }
+			 */ else if (STRING_LIT.equals(type)) {
 			tokens.add(new StringLiteralToken(type, line, column - strValue.length(), strValue));
 		} else if (COMMENT.equals(type)) {
 			tokens.add(new CommentToken(type, line, column - strValue.length(), strValue));
@@ -522,20 +549,20 @@ public class L3Lexer {
 		}
 		return b;
 	}
-	
+
 	public boolean peek(char... s) {
 		int c = peek();
-		for(char cs : s) {
-			if(cs == c)
+		for (char cs : s) {
+			if (cs == c)
 				return true;
 		}
 		return false;
 	}
-	
+
 	public boolean peek(int x, char... s) {
 		int c = peek(x);
-		for(char cs : s) {
-			if(cs == c)
+		for (char cs : s) {
+			if (cs == c)
 				return true;
 		}
 		return false;
