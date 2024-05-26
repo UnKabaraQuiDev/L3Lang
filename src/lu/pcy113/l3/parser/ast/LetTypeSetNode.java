@@ -1,12 +1,24 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.L3Exception;
+import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 
-public class LetTypeSetNode extends Node {
+public class LetTypeSetNode extends Node implements RecursiveArithmeticOp {
 
 	public LetTypeSetNode(Node let, Node expr) {
 		add(let);
 		add(expr);
+	}
+	
+	@Override
+	public boolean isFloat() throws L3Exception {
+		return getClosestContainer().getLetTypeDefDescriptor(this).getNode().getType().isFloat();
+	}
+	
+	@Override
+	public boolean isInt() throws L3Exception {
+		return getClosestContainer().getLetTypeDefDescriptor(this).getNode().getType().isInt();
 	}
 
 	public Node getLet() {

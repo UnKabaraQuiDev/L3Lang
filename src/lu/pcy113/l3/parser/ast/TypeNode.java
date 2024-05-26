@@ -62,6 +62,14 @@ public class TypeNode extends Node {
 		}
 	}
 
+	public boolean isInt() {
+		return isGeneric() && getType().softEquals(TokenType.INT);
+	}
+	
+	public boolean isFloat() {
+		return isGeneric() && getType().softEquals(TokenType.FLOAT);
+	}
+	
 	public boolean isGeneric() {
 		return generic;
 	}

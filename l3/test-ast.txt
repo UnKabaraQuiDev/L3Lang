@@ -1,14 +1,19 @@
 RuntimeNode{
-	test = [FileScopeDescriptor(test -> sd_1 1:1)]}[
+	test = [FileScopeDescriptor(test -> sd_2 1:1)]}[
 	FileNode(test){
-		main = [FunScopeDescriptor(main -> sd_0 3:9)]}[
+		main = [FunScopeDescriptor(main -> sd_1 3:9)]}[
 		PackageDefNode('' 1:1),
 		FunDefNode(TypeNode(generic=true, type=INT_8, pointer=false): main){}[
 			TypeNode(generic=true, type=INT_8, pointer=false),
 			FunArgsDefNode,
-			FunBodyDefNode{}[
+			FunBodyDefNode{
+				bb = [LetScopeDescriptor(bb -> sd_0 4:10)]}[
+				LetTypeDefNode(bb, TypeNode(generic=true, type=INT_8, pointer=false), index=0, size=4)[
+					TypeNode(generic=true, type=INT_8, pointer=false),
+					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=4, column=15, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=2, value=2])
+				],
 				ReturnNode[
-					NumLitNode(lu.pcy113.l3.lexer.tokens.NumericLiteralToken[line=4, column=9, type=lu.pcy113.l3.lexer.TokenType[NUM_LIT, fixed=false, string=false], literal=256, value=256])
+					VarNumNode(bb, pointer=false, arrayOffset=false)
 				]
 			]
 		]

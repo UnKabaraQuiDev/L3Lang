@@ -1,8 +1,10 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 
-public class VarNumNode extends Node {
+public class VarNumNode extends Node implements RecursiveArithmeticOp {
 
 	private IdentifierToken mainIdent, childIdent;
 	private boolean arrayOffset = false;
@@ -29,6 +31,16 @@ public class VarNumNode extends Node {
 		this.arrayOffset = true;
 	}
 
+	@Override
+	public boolean isFloat() throws CompilerException {
+		return getClosestContainer().getLetTypeDefDescriptor(this).getNode().getType().isFloat();
+	}
+	
+	@Override
+	public boolean isInt() throws CompilerException {
+		return getClosestContainer().getLetTypeDefDescriptor(this).getNode().getType().isInt();
+	}
+
 	public boolean hasChild() {
 		return childIdent != null;
 	}
@@ -48,7 +60,7 @@ public class VarNumNode extends Node {
 	public IdentifierToken getMainIdent() {
 		return mainIdent;
 	}
-	
+
 	public IdentifierToken getChildIdent() {
 		return childIdent;
 	}

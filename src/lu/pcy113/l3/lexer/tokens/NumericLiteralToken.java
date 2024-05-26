@@ -50,6 +50,7 @@ public class NumericLiteralToken extends LiteralToken<Number> {
 				throw new LexerException(e, "Invalid number format: " + e.getMessage(), line, column, literal);
 			}
 		}
+		
 		if (value instanceof Long) {
 			if ((long) value <= Byte.MAX_VALUE) {
 				valueType = ValueType.INT_8;

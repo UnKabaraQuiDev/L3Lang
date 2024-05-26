@@ -2,11 +2,11 @@ package lu.pcy113.l3.compiler;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.MemoryType;
 import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
@@ -18,7 +18,7 @@ import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.ConArgValNode;
 import lu.pcy113.l3.parser.ast.ConArgsValNode;
-import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.DelocalizingNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FinallyDefNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
@@ -29,7 +29,7 @@ import lu.pcy113.l3.parser.ast.IfContainerNode;
 import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.DelocalizingNode;
+import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
@@ -467,7 +467,8 @@ public class X86Compiler extends L3Compiler {
 				if (def.isiStatic()) { // static
 					writeinstln("lea dword " + reg + ", [" + desc.getAsmName() + " + ebx]  ; compileLoadComputeExpr(" + node + "): static");
 				} else { // local
-					writeinstln("mov dword " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE)) + "]  ; Loading pointer 2, index = " + def.getStackIndex() + ", size = " + STACK_INDEX);
+					writeinstln("mov dword " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE)) + "]  ; Loading pointer 2, index = " + def.getStackIndex() + ", size = "
+							+ STACK_INDEX);
 					writeinstln("add " + reg + ", ebx  ; compileLoadComputeExpr(" + node + "): local");
 				}
 
@@ -516,12 +517,12 @@ public class X86Compiler extends L3Compiler {
 			if (node.getExpr() instanceof ArrayInit) {
 				if (node.getExpr() instanceof ArrayInitNode && ((ArrayInitNode) node.getExpr()).isRaw()) {
 					writedataln(asmName + " dd "
-							+ (((ArrayInitNode) node.getExpr()).getChildren().subList(1, ((ArrayInitNode) node.getExpr()).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString())).collect(Collectors.joining(", ")) + "  ; "
-							+ name);
+							+ (((ArrayInitNode) node.getExpr()).getChildren().subList(1, ((ArrayInitNode) node.getExpr()).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString())).collect(Collectors.joining(", "))
+							+ "  ; " + name);
 				} else if (node.getExpr() instanceof StringLitNode) {
 					writedataln(asmName + " dd "
-							+ (((StringLitNode) node.getExpr()).getChildren().subList(0, ((StringLitNode) node.getExpr()).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString())).collect(Collectors.joining(", ")) + "  ; "
-							+ name);
+							+ (((StringLitNode) node.getExpr()).getChildren().subList(0, ((StringLitNode) node.getExpr()).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString())).collect(Collectors.joining(", "))
+							+ "  ; " + name);
 				}
 			} else {
 				writedataln(asmName + " dd 0  ; " + desc.getIdentifier().getValue());
@@ -640,11 +641,13 @@ public class X86Compiler extends L3Compiler {
 
 					if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
 						if (expr instanceof StringLitNode) {
-							writedataln(asmName + " dd " + (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
-									+ "  ; " + name + " at " + pos);
+							writedataln(asmName + " dd "
+									+ (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", "))) + "  ; "
+									+ name + " at " + pos);
 						} else if (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw()) {
-							writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
-									+ "  ; " + name + " at " + pos);
+							writedataln(asmName + " dd "
+									+ (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", "))) + "  ; "
+									+ name + " at " + pos);
 						}
 
 						writeinstln("mov esi, " + asmName + "  ; From");
@@ -692,7 +695,7 @@ public class X86Compiler extends L3Compiler {
 			} else {
 
 				compileComputeExpr("eax", node.getExpr());
-				writeinstln("mov dword [esp+" + dataSize + "], eax  ; Push var: " + desc.getIdentifier().getValue());
+				writeinstln("mov "+getMovTypeNameBySize(MemoryUtil.getPrimitiveSize(node.getType().getType()))+" [esp+" + dataSize + "], eax  ; Push var: " + desc.getIdentifier().getValue());
 
 			}
 		} else { // alloc only
@@ -739,7 +742,7 @@ public class X86Compiler extends L3Compiler {
 				operator = ((ComparisonOpNode) node).getOperator();
 			}
 
-			if (right instanceof BinaryOpNode || right instanceof LogicalOpNode || right instanceof ComparisonOpNode) {
+			if (right instanceof RecursiveArithmeticOp) {
 				generateExprRecursive("ebx", right);
 				writeinstln("push ebx");
 				push(right);
@@ -838,9 +841,11 @@ public class X86Compiler extends L3Compiler {
 			writeinstln("mov " + reg + ", eax");
 		} else if (node instanceof NumLitNode) {
 			if (((NumLitNode) node).getValue() instanceof NumericLiteralToken) {
-				writeinstln("mov dword " + reg + ", " + ((NumericLiteralToken) ((NumLitNode) node).getValue()).getValue() + "  ; compileComputeExpr(" + node + ")");
+				writeinstln("mov " + getMovTypeNameBySize(MemoryUtil.getPrimitiveSize(((NumericLiteralToken) ((NumLitNode) node).getValue()).getValueType())) + " " + reg + ", "
+						+ ((NumericLiteralToken) ((NumLitNode) node).getValue()).getValue() + "  ; compileComputeExpr(" + node + ")");
 			} else if (((Token) ((NumLitNode) node).getValue()).getType().softEquals(TokenType.BOOLEAN)) {
-				writeinstln("mov dword " + reg + ", " + (((Token) ((NumLitNode) node).getValue()).getType().equals(TokenType.FALSE) ? 0 : 1) + "  ; compileComputeExpr(" + node + ")");
+				writeinstln("mov " + getMovTypeNameBySize(MemoryUtil.getPrimitiveSize(((NumericLiteralToken) ((NumLitNode) node).getValue()).getValueType())) + " " + reg + ", "
+						+ (((Token) ((NumLitNode) node).getValue()).getType().equals(TokenType.FALSE) ? 0 : 1) + "  ; compileComputeExpr(" + node + ")");
 			}
 		} else if (node instanceof VarNumNode) {
 			compileLoadVarNum(reg, (VarNumNode) node);
@@ -876,7 +881,7 @@ public class X86Compiler extends L3Compiler {
 	private void compileArrayInit(Node node) throws CompilerException {
 		if (node instanceof ArrayInit) {
 			ArrayInit expr = (ArrayInit) node;
-			
+
 			final String asmName = super.newVar();
 			final String name = "otf";
 
@@ -898,11 +903,12 @@ public class X86Compiler extends L3Compiler {
 
 				if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
 					if (expr instanceof StringLitNode) {
-						writedataln(asmName + " dd " + (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
-								+ "  ; " + name+" str");
+						writedataln(
+								asmName + " dd " + (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
+										+ "  ; " + name + " str");
 					} else if (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw()) {
-						writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream().map((c) -> ((NumericLiteralToken) ((NumLitNode) c).getValue()).getValue().toString()).collect(Collectors.joining(", ")))
-								+ "  ; " + name+" arr");
+						writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream()
+								.map((c) -> ((NumericLiteralToken) ((NumLitNode) c).getValue()).getValue().toString()).collect(Collectors.joining(", "))) + "  ; " + name + " arr");
 					}
 
 					writeinstln("mov esi, " + asmName + "  ; From");
@@ -1142,7 +1148,7 @@ public class X86Compiler extends L3Compiler {
 				if (def.isiStatic()) {
 					writeinstln("mov " + reg + ", [" + desc.getAsmName() + "]  ; compileLoadVarNum(" + node + "): static");
 				} else {
-					writeinstln("mov " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex() - 4) + "]  ; compileLoadVarNum(" + node + "): local");
+					writeinstln("mov " + getMovTypeNameBySize(MemoryUtil.getPrimitiveSize(def.getType().getType())) + " " + reg + ", [esp + " + (STACK_INDEX - def.getStackIndex()) + "]  ; compileLoadVarNum(" + node + "): local");
 				}
 
 			}
@@ -1158,19 +1164,33 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private String getDataTypeNameBySize(int bytes) {
-		return "dd";
-		/*
-		 * switch (bytes) { case 1: return "db"; case 2: return "dw"; case 4: return
-		 * "dd"; case 8: return "dq"; } return null;
-		 */
+		switch (bytes) {
+		case 1:
+			return "db";
+		case 2:
+			return "dw";
+		case 4:
+			return "dd";
+		case 8:
+			return "dq";
+		}
+		return null;
 	}
 
 	private String getMovTypeNameBySize(int bytes) {
-		return "dword";
-		/*
-		 * switch (bytes) { case 1: return "byte"; case 2: return "word"; case 4: return
-		 * "dword"; case 8: return "qword"; } return null;
-		 */
+
+		switch (bytes) {
+		case 1:
+			return "byte";
+		case 2:
+			return "word";
+		case 4:
+			return "dword";
+		case 8:
+			return "qword";
+		}
+		return null;
+
 	}
 
 	private void warn(String msg) {

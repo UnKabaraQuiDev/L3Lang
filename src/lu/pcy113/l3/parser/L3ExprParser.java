@@ -4,18 +4,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
-import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.DelocalizingNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.DelocalizingNode;
+import lu.pcy113.l3.parser.ast.LocalizingNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.NumLitNode;
@@ -91,7 +92,7 @@ public class L3ExprParser {
 		while (peek(TokenType.PLUS, TokenType.MINUS)) {
 			TokenType op = consume().getType();
 			Node right = parseFactor();
-			left = new BinaryOpNode(left, op, right);
+			left = new BinaryOpNode((RecursiveArithmeticOp) left, op, (RecursiveArithmeticOp) right);
 		}
 
 		return left;
@@ -108,7 +109,7 @@ public class L3ExprParser {
 				TokenType.BIT_OR)) {
 			TokenType op = consume().getType();
 			Node right = parsePrimary();
-			left = new BinaryOpNode(left, op, right);
+			left = new BinaryOpNode((RecursiveArithmeticOp) left, op, (RecursiveArithmeticOp) right);
 		}
 
 		return left;

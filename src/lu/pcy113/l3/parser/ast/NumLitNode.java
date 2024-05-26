@@ -1,14 +1,24 @@
 package lu.pcy113.l3.parser.ast;
 
-import lu.pcy113.l3.lexer.tokens.Token;
+import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 
-public class NumLitNode extends Node {
+public class NumLitNode extends Node implements RecursiveArithmeticOp {
 
 	private Object value;
 	private int stackSize = 4;
 
 	public NumLitNode(Object value) {
 		this.value = value;
+	}
+
+	@Override
+	public boolean isFloat() {
+		return value instanceof Float || value instanceof Double;
+	}
+
+	@Override
+	public boolean isInt() {
+		return !isFloat();
 	}
 
 	public Object getValue() {

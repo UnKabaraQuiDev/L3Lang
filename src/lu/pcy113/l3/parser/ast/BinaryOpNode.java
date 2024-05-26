@@ -1,17 +1,29 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.L3Exception;
+import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.TokenType;
 
-public class BinaryOpNode extends Node {
+public class BinaryOpNode extends Node implements RecursiveArithmeticOp {
 
 	private TokenType operator;
 
-	public BinaryOpNode(Node left, TokenType operator, Node right) {
-		add(left);
-		add(right);
+	public BinaryOpNode(RecursiveArithmeticOp left, TokenType operator, RecursiveArithmeticOp right) {
+		add((Node) left);
+		add((Node) right);
 		this.operator = operator;
 	}
 
+	@Override
+	public boolean isFloat() throws L3Exception {
+		return ((RecursiveArithmeticOp) getLeft()).isFloat() || ((RecursiveArithmeticOp) getRight()).isFloat();
+	}
+	
+	@Override
+	public boolean isInt() throws L3Exception {
+		return !isFloat();
+	}
+	
 	public Node getLeft() {
 		return children.get(0);
 	}

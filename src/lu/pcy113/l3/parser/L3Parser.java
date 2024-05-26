@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
-import lu.pcy113.l3.lexer.tokens.CharLiteralToken;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
@@ -463,7 +463,7 @@ public class L3Parser {
 			return new ReturnNode();
 
 		Node expr = parseExpression();
-		
+
 		return new ReturnNode(expr);
 	}
 
@@ -809,7 +809,7 @@ public class L3Parser {
 		while (peek(TokenType.PLUS, TokenType.MINUS)) {
 			TokenType op = consume().getType();
 			Node right = parseFactor();
-			left = new BinaryOpNode(left, op, right);
+			left = new BinaryOpNode((RecursiveArithmeticOp) left, op, (RecursiveArithmeticOp) right);
 		}
 
 		return left;
@@ -825,7 +825,7 @@ public class L3Parser {
 		while (peek(TokenType.MUL, TokenType.DIV, TokenType.MODULO, TokenType.BIT_XOR, TokenType.BIT_AND, TokenType.BIT_OR)) {
 			TokenType op = consume().getType();
 			Node right = parsePrimary();
-			left = new BinaryOpNode(left, op, right);
+			left = new BinaryOpNode((RecursiveArithmeticOp) left, op, (RecursiveArithmeticOp) right);
 		}
 
 		return left;
@@ -927,6 +927,7 @@ public class L3Parser {
 			consume(TokenType.BRACKET_OPEN);
 			Node expr = parseExpression();
 			consume(TokenType.BRACKET_CLOSE);
+			
 			var = new VarNumNode(varIdent, expr);
 
 		} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
@@ -1015,7 +1016,7 @@ public class L3Parser {
 			val = new VarNumNode((IdentifierToken) consume(TokenType.IDENT));
 		}
 		if (negative) {
-			return new BinaryOpNode(new NumLitNode(0), TokenType.MINUS, val);
+			return new BinaryOpNode(new NumLitNode(0), TokenType.MINUS, (RecursiveArithmeticOp) val);
 		} else {
 			return val;
 		}
