@@ -114,10 +114,10 @@ public class L3ExprParser {
 	}
 
 	private ExprNode parsePrimary() throws ParserException {
-		if(peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
-			
+		if (peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+
 			return new UnaryOpNode(consume().getType(), parseIdent(), true);
-			
+
 		} else if (peek(TokenType.NUM_LIT)) {
 
 			return new NumLitNode(consume());
@@ -170,13 +170,13 @@ public class L3ExprParser {
 
 			return parseFunCall(ident);
 
-		} else  {
+		} else {
 
 			FieldAccessNode fieldAccessNode = new FieldAccessNode(ident);
-			
-			if(peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+
+			if (peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
 				return new UnaryOpNode(consume().getType(), fieldAccessNode, false);
-			}else {
+			} else {
 				return fieldAccessNode;
 			}
 
