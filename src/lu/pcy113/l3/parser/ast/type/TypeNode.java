@@ -1,10 +1,11 @@
-package lu.pcy113.l3.parser.ast;
+package lu.pcy113.l3.parser.ast.type;
 
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.MemoryUtil;
+import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
 
 public class TypeNode extends Node {

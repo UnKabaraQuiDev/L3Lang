@@ -13,12 +13,11 @@ import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.ArrayInit;
-import lu.pcy113.l3.parser.ast.ArrayInitNode;
-import lu.pcy113.l3.parser.ast.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.ArrayAllocNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.ConArgValNode;
 import lu.pcy113.l3.parser.ast.ConArgsValNode;
-import lu.pcy113.l3.parser.ast.DelocalizingNode;
+import lu.pcy113.l3.parser.ast.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FinallyDefNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
@@ -27,20 +26,20 @@ import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.IfContainerNode;
 import lu.pcy113.l3.parser.ast.IfDefNode;
-import lu.pcy113.l3.parser.ast.LetTypeDefNode;
+import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.LetRefNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
-import lu.pcy113.l3.parser.ast.NumLitNode;
-import lu.pcy113.l3.parser.ast.ObjectInitNode;
+import lu.pcy113.l3.parser.ast.TypeAllocNode;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
-import lu.pcy113.l3.parser.ast.StringLitNode;
-import lu.pcy113.l3.parser.ast.TypeNode;
-import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
+import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.lit.NumLitNode;
+import lu.pcy113.l3.parser.ast.lit.StringLitNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
 import lu.pcy113.l3.parser.ast.scope.FileScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
@@ -52,6 +51,7 @@ import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 import lu.pcy113.l3.parser.ast.scope.ScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.StructDefNode;
 import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.pclib.GlobalLogger;
 
 public class X86Compiler extends L3Compiler {
@@ -132,8 +132,8 @@ public class X86Compiler extends L3Compiler {
 			}
 
 			compileFunDef(container.getFunDescriptor((FunDefNode) node));
-		} else if (node instanceof LetTypeDefNode) {
-			compileLetTypeDef(container.getLetTypeDefDescriptor((LetTypeDefNode) node));
+		} else if (node instanceof LetDefNode) {
+			compileLetTypeDef(container.getLetTypeDefDescriptor((LetDefNode) node));
 		} else if (node instanceof LetTypeSetNode) {
 			compileLetTypeSet((LetTypeSetNode) node);
 		} else if (node instanceof FunCallNode) {
@@ -164,7 +164,7 @@ public class X86Compiler extends L3Compiler {
 
 		for (ScopeDescriptor desc : container.getLocalDescriptors().values().stream().flatMap(List::stream).collect(Collectors.toList())) {
 			if (desc instanceof LetScopeDescriptor) {
-				if (((LetTypeDefNode) ((LetScopeDescriptor) desc).getNode()).isiStatic()) {
+				if (((LetDefNode) ((LetScopeDescriptor) desc).getNode()).isiStatic()) {
 					compileStaticLetTypeDef((LetScopeDescriptor) desc);
 				}
 			}
@@ -419,7 +419,7 @@ public class X86Compiler extends L3Compiler {
 	private void compileLetTypeSet(LetTypeSetNode node) throws CompilerException {
 		ScopeContainer container = node.getClosestContainer();
 		LetScopeDescriptor desc = (LetScopeDescriptor) container.getClosestDescriptor(node.getLetIdent().getValue());
-		LetTypeDefNode def = desc.getNode();
+		LetDefNode def = desc.getNode();
 
 		compileComputeExpr("eax", node.getExpr());
 
@@ -437,8 +437,8 @@ public class X86Compiler extends L3Compiler {
 	private void compileLoadComputeExpr(String reg, Node expr) throws CompilerException {
 		if (expr instanceof FunCallNode) {
 			compileComputeExpr(reg, expr);
-		} else if (expr instanceof VarNumNode) {
-			VarNumNode node = (VarNumNode) expr;
+		} else if (expr instanceof FieldAccessNode) {
+			FieldAccessNode node = (FieldAccessNode) expr;
 
 			ScopeContainer container = node.getClosestContainer();
 			String ident = node.getMainIdent().getValue();
@@ -446,7 +446,7 @@ public class X86Compiler extends L3Compiler {
 				throw new CompilerException("Cannot find: '" + ident + "' in current scope");
 			}
 			LetScopeDescriptor desc = (LetScopeDescriptor) container.getClosestDescriptor(ident);
-			LetTypeDefNode def = desc.getNode();
+			LetDefNode def = desc.getNode();
 
 			if (node.hasChild()) { // struct
 				StructScopeDescriptor structDesc = def.getClosestContainer().getStructScopeDescriptor(((IdentifierToken) def.getType().getIdent()).getValue());
@@ -481,8 +481,8 @@ public class X86Compiler extends L3Compiler {
 				}
 
 			}
-		} else if (expr instanceof DelocalizingNode) {
-			compileDelocalizing(reg, (DelocalizingNode) expr);
+		} else if (expr instanceof PointerDerefNode) {
+			compileDelocalizing(reg, (PointerDerefNode) expr);
 		} else {
 			implement(expr);
 		}
@@ -509,15 +509,15 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private void compileStaticLetTypeDef(LetScopeDescriptor desc) throws CompilerException {
-		LetTypeDefNode node = desc.getNode();
+		LetDefNode node = desc.getNode();
 		String name = node.getIdent().getValue();
 		String asmName = desc.getAsmName();
 
 		if (node.hasExpr()) {
 			if (node.getExpr() instanceof ArrayInit) {
-				if (node.getExpr() instanceof ArrayInitNode && ((ArrayInitNode) node.getExpr()).isRaw()) {
+				if (node.getExpr() instanceof ArrayAllocNode && ((ArrayAllocNode) node.getExpr()).isRaw()) {
 					writedataln(asmName + " dd "
-							+ (((ArrayInitNode) node.getExpr()).getChildren().subList(1, ((ArrayInitNode) node.getExpr()).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString())).collect(Collectors.joining(", "))
+							+ (((ArrayAllocNode) node.getExpr()).getChildren().subList(1, ((ArrayAllocNode) node.getExpr()).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString())).collect(Collectors.joining(", "))
 							+ "  ; " + name);
 				} else if (node.getExpr() instanceof StringLitNode) {
 					writedataln(asmName + " dd "
@@ -608,7 +608,7 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private void compileLetTypeDef(LetScopeDescriptor desc) throws CompilerException {
-		LetTypeDefNode node = desc.getNode();
+		LetDefNode node = desc.getNode();
 
 		final String asmName = desc.getAsmName();
 		final String name = node.getIdent().getValue();
@@ -639,14 +639,14 @@ public class X86Compiler extends L3Compiler {
 
 				if (expr.hasExpr()) { // init
 
-					if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
+					if (expr instanceof StringLitNode || (expr instanceof ArrayAllocNode && ((ArrayAllocNode) expr).isRaw())) {
 						if (expr instanceof StringLitNode) {
 							writedataln(asmName + " dd "
 									+ (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", "))) + "  ; "
 									+ name + " at " + pos);
-						} else if (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw()) {
+						} else if (expr instanceof ArrayAllocNode && ((ArrayAllocNode) expr).isRaw()) {
 							writedataln(asmName + " dd "
-									+ (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", "))) + "  ; "
+									+ (((ArrayAllocNode) expr).getChildren().subList(1, ((ArrayAllocNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", "))) + "  ; "
 									+ name + " at " + pos);
 						}
 
@@ -669,16 +669,16 @@ public class X86Compiler extends L3Compiler {
 
 				}
 
-			} else if (node.getExpr() instanceof ObjectInitNode) {
+			} else if (node.getExpr() instanceof TypeAllocNode) {
 
-				ObjectInitNode init = (ObjectInitNode) node.getExpr();
+				TypeAllocNode init = (TypeAllocNode) node.getExpr();
 				StructScopeDescriptor structDesc = node.getClosestContainer().getStructScopeDescriptor(((IdentifierToken) node.getType().getIdent()).getValue());
 				StructDefNode structDef = structDesc.getNode();
 
 				int stackPos = 0;
 				ConArgsValNode args = init.getArgs();
 
-				int neededArgCount = (int) structDef.getChildren().stream().filter(t -> t instanceof LetTypeDefNode).count();
+				int neededArgCount = (int) structDef.getChildren().stream().filter(t -> t instanceof LetDefNode).count();
 				if (args.getChildren().size() != neededArgCount)
 					throw new CompilerException("Struct: " + structDef + " awaits: " + neededArgCount + ", only got: " + args.getChildren().size());
 
@@ -688,7 +688,7 @@ public class X86Compiler extends L3Compiler {
 					compileComputeExpr("eax", arg.getExpr());
 					writeinstln("mov [esp + " + (stackPos) + "], eax");
 
-					((LetTypeDefNode) structDef.getChildren().get(index)).setStackIndex(stackPos);
+					((LetDefNode) structDef.getChildren().get(index)).setStackIndex(stackPos);
 					stackPos += getStackSize(arg.getExpr());
 				}
 
@@ -753,13 +753,13 @@ public class X86Compiler extends L3Compiler {
 				push(left);
 			}
 
-			if (right instanceof NumLitNode || right instanceof VarNumNode || right instanceof FunCallNode || right instanceof DelocalizingNode) {
+			if (right instanceof NumLitNode || right instanceof FieldAccessNode || right instanceof FunCallNode || right instanceof PointerDerefNode) {
 				compileComputeExpr("ebx", right);
 				writeinstln("push ebx");
 				push(right);
 			}
 
-			if (left instanceof NumLitNode || left instanceof VarNumNode || left instanceof FunCallNode || left instanceof DelocalizingNode) {
+			if (left instanceof NumLitNode || left instanceof FieldAccessNode || left instanceof FunCallNode || left instanceof PointerDerefNode) {
 				compileComputeExpr("eax", left);
 				writeinstln("push eax");
 				push(left);
@@ -847,25 +847,25 @@ public class X86Compiler extends L3Compiler {
 				writeinstln("mov " + getMovTypeNameBySize(MemoryUtil.getPrimitiveSize(((NumericLiteralToken) ((NumLitNode) node).getValue()).getValueType())) + " " + reg + ", "
 						+ (((Token) ((NumLitNode) node).getValue()).getType().equals(TokenType.FALSE) ? 0 : 1) + "  ; compileComputeExpr(" + node + ")");
 			}
-		} else if (node instanceof VarNumNode) {
-			compileLoadVarNum(reg, (VarNumNode) node);
+		} else if (node instanceof FieldAccessNode) {
+			compileLoadVarNum(reg, (FieldAccessNode) node);
 		} else if (node instanceof BinaryOpNode || node instanceof LogicalOpNode || node instanceof ComparisonOpNode) {
 			generateExprRecursive(reg, node);
 		} else if (node instanceof StringLitNode) {
 			compileArrayInit((StringLitNode) node);
 			writeinstln("mov " + reg + ", [esp + " + (((StringLitNode) node).getStackSize() - 4) + "]  ; Loading StringLitNode pointer");
-		} else if (node instanceof DelocalizingNode) {
-			compileDelocalizing(reg, (DelocalizingNode) node);
-		} else if (node instanceof LocalizingNode) {
-			compileLocalizing(reg, (LocalizingNode) node);
-		} else if (node instanceof ArrayInitNode) {
+		} else if (node instanceof PointerDerefNode) {
+			compileDelocalizing(reg, (PointerDerefNode) node);
+		} else if (node instanceof LetRefNode) {
+			compileLocalizing(reg, (LetRefNode) node);
+		} else if (node instanceof ArrayAllocNode) {
 			compileArrayInit(node);
 		} else {
 			implement(node);
 		}
 	}
 
-	private void compileLocalizing(String reg, LocalizingNode node) throws CompilerException {
+	private void compileLocalizing(String reg, LetRefNode node) throws CompilerException {
 		if (true)
 			throw new CompilerException("To do somehow");
 
@@ -873,7 +873,7 @@ public class X86Compiler extends L3Compiler {
 		writeinstln("lea " + reg + ", [" + reg + "]  ; Loading " + node.getNode());
 	}
 
-	private void compileDelocalizing(String reg, DelocalizingNode node) throws CompilerException {
+	private void compileDelocalizing(String reg, PointerDerefNode node) throws CompilerException {
 		compileComputeExpr(reg, node.getNode());
 		writeinstln("mov " + reg + ", [" + reg + "]  ; Loading " + node.getNode());
 	}
@@ -901,13 +901,13 @@ public class X86Compiler extends L3Compiler {
 
 			if (expr.hasExpr()) { // init
 
-				if (expr instanceof StringLitNode || (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw())) {
+				if (expr instanceof StringLitNode || (expr instanceof ArrayAllocNode && ((ArrayAllocNode) expr).isRaw())) {
 					if (expr instanceof StringLitNode) {
 						writedataln(
 								asmName + " dd " + (((StringLitNode) expr).getChildren().subList(0, ((StringLitNode) expr).getChildren().size()).stream().map((c) -> ((NumLitNode) c).getValue().toString()).collect(Collectors.joining(", ")))
 										+ "  ; " + name + " str");
-					} else if (expr instanceof ArrayInitNode && ((ArrayInitNode) expr).isRaw()) {
-						writedataln(asmName + " dd " + (((ArrayInitNode) expr).getChildren().subList(1, ((ArrayInitNode) expr).getChildren().size()).stream()
+					} else if (expr instanceof ArrayAllocNode && ((ArrayAllocNode) expr).isRaw()) {
+						writedataln(asmName + " dd " + (((ArrayAllocNode) expr).getChildren().subList(1, ((ArrayAllocNode) expr).getChildren().size()).stream()
 								.map((c) -> ((NumericLiteralToken) ((NumLitNode) c).getValue()).getValue().toString()).collect(Collectors.joining(", "))) + "  ; " + name + " arr");
 					}
 
@@ -1040,12 +1040,12 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	private int getStackSize(Node node) throws CompilerException {
-		if (node instanceof VarNumNode) {
-			return ((LetTypeDefNode) ((LetScopeDescriptor) node.getParentContainer().getLetTypeDefDescriptor((VarNumNode) node)).getNode()).getType().getSize();
+		if (node instanceof FieldAccessNode) {
+			return ((LetDefNode) ((LetScopeDescriptor) node.getParentContainer().getLetTypeDefDescriptor((FieldAccessNode) node)).getNode()).getType().getSize();
 		} else if (node instanceof NumLitNode) {
 			return ((NumLitNode) node).getStackSize();
-		} else if (node instanceof LetTypeDefNode) {
-			return ((LetTypeDefNode) node).getStackSize();
+		} else if (node instanceof LetDefNode) {
+			return ((LetDefNode) node).getStackSize();
 		} else if (node instanceof FunCallNode) {
 			return 4;
 		} else if (node instanceof FunArgValNode) {
@@ -1058,7 +1058,7 @@ public class X86Compiler extends L3Compiler {
 			return ((ArrayInit) node).getStackSize();
 		} else if (node instanceof BinaryOpNode || node instanceof LogicalOpNode || node instanceof ComparisonOpNode) {
 			return 4;
-		} else if (node instanceof DelocalizingNode) {
+		} else if (node instanceof PointerDerefNode) {
 			return 4; // depends on the type but type info missing.
 		} else {
 			implement(node);
@@ -1090,7 +1090,7 @@ public class X86Compiler extends L3Compiler {
 	private void compilePrint(Node expr, Node length) throws CompilerException {
 		if (expr instanceof StringLitNode) {
 			implement();
-		} else if (expr instanceof VarNumNode) {
+		} else if (expr instanceof FieldAccessNode) {
 			writeinstln("; Println");
 			compileComputeExpr("edx", length); // length
 			compileComputeExpr("ecx", expr); // pointer
@@ -1100,14 +1100,14 @@ public class X86Compiler extends L3Compiler {
 		}
 	}
 
-	private void compileLoadVarNum(String reg, VarNumNode node) throws CompilerException {
+	private void compileLoadVarNum(String reg, FieldAccessNode node) throws CompilerException {
 		ScopeContainer container = node.getClosestContainer();
 		String ident = node.getMainIdent().getValue();
 		if (!container.containsDescriptor(ident)) {
 			throw new CompilerException("Cannot find: '" + ident + "' in current scope");
 		}
 		LetScopeDescriptor desc = (LetScopeDescriptor) container.getClosestDescriptor(ident);
-		LetTypeDefNode def = desc.getNode();
+		LetDefNode def = desc.getNode();
 
 		if (def.getType().isPointer()) { // pointer
 			if (node.isArrayOffset()) { // array

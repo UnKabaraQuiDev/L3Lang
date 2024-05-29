@@ -6,9 +6,9 @@ import java.util.List;
 
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.FunCallNode;
-import lu.pcy113.l3.parser.ast.LetTypeDefNode;
+import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
 
 public interface ScopeContainer {
 
@@ -34,23 +34,23 @@ public interface ScopeContainer {
 
 	boolean containsFunDescriptor(FunCallNode node);
 
-	boolean containsLetTypeDefDescriptor(LetTypeDefNode node);
+	boolean containsLetTypeDefDescriptor(LetDefNode node);
 
 	boolean containsFunDescriptor(FunDefNode node);
 
-	boolean containsLetTypeDefDescriptor(VarNumNode node);
+	boolean containsLetTypeDefDescriptor(FieldAccessNode node);
 
 	boolean containsStructScopeDescriptor(StructDefNode node) throws CompilerException;
 
 	FunScopeDescriptor getFunDescriptor(FunCallNode node) throws CompilerException;
 
-	LetScopeDescriptor getLetTypeDefDescriptor(LetTypeDefNode node) throws CompilerException;
+	LetScopeDescriptor getLetTypeDefDescriptor(LetDefNode node) throws CompilerException;
 
 	FunScopeDescriptor getFunDescriptor(FunDefNode node) throws CompilerException;
 
 	LetScopeDescriptor getLetTypeDefDescriptor(LetTypeSetNode node) throws CompilerException;
 
-	LetScopeDescriptor getLetTypeDefDescriptor(VarNumNode node) throws CompilerException;
+	LetScopeDescriptor getLetTypeDefDescriptor(FieldAccessNode node) throws CompilerException;
 
 	LetScopeDescriptor getLetTypeDefDescriptor(String ident) throws CompilerException;
 

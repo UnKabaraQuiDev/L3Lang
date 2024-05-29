@@ -9,18 +9,18 @@ import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.Token;
-import lu.pcy113.l3.parser.ast.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
-import lu.pcy113.l3.parser.ast.DelocalizingNode;
+import lu.pcy113.l3.parser.ast.PointerDerefNode;
+import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.LetRefNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
-import lu.pcy113.l3.parser.ast.NumLitNode;
-import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 
 public class L3ExprParser {
@@ -127,10 +127,10 @@ public class L3ExprParser {
 			return expr;
 		} else if (peek(TokenType.DOLLAR)) {
 			consume(TokenType.DOLLAR);
-			return new DelocalizingNode(parseIdent());
+			return new PointerDerefNode(parseIdent());
 		} else if (peek(TokenType.COLON)) {
 			consume(TokenType.COLON);
-			return new LocalizingNode(parseIdent());
+			return new LetRefNode(parseIdent());
 		} else {
 			throw new RuntimeException("Unexpected token: " + peek().getType());
 		}
@@ -143,7 +143,7 @@ public class L3ExprParser {
 			consume(TokenType.BRACKET_OPEN);
 			Node expr = parseExpression();
 			consume(TokenType.BRACKET_CLOSE);
-			var = new VarNumNode(varIdent, expr);
+			var = new FieldAccessNode(varIdent, expr);
 		} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
 			boolean preset = peek(TokenType.HASH);
 			if (preset)
@@ -161,7 +161,7 @@ public class L3ExprParser {
 			call.add(args);
 			return call;
 		} else {
-			var = new VarNumNode(varIdent);
+			var = new FieldAccessNode(varIdent);
 		}
 		return var;
 	}

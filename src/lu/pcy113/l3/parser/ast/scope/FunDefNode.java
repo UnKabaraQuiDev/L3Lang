@@ -2,9 +2,9 @@ package lu.pcy113.l3.parser.ast.scope;
 
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
-import lu.pcy113.l3.parser.ast.FunArgsDefNode;
+import lu.pcy113.l3.parser.ast.FunParamDefNode;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
-import lu.pcy113.l3.parser.ast.TypeNode;
 
 public class FunDefNode extends ScopeContainerNode {
 
@@ -23,8 +23,8 @@ public class FunDefNode extends ScopeContainerNode {
 		return ident;
 	}
 
-	public FunArgsDefNode getArgs() {
-		return (FunArgsDefNode) children.get(1);
+	public FunParamDefNode getArgs() {
+		return (FunParamDefNode) children.get(1);
 	}
 
 	public FunBodyDefNode getBody() {

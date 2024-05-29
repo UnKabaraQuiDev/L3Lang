@@ -12,38 +12,37 @@ import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
-import lu.pcy113.l3.parser.ast.ArrayInitNode;
-import lu.pcy113.l3.parser.ast.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.ArrayAllocNode;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.ConArgValNode;
 import lu.pcy113.l3.parser.ast.ConArgsValNode;
-import lu.pcy113.l3.parser.ast.DelocalizingNode;
+import lu.pcy113.l3.parser.ast.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FinallyDefNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
 import lu.pcy113.l3.parser.ast.FunArgDefNode;
 import lu.pcy113.l3.parser.ast.FunArgValNode;
-import lu.pcy113.l3.parser.ast.FunArgsDefNode;
+import lu.pcy113.l3.parser.ast.FunParamDefNode;
 import lu.pcy113.l3.parser.ast.FunArgsValNode;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.IfContainerNode;
 import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.ImportDefNode;
-import lu.pcy113.l3.parser.ast.LetTypeDefNode;
+import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.LocalizingNode;
+import lu.pcy113.l3.parser.ast.LetRefNode;
 import lu.pcy113.l3.parser.ast.LogicalOpNode;
 import lu.pcy113.l3.parser.ast.Node;
-import lu.pcy113.l3.parser.ast.NumLitNode;
-import lu.pcy113.l3.parser.ast.ObjectInitNode;
+import lu.pcy113.l3.parser.ast.TypeAllocNode;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
-import lu.pcy113.l3.parser.ast.StringLitNode;
-import lu.pcy113.l3.parser.ast.TypeNode;
-import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
+import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.lit.NumLitNode;
+import lu.pcy113.l3.parser.ast.lit.StringLitNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
@@ -53,6 +52,7 @@ import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 import lu.pcy113.l3.parser.ast.scope.ScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.StructDefNode;
 import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.l3.utils.FileUtils;
 
 public class L3Parser {
@@ -108,7 +108,7 @@ public class L3Parser {
 
 			return ltdn;
 		} else if (peek(TokenType.LET)) { // var declaration
-			LetTypeDefNode ltdn = parseLetTypeDef(parent);
+			LetDefNode ltdn = parseLetTypeDef(parent);
 
 			return ltdn;
 		} else if ((peek(TokenType.IDENT) && (peek(1, TokenType.PAREN_OPEN, TokenType.HASH) || peek(TokenType.PAREN_OPEN))
@@ -213,7 +213,7 @@ public class L3Parser {
 
 	private Node parseLineExpr(Node parent) throws ParserException {
 		Node node = parseFunctionalExpr(parent);
-		if (node instanceof LetTypeDefNode || node instanceof FunCallNode || node instanceof ReturnNode || node instanceof LetTypeSetNode) {
+		if (node instanceof LetDefNode || node instanceof FunCallNode || node instanceof ReturnNode || node instanceof LetTypeSetNode) {
 			consume(TokenType.SEMICOLON);
 		}
 		return node;
@@ -402,9 +402,9 @@ public class L3Parser {
 				arrayIndex = parseExpression();
 				consume(TokenType.BRACKET_CLOSE);
 
-				val = new VarNumNode(ident, arrayIndex);
+				val = new FieldAccessNode(ident, arrayIndex);
 			} else {
-				val = new VarNumNode(ident);
+				val = new FieldAccessNode(ident);
 			}
 
 			Token assign = consume(TokenType.ASSIGN);
@@ -438,9 +438,9 @@ public class L3Parser {
 				arrayIndex = parseExpression();
 				consume(TokenType.BRACKET_CLOSE);
 
-				val = new VarNumNode(ident, ident2, arrayIndex);
+				val = new FieldAccessNode(ident, ident2, arrayIndex);
 			} else {
-				val = new VarNumNode(ident, ident2);
+				val = new FieldAccessNode(ident, ident2);
 			}
 
 			Token assign = consume(TokenType.ASSIGN);
@@ -489,7 +489,7 @@ public class L3Parser {
 			FunDefNode fdn = new FunDefNode(returnType, ident);
 			container.add(fdn);
 
-			FunArgsDefNode args = parseFunArgsDef(fdn);
+			FunParamDefNode args = parseFunArgsDef(fdn);
 
 			FunBodyDefNode body = parseFunBodyDef(fdn);
 
@@ -500,15 +500,15 @@ public class L3Parser {
 		throw new ParserException("Undefined Fun def");
 	}
 
-	private FunArgsDefNode parseFunArgsDef(FunDefNode fdn) throws ParserException {
+	private FunParamDefNode parseFunArgsDef(FunDefNode fdn) throws ParserException {
 		consume(TokenType.PAREN_OPEN);
-		FunArgsDefNode argsNode = new FunArgsDefNode();
+		FunParamDefNode argsNode = new FunParamDefNode();
 		fdn.add(argsNode);
 
 		// int index = 0;
 		while (!peek(TokenType.PAREN_CLOSE)) {
 			FunArgDefNode arg = parseFunArgDef();
-			LetTypeDefNode let = arg.getLet();
+			LetDefNode let = arg.getLet();
 			argsNode.add(arg);
 			fdn.addDescriptor(let.getIdent().getValue(), new LetScopeDescriptor(let.getIdent(), let));
 			if (peek(TokenType.COMMA)) {
@@ -604,7 +604,7 @@ public class L3Parser {
 			TypeNode typeNode = parseType();
 			IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 
-			LetTypeDefNode typeDefNode = new LetTypeDefNode(typeNode, (IdentifierToken) ident, false, true);
+			LetDefNode typeDefNode = new LetDefNode(typeNode, (IdentifierToken) ident, false, true);
 			// TODO: Array
 
 			return new FunArgDefNode(typeDefNode);
@@ -638,7 +638,7 @@ public class L3Parser {
 		}
 	}
 
-	private LetTypeDefNode parseLetTypeDef(Node parent) throws ParserException {
+	private LetDefNode parseLetTypeDef(Node parent) throws ParserException {
 		ScopeContainer container = parent.getClosestContainer();
 
 		Token let = consume(TokenType.LET);
@@ -650,7 +650,7 @@ public class L3Parser {
 
 		IdentifierToken ident = (IdentifierToken) consume(TokenType.IDENT);
 
-		LetTypeDefNode typeDefNode = new LetTypeDefNode(type, ident, iStatic, false);
+		LetDefNode typeDefNode = new LetDefNode(type, ident, iStatic, false);
 
 		if (container.containsDescriptor(ident.getValue())) {
 			throw new ParserException("let " + ident.getValue() + " already defined: " + ident.getPosition());
@@ -687,7 +687,7 @@ public class L3Parser {
 		return typeDefNode;
 	}
 
-	private ConArgsValNode parseConArgsVal(ObjectInitNode fcn) throws ParserException {
+	private ConArgsValNode parseConArgsVal(TypeAllocNode fcn) throws ParserException {
 		ConArgsValNode fargs = new ConArgsValNode();
 		fcn.add(fargs);
 		int index = 0;
@@ -707,9 +707,9 @@ public class L3Parser {
 
 	private int getLetIndex(ScopeContainer container) {
 		return (int) (long) container.getDescriptors().values().stream().flatMap(List::stream).map((ScopeDescriptor i) -> {
-			if (i instanceof LetScopeDescriptor && ((LetScopeDescriptor) i).getNode() instanceof LetTypeDefNode) {
+			if (i instanceof LetScopeDescriptor && ((LetScopeDescriptor) i).getNode() instanceof LetDefNode) {
 				LetScopeDescriptor letDesc = (LetScopeDescriptor) i;
-				LetTypeDefNode letNode = (LetTypeDefNode) letDesc.getNode();
+				LetDefNode letNode = (LetDefNode) letDesc.getNode();
 				return letNode.isiStatic() ? 0 : 1;
 			}
 			return 0;
@@ -861,12 +861,12 @@ public class L3Parser {
 				throw new RuntimeException("Unexpected token: " + peek());
 			}
 
-			return new DelocalizingNode(expr);
+			return new PointerDerefNode(expr);
 
 		} else if (peek(TokenType.COLON)) {
 
 			consume(TokenType.COLON);
-			return new LocalizingNode(parseIdent());
+			return new LetRefNode(parseIdent());
 
 		} else if (peek(TokenType.STRING_LIT)) {
 
@@ -882,7 +882,7 @@ public class L3Parser {
 
 				consume(TokenType.BRACKET_OPEN);
 
-				ArrayInitNode arr = new ArrayInitNode(newType);
+				ArrayAllocNode arr = new ArrayAllocNode(newType);
 
 				if (peek(TokenType.NUM_LIT)) {
 					int newTypeArrayLength = (int) (long) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
@@ -905,7 +905,7 @@ public class L3Parser {
 
 				consume(TokenType.PAREN_OPEN);
 
-				ObjectInitNode objInit = new ObjectInitNode(newType);
+				TypeAllocNode objInit = new TypeAllocNode(newType);
 				parseConArgsVal(objInit);
 
 				consume(TokenType.PAREN_CLOSE);
@@ -928,7 +928,7 @@ public class L3Parser {
 			Node expr = parseExpression();
 			consume(TokenType.BRACKET_CLOSE);
 			
-			var = new VarNumNode(varIdent, expr);
+			var = new FieldAccessNode(varIdent, expr);
 
 		} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
 
@@ -951,11 +951,11 @@ public class L3Parser {
 		} else if (peek(TokenType.DOT) && peek(1, TokenType.IDENT) && !peek(2, TokenType.PAREN_OPEN)) {
 
 			consume(TokenType.DOT);
-			var = new VarNumNode(varIdent, (IdentifierToken) consume(TokenType.IDENT));
+			var = new FieldAccessNode(varIdent, (IdentifierToken) consume(TokenType.IDENT));
 
 		} else {
 
-			var = new VarNumNode(varIdent);
+			var = new FieldAccessNode(varIdent);
 
 		}
 		return var;
@@ -967,13 +967,13 @@ public class L3Parser {
 		return new LetTypeSetNode(var, expr);
 	}
 
-	private ArrayInitNode parseArrayInit() throws ParserException {
+	private ArrayAllocNode parseArrayInit() throws ParserException {
 		consume(TokenType.NEW);
 		TypeNode type = parseType();
 		consume(TokenType.BRACKET_OPEN);
 		int arraySize = (int) (long) ((NumericLiteralToken) consume(TokenType.NUM_LIT)).getValue();
 		consume(TokenType.BRACKET_CLOSE);
-		return new ArrayInitNode(type, arraySize);
+		return new ArrayAllocNode(type, arraySize);
 	}
 
 	private boolean canParseArrayInit() {
@@ -1011,9 +1011,9 @@ public class L3Parser {
 			arrayIndex = parseExpression();
 			consume(TokenType.BRACKET_CLOSE);
 
-			val = new VarNumNode(ident, arrayIndex);
+			val = new FieldAccessNode(ident, arrayIndex);
 		} else {
-			val = new VarNumNode((IdentifierToken) consume(TokenType.IDENT));
+			val = new FieldAccessNode((IdentifierToken) consume(TokenType.IDENT));
 		}
 		if (negative) {
 			return new BinaryOpNode(new NumLitNode(0), TokenType.MINUS, (RecursiveArithmeticOp) val);

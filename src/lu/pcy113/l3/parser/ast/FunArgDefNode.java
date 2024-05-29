@@ -2,12 +2,12 @@ package lu.pcy113.l3.parser.ast;
 
 public class FunArgDefNode extends Node {
 
-	public FunArgDefNode(LetTypeDefNode typeDefNode) {
+	public FunArgDefNode(LetDefNode typeDefNode) {
 		add(typeDefNode);
 	}
 	
-	public LetTypeDefNode getLet() {
-		return (LetTypeDefNode) children.get(0);
+	public LetDefNode getLet() {
+		return (LetDefNode) children.get(0);
 	}
 	
 	@Override

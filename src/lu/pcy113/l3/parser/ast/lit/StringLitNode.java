@@ -1,8 +1,11 @@
-package lu.pcy113.l3.parser.ast;
+package lu.pcy113.l3.parser.ast.lit;
 
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.CharLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
+import lu.pcy113.l3.parser.ast.ArrayInit;
+import lu.pcy113.l3.parser.ast.Node;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.l3.utils.StringUtils;
 
 public class StringLitNode extends Node implements ArrayInit {

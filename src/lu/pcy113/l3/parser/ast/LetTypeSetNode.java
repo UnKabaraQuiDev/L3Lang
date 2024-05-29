@@ -36,15 +36,15 @@ public class LetTypeSetNode extends Node implements RecursiveArithmeticOp {
 
 	public IdentifierToken getLetIdent() {
 		Node let = getLet();
-		if (let instanceof DelocalizingNode) {
-			DelocalizingNode llet = (DelocalizingNode) let;
-			if (llet.getNode() instanceof VarNumNode) {
-				return (IdentifierToken) ((VarNumNode) (llet).getNode()).getMainIdent();
+		if (let instanceof PointerDerefNode) {
+			PointerDerefNode llet = (PointerDerefNode) let;
+			if (llet.getNode() instanceof FieldAccessNode) {
+				return (IdentifierToken) ((FieldAccessNode) (llet).getNode()).getMainIdent();
 			} else if (llet.getNode() instanceof FunCallNode) {
 				return (IdentifierToken) ((FunCallNode) (llet).getNode()).getIdent();
 			}
-		} else if (let instanceof VarNumNode) {
-			return ((VarNumNode) let).getMainIdent();
+		} else if (let instanceof FieldAccessNode) {
+			return ((FieldAccessNode) let).getMainIdent();
 		}
 		return null;
 	}

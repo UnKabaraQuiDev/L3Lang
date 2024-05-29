@@ -1,5 +1,7 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.parser.ast.type.TypeNode;
+
 public interface ArrayInit {
 
 	TypeNode getType();

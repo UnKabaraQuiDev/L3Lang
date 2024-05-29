@@ -9,10 +9,10 @@ import java.util.stream.Collectors;
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.FunCallNode;
-import lu.pcy113.l3.parser.ast.LetTypeDefNode;
+import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetTypeSetNode;
 import lu.pcy113.l3.parser.ast.Node;
-import lu.pcy113.l3.parser.ast.VarNumNode;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
 
 public class ScopeContainerNode extends Node implements ScopeContainer {
 
@@ -139,8 +139,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public LetScopeDescriptor getLetTypeDefDescriptor(LetTypeDefNode node) throws CompilerException {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((LetTypeDefNode) node).getIdent().getValue());
+	public LetScopeDescriptor getLetTypeDefDescriptor(LetDefNode node) throws CompilerException {
+		Collection<ScopeDescriptor> col = this.getDescriptors(((LetDefNode) node).getIdent().getValue());
 
 		return (LetScopeDescriptor) col.stream().filter(c -> c instanceof LetScopeDescriptor).filter(c -> ((LetScopeDescriptor) c).getNode().equals(node)).findFirst()
 				.orElseThrow(() -> new CompilerException("LetTypeDef: " + node + ", not defined."));
@@ -163,8 +163,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public LetScopeDescriptor getLetTypeDefDescriptor(VarNumNode node) throws CompilerException {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((VarNumNode) node).getMainIdent().getValue());
+	public LetScopeDescriptor getLetTypeDefDescriptor(FieldAccessNode node) throws CompilerException {
+		Collection<ScopeDescriptor> col = this.getDescriptors(((FieldAccessNode) node).getMainIdent().getValue());
 
 		return (LetScopeDescriptor) col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("LetTypeDef: " + node + ", not defined."));
 	}
@@ -186,8 +186,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public boolean containsLetTypeDefDescriptor(LetTypeDefNode node) {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((LetTypeDefNode) node).getIdent().getValue());
+	public boolean containsLetTypeDefDescriptor(LetDefNode node) {
+		Collection<ScopeDescriptor> col = this.getDescriptors(((LetDefNode) node).getIdent().getValue());
 
 		return col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().isPresent();
 	}
@@ -200,8 +200,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public boolean containsLetTypeDefDescriptor(VarNumNode node) {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((VarNumNode) node).getMainIdent().getValue());
+	public boolean containsLetTypeDefDescriptor(FieldAccessNode node) {
+		Collection<ScopeDescriptor> col = this.getDescriptors(((FieldAccessNode) node).getMainIdent().getValue());
 
 		return col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().isPresent();
 	}

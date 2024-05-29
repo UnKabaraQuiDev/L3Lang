@@ -1,0 +1,163 @@
+- RuntimeNode (scope)
+- PackageNode (scope)
+- FileNode (scope)
+- ImportNode
+
+- ClassDefNode (scope)
+- InterfaceDefNode (scope) (signatures only)
+- StructDefNode (scope) (fields only)
+- UnionDefNode (scope) (fields only)
+- EnumDefNode (scope) (static fields ? only)
+- AnnotationDefNode (scope) (fields only)
+
+- FunDefNode (scope)
+- FieldDefNode
+- LetDefNode
+- FunParamDefNode
+- ScopeNode (scope)
+- IfContainerNode
+- IfNode (scope)
+- ElseNode (scope)
+- SwitchContainerNode
+- CaseNode (scope)
+- WhileNode (scope)
+- DoWhileNode (scope)
+- ForNode (scope)
+- ForEachNode (scope)
+- BreakNode (scope)
+- ReturnNode (scope)
+- ThrowNode (scope)
+- TryCatchContainerNode (scope)
+- TryNode (scope)
+- CatchNode (scope)
+- FinallyNode (scope)
+
+- LetSetNode
+- ExprNode
+- UnaryNode
+- BinaryNode
+- PostfixNode
+- PrefixNode
+- ConditionalNode (ternary)
+- FunCallNode
+- FieldAccessNode
+- ArrayAccessNode
+- ArrayAllocNode
+- PrimitiveAllocNode (int, float, bool ?)
+- TypeAllocNode (struct, class, union)
+- CastNode
+
+- PointerDerefNode (addr -> value)
+- LetRefNode (var -> addr)
+
+- BoolLitNode
+- (CharLitNode)
+- StringLitNode
+- NumLitNode
+- NullLitNode
+
+- TypeNode
+- PrimitiveTypeNode
+- ArrayTypeNode
+- ClassType
+- GenericType
+- FunType
+
+- ModifierNode (on LetDefNode, FunDefNode, FieldDefNode)
+- AnnotationNode (on ClassDefNode, StructDefNode, InterfaceDefNode, UnionDefNode, EnumDefNode, LetDefNode, FunDefNode, FieldDefNode)
+
+// Registers: https://www.google.com/url?sa=i&url=https%3A%2F%2Fflint.cs.yale.edu%2Fcs421%2Fpapers%2Fx86-asm%2Fasm.html&psig=AOvVaw0rCnty8jhAqtjqMHjZcsUA&ust=1716928948284000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCPCNrfLYroYDFQAAAAAdAAAAABAE
+
+// build symbol table (populate LetTypeDefDescriptors at compile-time, or change a flag to make it defined in the current scope)
+// use ebp to set the start of the stack frame, then compute the offset to the stack content from ebp (push ebp for each new scope/stack frame)
+// ebp is only reset on function start, not on each scope; alloc new space for each space but don't move ebp
+// Return from a function: esp = ebp
+
+
+### Common AST Nodes for Java and C/C++
+
+#### 1. **Program Structure**
+   - **CompilationUnit**: Represents the entire source file.
+   - **PackageDeclaration** (Java): Represents the package declaration.
+   - **ImportDeclaration** (Java): Represents import statements.
+   - **NamespaceDeclaration** (C++): Represents namespace declarations.
+
+#### 2. **Declarations**
+   - **ClassDeclaration**: Represents a class definition.
+   - **InterfaceDeclaration** (Java): Represents an interface definition.
+   - **StructDeclaration** (C/C++): Represents a struct definition.
+   - **UnionDeclaration** (C/C++): Represents a union definition.
+   - **EnumDeclaration**: Represents an enum definition.
+   - **MethodDeclaration**: Represents a method/function definition.
+   - **FieldDeclaration**: Represents a class/struct/union field declaration.
+   - **VariableDeclaration**: Represents a local variable declaration.
+   - **ParameterDeclaration**: Represents a function/method parameter.
+   - **TypeDeclaration**: Represents a type alias or typedef.
+
+#### 3. **Statements**
+   - **BlockStatement**: Represents a block of statements (compound statement).
+   - **ExpressionStatement**: Represents a statement consisting of a single expression.
+   - **IfStatement**: Represents an if-else statement.
+   - **SwitchStatement**: Represents a switch statement.
+   - **CaseStatement**: Represents a case within a switch statement.
+   - **WhileStatement**: Represents a while loop.
+   - **DoWhileStatement**: Represents a do-while loop.
+   - **ForStatement**: Represents a for loop.
+   - **EnhancedForStatement** (Java): Represents a for-each loop.
+   - **BreakStatement**: Represents a break statement.
+   - **ContinueStatement**: Represents a continue statement.
+   - **ReturnStatement**: Represents a return statement.
+   - **ThrowStatement** (Java): Represents a throw statement.
+   - **TryStatement**: Represents a try-catch-finally block.
+   - **CatchClause**: Represents a catch clause in a try statement.
+   - **SynchronizedStatement** (Java): Represents a synchronized block.
+
+#### 4. **Expressions**
+   - **AssignmentExpression**: Represents an assignment operation.
+   - **BinaryExpression**: Represents a binary operation (e.g., addition, subtraction).
+   - **UnaryExpression**: Represents a unary operation (e.g., negation).
+   - **PostfixExpression**: Represents a postfix operation (e.g., increment, decrement).
+   - **PrefixExpression**: Represents a prefix operation (e.g., increment, decrement).
+   - **ConditionalExpression**: Represents a ternary conditional operation.
+   - **MethodInvocation**: Represents a method call.
+   - **FieldAccess**: Represents accessing a field or property.
+   - **ArrayAccess**: Represents accessing an array element.
+   - **ArrayCreation**: Represents array creation.
+   - **ClassInstanceCreation**: Represents creating an instance of a class (Java: `new` operator).
+   - **CastExpression**: Represents a type cast.
+   - **InstanceofExpression** (Java): Represents the `instanceof` check.
+   - **LambdaExpression** (Java): Represents a lambda expression.
+   - **AnonymousClassDeclaration** (Java): Represents an anonymous class instantiation.
+   - **ObjectCreation** (C++): Represents creating an instance of a class (C++: `new` operator).
+   - **PointerDereference** (C++): Represents dereferencing a pointer.
+   - **AddressOf** (C++): Represents taking the address of a variable.
+
+#### 5. **Literals**
+   - **BooleanLiteral**: Represents a boolean literal.
+   - **CharacterLiteral**: Represents a character literal.
+   - **StringLiteral**: Represents a string literal.
+   - **NumberLiteral**: Represents a numeric literal (int, float, etc.).
+   - **NullLiteral**: Represents the null literal.
+   
+#### 6. **Types**
+   - **PrimitiveType**: Represents a primitive data type (e.g., int, float).
+   - **ArrayType**: Represents an array type.
+   - **ClassType**: Represents a class or interface type.
+   - **ParameterizedType**: Represents a parameterized type (e.g., generics in Java).
+   - **TypeParameter**: Represents a type parameter in generic types.
+
+#### 7. **Modifiers and Annotations**
+   - **Modifier**: Represents a modifier (e.g., public, private, static).
+   - **Annotation** (Java): Represents an annotation.
+   - **Attribute** (C++): Represents an attribute.
+
+### Specific to Java
+   - **ForEachStatement**: Represents a for-each loop.
+   - **AnnotationDeclaration**: Represents an annotation type declaration.
+
+### Specific to C/C++
+   - **FunctionPointer**: Represents a function pointer.
+   - **PointerType**: Represents a pointer type.
+   - **ReferenceType**: Represents a reference type.
+   - **TemplateDeclaration** (C++): Represents a template declaration.
+   - **UsingDeclaration** (C++): Represents a using declaration for namespaces and types.

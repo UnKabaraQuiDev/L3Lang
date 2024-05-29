@@ -1,8 +1,10 @@
 package lu.pcy113.l3.parser.ast;
 
-public class ObjectInitNode extends Node {
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 
-	public ObjectInitNode(TypeNode type) {
+public class TypeAllocNode extends Node {
+
+	public TypeAllocNode(TypeNode type) {
 		add(type);
 	}
 

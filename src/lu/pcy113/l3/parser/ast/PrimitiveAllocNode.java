@@ -1,17 +1,20 @@
 package lu.pcy113.l3.parser.ast;
 
-public class ArrayInitNode extends Node implements ArrayInit {
+import lu.pcy113.l3.parser.ast.lit.NumLitNode;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
+
+public class PrimitiveAllocNode extends Node implements ArrayInit {
 
 	private boolean empty;
 	private int arraySize, stackSize;
 
-	public ArrayInitNode(TypeNode type, int arraySize) {
+	public PrimitiveAllocNode(TypeNode type, int arraySize) {
 		add(type);
 		this.empty = true;
 		this.arraySize = arraySize;
 	}
 
-	public ArrayInitNode(TypeNode type) {
+	public PrimitiveAllocNode(TypeNode type) {
 		add(type);
 		this.empty = true;
 	}

@@ -4,27 +4,27 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 
-public class VarNumNode extends Node implements RecursiveArithmeticOp {
+public class FieldAccessNode extends Node implements RecursiveArithmeticOp {
 
 	private IdentifierToken mainIdent, childIdent;
 	private boolean arrayOffset = false;
 
-	public VarNumNode(IdentifierToken mainIdent) {
+	public FieldAccessNode(IdentifierToken mainIdent) {
 		this.mainIdent = mainIdent;
 	}
 
-	public VarNumNode(IdentifierToken mainIdent, Node offset) {
+	public FieldAccessNode(IdentifierToken mainIdent, Node offset) {
 		add(offset);
 		this.mainIdent = mainIdent;
 		this.arrayOffset = true;
 	}
 
-	public VarNumNode(IdentifierToken mainIdent, IdentifierToken childIdent) {
+	public FieldAccessNode(IdentifierToken mainIdent, IdentifierToken childIdent) {
 		this.childIdent = childIdent;
 		this.mainIdent = mainIdent;
 	}
 
-	public VarNumNode(IdentifierToken mainIdent, IdentifierToken childIdent, Node offset) {
+	public FieldAccessNode(IdentifierToken mainIdent, IdentifierToken childIdent, Node offset) {
 		add(offset);
 		this.childIdent = childIdent;
 		this.mainIdent = mainIdent;

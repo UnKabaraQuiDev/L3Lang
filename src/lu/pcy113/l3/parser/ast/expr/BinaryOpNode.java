@@ -1,8 +1,9 @@
-package lu.pcy113.l3.parser.ast;
+package lu.pcy113.l3.parser.ast.expr;
 
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.parser.ast.Node;
 
 public class BinaryOpNode extends Node implements RecursiveArithmeticOp {
 

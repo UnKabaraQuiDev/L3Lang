@@ -1,14 +1,15 @@
 package lu.pcy113.l3.parser.ast;
 
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 
-public class LetTypeDefNode extends Node {
+public class LetDefNode extends Node {
 
 	private IdentifierToken ident;
 	private boolean iStatic, arg;
 	private int stackIndex = 0, stackSize = 4;
 
-	public LetTypeDefNode(TypeNode type, IdentifierToken ident, boolean iStatic, boolean arg) {
+	public LetDefNode(TypeNode type, IdentifierToken ident, boolean iStatic, boolean arg) {
 		add(type);
 		this.ident = ident;
 		this.iStatic = iStatic;

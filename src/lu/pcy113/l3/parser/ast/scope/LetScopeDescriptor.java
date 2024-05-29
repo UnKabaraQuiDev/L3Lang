@@ -1,18 +1,18 @@
 package lu.pcy113.l3.parser.ast.scope;
 
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
-import lu.pcy113.l3.parser.ast.LetTypeDefNode;
+import lu.pcy113.l3.parser.ast.LetDefNode;
 
 public class LetScopeDescriptor extends ScopeDescriptor {
 
-	private LetTypeDefNode node;
+	private LetDefNode node;
 
-	public LetScopeDescriptor(IdentifierToken ident, LetTypeDefNode node) {
+	public LetScopeDescriptor(IdentifierToken ident, LetDefNode node) {
 		super(ident);
 		this.node = node;
 	}
 
-	public LetTypeDefNode getNode() {
+	public LetDefNode getNode() {
 		return node;
 	}
 	

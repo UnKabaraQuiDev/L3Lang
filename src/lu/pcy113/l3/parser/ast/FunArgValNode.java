@@ -1,8 +1,11 @@
 package lu.pcy113.l3.parser.ast;
 
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.parser.ast.lit.NumLitNode;
+import lu.pcy113.l3.parser.ast.lit.StringLitNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class FunArgValNode extends Node {
 
@@ -17,8 +20,8 @@ public class FunArgValNode extends Node {
 		Node expr = getExpr();
 		if (expr instanceof NumLitNode) {
 			return new TypeNode(TokenType.NUM_LIT);
-		} else if (expr instanceof VarNumNode) {
-			return ((LetScopeDescriptor) expr.getClosestContainer().getClosestDescriptor(((VarNumNode) expr).getMainIdent().getValue())).getNode().getType();
+		} else if (expr instanceof FieldAccessNode) {
+			return ((LetScopeDescriptor) expr.getClosestContainer().getClosestDescriptor(((FieldAccessNode) expr).getMainIdent().getValue())).getNode().getType();
 		} else if (expr instanceof FunCallNode) {
 			return ((FunScopeDescriptor) expr.getClosestContainer().getClosestDescriptor(((FunCallNode) expr).getIdent().getValue())).getNode().getReturnType();
 		} else if (expr instanceof StringLitNode) {

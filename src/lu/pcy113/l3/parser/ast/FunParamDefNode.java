@@ -1,6 +1,6 @@
 package lu.pcy113.l3.parser.ast;
 
-public class FunArgsDefNode extends Node {
+public class FunParamDefNode extends Node {
 
 	public boolean argsEquals(FunArgsValNode args) {
 		
