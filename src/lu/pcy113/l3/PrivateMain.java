@@ -4,19 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 
 import lu.pcy113.l3.compiler.CompilerException;
-import lu.pcy113.l3.compiler.X86Compiler;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
-import lu.pcy113.l3.parser.L3Parser;
+import lu.pcy113.l3.parser.L3ExprParser;
 import lu.pcy113.l3.parser.ParserException;
-import lu.pcy113.l3.parser.ast.scope.FileNode;
-import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
-import lu.pcy113.l3.utils.FileUtils;
 import lu.pcy113.pclib.GlobalLogger;
 
 public class PrivateMain {
@@ -29,7 +23,13 @@ public class PrivateMain {
 		File l3Dir = new File("./l3/");
 		File srcDir = new File(l3Dir, "src/");
 
-		String mainFile = "test.l3";
+		L3Lexer lexer = new L3Lexer(new FileReader(new File("./expr.l3")));
+		lexer.lexe();
+		L3ExprParser exprParser = new L3ExprParser(lexer);
+		exprParser.parse();
+		System.out.println(exprParser.getRoot().toString(0));
+		
+		/*String mainFile = "test.l3";
 
 		L3Lexer lexer = new L3Lexer(new FileReader(new File(srcDir, mainFile)));
 		System.out.println("Input:\n" + lexer.getInput());
@@ -48,7 +48,7 @@ public class PrivateMain {
 		Files.write(Paths.get(l3Dir + "/" + FileUtils.removeExtension(mainFile) + "-ast.txt"), runtimeNode.toString(0).getBytes());
 		
 		X86Compiler compiler = new X86Compiler(runtimeNode, l3Dir, mainFile);
-		compiler.compile();
+		compiler.compile();*/
 	}
 
 }

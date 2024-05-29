@@ -126,7 +126,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 
 	@Override
 	public FunScopeDescriptor getFunDescriptor(FunCallNode node) throws CompilerException {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getValue());
+		// TODO
+		/*Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getValue());
 
 		col = col.stream().filter(c -> c instanceof FunScopeDescriptor).filter(c -> ((FunScopeDescriptor) c).getNode().getArgs().argsEquals(node.getArgs())).collect(Collectors.toCollection(ArrayList::new));
 
@@ -135,7 +136,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 					+ col.stream().map(c -> ((FunScopeDescriptor) c).getNode().toString() + " (" + ((FunScopeDescriptor) c).getNode().getArgs().toString(0) + ")").collect(Collectors.joining(", \n")));
 		}
 
-		return (FunScopeDescriptor) col.stream().findFirst().orElseThrow(() -> new CompilerException("FunDefNode: " + node + " (" + node.getArgs().toString(0) + ")" + ", not defined."));
+		return (FunScopeDescriptor) col.stream().findFirst().orElseThrow(() -> new CompilerException("FunDefNode: " + node + " (" + node.getArgs().toString(0) + ")" + ", not defined."));*/
+		return null;
 	}
 
 	@Override
@@ -178,11 +180,13 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 
 	@Override
 	public boolean containsFunDescriptor(FunCallNode node) {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getValue());
+		// TODO
+		/*Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getValue());
 
 		col = col.stream().filter(c -> c instanceof FunScopeDescriptor).filter(c -> ((FunScopeDescriptor) c).getNode().getArgs().argsEquals(node.getArgs())).collect(Collectors.toCollection(ArrayList::new));
 
-		return col.stream().findFirst().isPresent();
+		return col.stream().findFirst().isPresent();*/
+		return false;
 	}
 
 	@Override

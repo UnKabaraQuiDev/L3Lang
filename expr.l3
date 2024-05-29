@@ -1,15 +1,1 @@
-fun int func(int x, int y, int z) {
-	break#("func");
-	return int x + y + z;
-}
-
-fun int tt() {
-	return int 3;
-}
-
-fun int main() {
-	let int x = 2;
-	let int y = 3;
-	break#("stop");
-	return int func(x, y, tt());
-}
+a + b * person.getAge().calcAge(a, b) + person.X.a.b + (a > b) % c / x * 12 + 0x12 + 0o11 + 0b1101

@@ -3,8 +3,9 @@ package lu.pcy113.l3.parser.ast;
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
+import lu.pcy113.l3.parser.ast.expr.ExprNode;
 
-public class LetTypeSetNode extends Node implements RecursiveArithmeticOp {
+public class LetTypeSetNode extends ExprNode implements RecursiveArithmeticOp {
 
 	public LetTypeSetNode(Node let, Node expr) {
 		add(let);

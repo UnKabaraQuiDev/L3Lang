@@ -5,13 +5,13 @@ import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.Node;
 
-public class BinaryOpNode extends Node implements RecursiveArithmeticOp {
+public class BinaryOpNode extends ExprNode implements RecursiveArithmeticOp {
 
 	private TokenType operator;
 
 	public BinaryOpNode(RecursiveArithmeticOp left, TokenType operator, RecursiveArithmeticOp right) {
-		add((Node) left);
-		add((Node) right);
+		add((ExprNode) left);
+		add((ExprNode) right);
 		this.operator = operator;
 	}
 

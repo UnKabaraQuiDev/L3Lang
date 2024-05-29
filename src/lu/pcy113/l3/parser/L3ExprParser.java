@@ -9,18 +9,17 @@ import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.Token;
-import lu.pcy113.l3.parser.ast.ComparisonOpNode;
+import lu.pcy113.l3.parser.ast.ArrayAccessNode;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
+import lu.pcy113.l3.parser.ast.FunCallNode;
+import lu.pcy113.l3.parser.ast.LetRefNode;
+import lu.pcy113.l3.parser.ast.LetTypeSetNode;
+import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
-import lu.pcy113.l3.parser.ast.expr.LogicalOpNode;
+import lu.pcy113.l3.parser.ast.expr.ExprNode;
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
-import lu.pcy113.l3.parser.ast.FunArgValNode;
-import lu.pcy113.l3.parser.ast.FunArgsValNode;
-import lu.pcy113.l3.parser.ast.FunCallNode;
-import lu.pcy113.l3.parser.ast.LetTypeSetNode;
-import lu.pcy113.l3.parser.ast.LetRefNode;
-import lu.pcy113.l3.parser.ast.Node;
-import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 
 public class L3ExprParser {
@@ -57,116 +56,151 @@ public class L3ExprParser {
 
 	}
 
-	public Node parseExpression() throws ParserException {
+	public ExprNode parseExpression() throws ParserException {
 		return parseLogical();
 	}
 
-	private Node parseLogical() throws ParserException {
-		Node left = parseComparison();
+	private ExprNode parseLogical() throws ParserException {
+		ExprNode left = parseComparison();
 
 		while (peek(TokenType.OR, TokenType.AND, TokenType.XOR)) {
 			TokenType op = consume().getType();
 			Node right = parseComparison();
-			left = new LogicalOpNode(left, op, right);
+			left = new BinaryOpNode((RecursiveArithmeticOp) left, op, (RecursiveArithmeticOp) right);
 		}
 
 		return left;
 	}
 
-	private Node parseComparison() throws ParserException {
-		Node left = parseTerm();
+	private ExprNode parseComparison() throws ParserException {
+		ExprNode left = parseTerm();
 
-		while (peek(TokenType.EQUALS, TokenType.NOT_EQUALS, TokenType.LESS, TokenType.LESS_EQUALS, TokenType.GREATER,
-				TokenType.GREATER_EQUALS)) {
+		while (peek(TokenType.EQUALS, TokenType.NOT_EQUALS, TokenType.LESS, TokenType.LESS_EQUALS, TokenType.GREATER, TokenType.GREATER_EQUALS)) {
 			TokenType op = consume().getType();
-			Node right = parseTerm();
-			left = new ComparisonOpNode(left, op, right);
+			ExprNode right = parseTerm();
+			left = new BinaryOpNode((RecursiveArithmeticOp) left, op, (RecursiveArithmeticOp) right);
 		}
 
 		return left;
 	}
 
-	private Node parseTerm() throws ParserException {
-		Node left = parseFactor();
+	private ExprNode parseTerm() throws ParserException {
+		ExprNode left = parseFactor();
 
 		while (peek(TokenType.PLUS, TokenType.MINUS)) {
 			TokenType op = consume().getType();
-			Node right = parseFactor();
+			ExprNode right = parseFactor();
 			left = new BinaryOpNode((RecursiveArithmeticOp) left, op, (RecursiveArithmeticOp) right);
 		}
 
 		return left;
 	}
 
-	private Node parseFactor() throws ParserException {
-		Node left = parsePrimary();
+	private ExprNode parseFactor() throws ParserException {
+		ExprNode left = parsePrimary();
 
 		if (peek(TokenType.ASSIGN)) {
-			left = parseLetTypeSet(left);
+			left = parseLetSet(left);
 		}
 
-		while (peek(TokenType.MUL, TokenType.DIV, TokenType.MODULO, TokenType.BIT_XOR, TokenType.BIT_AND,
-				TokenType.BIT_OR)) {
+		while (peek(TokenType.MUL, TokenType.DIV, TokenType.MODULO, TokenType.BIT_XOR, TokenType.BIT_AND, TokenType.BIT_OR)) {
 			TokenType op = consume().getType();
-			Node right = parsePrimary();
+			ExprNode right = parsePrimary();
 			left = new BinaryOpNode((RecursiveArithmeticOp) left, op, (RecursiveArithmeticOp) right);
 		}
 
 		return left;
 	}
 
-	private Node parsePrimary() throws ParserException {
+	private ExprNode parsePrimary() throws ParserException {
 		if (peek(TokenType.NUM_LIT)) {
+
 			return new NumLitNode(consume());
+
 		} else if (peek(TokenType.IDENT)) {
+
 			return parseIdent();
+
 		} else if (peek(TokenType.PAREN_OPEN)) {
+
 			consume(TokenType.PAREN_OPEN);
-			Node expr = parseExpression();
+			ExprNode expr = parseExpression();
 			consume(TokenType.PAREN_CLOSE);
 			return expr;
+
 		} else if (peek(TokenType.DOLLAR)) {
+
 			consume(TokenType.DOLLAR);
 			return new PointerDerefNode(parseIdent());
+
 		} else if (peek(TokenType.COLON)) {
+
 			consume(TokenType.COLON);
 			return new LetRefNode(parseIdent());
+
 		} else {
 			throw new RuntimeException("Unexpected token: " + peek().getType());
 		}
 	}
 
-	private Node parseIdent() throws ParserException {
-		IdentifierToken varIdent = (IdentifierToken) consume();
-		Node var = null;
-		if (peek(TokenType.BRACKET_OPEN)) {
-			consume(TokenType.BRACKET_OPEN);
-			Node expr = parseExpression();
-			consume(TokenType.BRACKET_CLOSE);
-			var = new FieldAccessNode(varIdent, expr);
-		} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
-			boolean preset = peek(TokenType.HASH);
-			if (preset)
-				consume(TokenType.HASH);
-			consume(TokenType.PAREN_OPEN);
-			FunArgsValNode args = new FunArgsValNode();
-			int index = 0;
-			while (!peek(TokenType.PAREN_CLOSE)) {
-				args.add(new FunArgValNode(index++, parseExpression()));
-				if (peek(TokenType.COMMA))
-					consume(TokenType.COMMA);
-			}
-			consume(TokenType.PAREN_CLOSE);
-			FunCallNode call = new FunCallNode(varIdent, preset);
-			call.add(args);
-			return call;
-		} else {
-			var = new FieldAccessNode(varIdent);
+	private ExprNode parseIdent() throws ParserException {
+		IdentifierLitNode ident = new IdentifierLitNode((IdentifierToken) consume());
+
+		// (parsed).not.not.func();
+
+		while (peek(0, TokenType.DOT) && peek(1, TokenType.IDENT)) {
+			consume(TokenType.DOT);
+			ident.append((IdentifierToken) consume(TokenType.IDENT));
 		}
-		return var;
+
+		if (peek(TokenType.BRACKET_OPEN)) {
+
+			consume(TokenType.BRACKET_OPEN);
+			ExprNode expr = parseExpression();
+			consume(TokenType.BRACKET_CLOSE);
+
+			return new ArrayAccessNode(ident, expr);
+
+		} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
+
+			return parseFunCall(ident);
+
+		} else {
+
+			return new FieldAccessNode(ident);
+
+		}
+		// throw new ParserException("Unexpected token: "+peek());
 	}
 
-	private Node parseLetTypeSet(Node var) throws ParserException {
+	private ExprNode parseFunCall(IdentifierLitNode ident) throws ParserException {
+		boolean preset = peek(TokenType.HASH);
+		if (preset)
+			consume(TokenType.HASH);
+		consume(TokenType.PAREN_OPEN);
+
+		FunCallNode call = new FunCallNode(ident, preset);
+
+		int index = 0;
+		while (!peek(TokenType.PAREN_CLOSE)) {
+			ExprNode expr = parseExpression();
+			call.addParam(expr);
+
+			if (peek(TokenType.COMMA))
+				consume(TokenType.COMMA);
+		}
+
+		consume(TokenType.PAREN_CLOSE);
+
+		if (peek(TokenType.DOT)) {
+			consume(TokenType.DOT);
+			call.add(parseIdent());
+		}
+		
+		return call;
+	}
+
+	private ExprNode parseLetSet(Node var) throws ParserException {
 		consume(TokenType.ASSIGN);
 		Node expr = parseExpression();
 		return new LetTypeSetNode(var, expr);

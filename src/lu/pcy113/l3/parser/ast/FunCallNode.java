@@ -1,57 +1,64 @@
 package lu.pcy113.l3.parser.ast;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
-import lu.pcy113.l3.lexer.tokens.IdentifierToken;
+import lu.pcy113.l3.parser.ast.expr.ExprNode;
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
+import lu.pcy113.l3.utils.StringUtils;
 
-public class FunCallNode extends Node implements RecursiveArithmeticOp {
+public class FunCallNode extends ExprNode implements RecursiveArithmeticOp {
 
 	private boolean preset = false;
-	private IdentifierToken name, source;
+	private IdentifierLitNode ident;
 
-	public FunCallNode(IdentifierToken ident, boolean preset) {
-		this.name = ident;
+	private List<ExprNode> params = new ArrayList<>();
+
+	public FunCallNode(IdentifierLitNode ident, boolean preset) {
+		this.ident = ident;
 		this.preset = preset;
 	}
 
-	public FunCallNode(IdentifierToken source, IdentifierToken ident) {
-		this.source = source;
-		this.name = ident;
+	public FunCallNode(IdentifierLitNode ident) {
+		this.ident = ident;
 	}
 
 	@Override
 	public boolean isFloat() throws L3Exception {
 		return getClosestContainer().getFunDescriptor(this).getNode().getReturnType().isFloat();
 	}
-	
+
 	@Override
 	public boolean isInt() throws L3Exception {
 		return getClosestContainer().getFunDescriptor(this).getNode().getReturnType().isInt();
 	}
-	
-	public IdentifierToken getSource() {
-		return source;
-	}
 
-	public boolean hasSource() {
-		return source != null;
-	}
-
-	public IdentifierToken getIdent() {
-		return name;
+	public IdentifierLitNode getIdent() {
+		return ident;
 	}
 
 	public boolean isPreset() {
 		return preset;
 	}
 
-	public FunArgsValNode getArgs() {
-		return (FunArgsValNode) children.get(0);
+	public void addParam(ExprNode expr) {
+		this.params.add(expr);
 	}
 
 	@Override
+	public String toString(int indent) {
+		String tab = StringUtils.repeat("\t", indent);
+		String ret = tab + toString()
+				+ (params != null && !params.isEmpty() ? ("[\n" + (params.stream().map(c -> c == null ? "null" : c.toString(indent + 1)).collect(Collectors.joining(",\n"))) + "\n" + tab + "]") : "")
+				+ (!isLeaf() ? "[\n" + (children.stream().map(c -> c.toString(indent + 1)).collect(Collectors.joining(",\n"))) + "\n" + tab + "]" : "");;
+		return ret;
+	}
+
 	public String toString() {
-		return super.toString() + "(" + (hasSource() ? source.getValue() : "") + "." + name.getValue() + ", " + (preset ? "preset" : "def") + ")";
+		return super.toString() + "(" + ident.toString() + ", " + (preset ? "preset" : "def") + ")";
 	}
 
 }

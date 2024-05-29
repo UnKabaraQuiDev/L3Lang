@@ -17,5 +17,5 @@ public class IdentifierToken extends Token {
 	public String toString() {
 		return IdentifierToken.class.getName()+"[line="+line+", column="+column+", type="+type+", identifier="+identifier+"]";
 	}
-	
+
 }

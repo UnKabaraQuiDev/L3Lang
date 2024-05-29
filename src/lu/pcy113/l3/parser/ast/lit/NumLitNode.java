@@ -1,9 +1,9 @@
 package lu.pcy113.l3.parser.ast.lit;
 
 import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
-import lu.pcy113.l3.parser.ast.Node;
+import lu.pcy113.l3.parser.ast.expr.ExprNode;
 
-public class NumLitNode extends Node implements RecursiveArithmeticOp {
+public class NumLitNode extends ExprNode implements RecursiveArithmeticOp {
 
 	private Object value;
 	private int stackSize = 4;

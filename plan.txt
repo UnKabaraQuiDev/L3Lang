@@ -55,6 +55,7 @@
 - StringLitNode
 - NumLitNode
 - NullLitNode
+- IdentifierLitNode
 
 - TypeNode
 - PrimitiveTypeNode
