@@ -18,6 +18,7 @@ import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
+import lu.pcy113.l3.parser.ast.expr.UnaryOpNode;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
@@ -113,7 +114,11 @@ public class L3ExprParser {
 	}
 
 	private ExprNode parsePrimary() throws ParserException {
-		if (peek(TokenType.NUM_LIT)) {
+		if(peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+			
+			return new UnaryOpNode(consume().getType(), parseIdent(), true);
+			
+		} else if (peek(TokenType.NUM_LIT)) {
 
 			return new NumLitNode(consume());
 
@@ -165,9 +170,15 @@ public class L3ExprParser {
 
 			return parseFunCall(ident);
 
-		} else {
+		} else  {
 
-			return new FieldAccessNode(ident);
+			FieldAccessNode fieldAccessNode = new FieldAccessNode(ident);
+			
+			if(peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+				return new UnaryOpNode(consume().getType(), fieldAccessNode, false);
+			}else {
+				return fieldAccessNode;
+			}
 
 		}
 		// throw new ParserException("Unexpected token: "+peek());
@@ -196,13 +207,47 @@ public class L3ExprParser {
 			consume(TokenType.DOT);
 			call.add(parseIdent());
 		}
-		
+
 		return call;
 	}
 
 	private ExprNode parseLetSet(Node var) throws ParserException {
-		consume(TokenType.ASSIGN);
-		Node expr = parseExpression();
+		TokenType type = consume(TokenType.ASSIGN).getType();
+
+		ExprNode expr = parseExpression();
+
+		switch (type) {
+		case PLUS_ASSIGN:
+			expr = new BinaryOpNode((RecursiveArithmeticOp) var, TokenType.PLUS, (RecursiveArithmeticOp) expr);
+			break;
+		case MINUS_ASSIGN:
+			expr = new BinaryOpNode((RecursiveArithmeticOp) var, TokenType.MINUS, (RecursiveArithmeticOp) expr);
+			break;
+		case MUL_ASSIGN:
+			expr = new BinaryOpNode((RecursiveArithmeticOp) var, TokenType.MUL, (RecursiveArithmeticOp) expr);
+			break;
+		case DIV_ASSIGN:
+			expr = new BinaryOpNode((RecursiveArithmeticOp) var, TokenType.DIV, (RecursiveArithmeticOp) expr);
+			break;
+		case MODULO_ASSIGN:
+			expr = new BinaryOpNode((RecursiveArithmeticOp) var, TokenType.MODULO, (RecursiveArithmeticOp) expr);
+			break;
+		case BIT_AND_ASSIGN:
+			expr = new BinaryOpNode((RecursiveArithmeticOp) var, TokenType.BIT_AND, (RecursiveArithmeticOp) expr);
+			break;
+		case BIT_NOT_ASSIGN:
+			expr = new BinaryOpNode((RecursiveArithmeticOp) var, TokenType.BIT_NOT, (RecursiveArithmeticOp) expr);
+			break;
+		case BIT_XOR_ASSIGN:
+			expr = new BinaryOpNode((RecursiveArithmeticOp) var, TokenType.BIT_XOR, (RecursiveArithmeticOp) expr);
+			break;
+		case BIT_OR_ASSIGN:
+			expr = new BinaryOpNode((RecursiveArithmeticOp) var, TokenType.BIT_OR, (RecursiveArithmeticOp) expr);
+			break;
+		default:
+			break;
+		}
+
 		return new LetTypeSetNode(var, expr);
 	}
 

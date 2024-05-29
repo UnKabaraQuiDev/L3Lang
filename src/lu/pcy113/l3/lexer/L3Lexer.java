@@ -6,9 +6,13 @@ import static lu.pcy113.l3.lexer.TokenType.AS;
 import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIN_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_AND;
+import static lu.pcy113.l3.lexer.TokenType.BIT_AND_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIT_NOT;
+import static lu.pcy113.l3.lexer.TokenType.BIT_NOT_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIT_OR;
+import static lu.pcy113.l3.lexer.TokenType.BIT_OR_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIT_XOR;
+import static lu.pcy113.l3.lexer.TokenType.BIT_XOR_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.BYTE;
@@ -23,6 +27,7 @@ import static lu.pcy113.l3.lexer.TokenType.CURLY_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.DEC_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.DEFAULT;
 import static lu.pcy113.l3.lexer.TokenType.DIV;
+import static lu.pcy113.l3.lexer.TokenType.DIV_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.DOLLAR;
 import static lu.pcy113.l3.lexer.TokenType.DOT;
 import static lu.pcy113.l3.lexer.TokenType.ELSE;
@@ -49,8 +54,12 @@ import static lu.pcy113.l3.lexer.TokenType.LESS_EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.LET;
 import static lu.pcy113.l3.lexer.TokenType.LONG;
 import static lu.pcy113.l3.lexer.TokenType.MINUS;
+import static lu.pcy113.l3.lexer.TokenType.MINUS_ASSIGN;
+import static lu.pcy113.l3.lexer.TokenType.MINUS_MINUS;
 import static lu.pcy113.l3.lexer.TokenType.MODULO;
+import static lu.pcy113.l3.lexer.TokenType.MODULO_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.MUL;
+import static lu.pcy113.l3.lexer.TokenType.MUL_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.NEW;
 import static lu.pcy113.l3.lexer.TokenType.NOT;
 import static lu.pcy113.l3.lexer.TokenType.NOT_EQUALS;
@@ -60,6 +69,8 @@ import static lu.pcy113.l3.lexer.TokenType.PACKAGE;
 import static lu.pcy113.l3.lexer.TokenType.PAREN_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.PAREN_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.PLUS;
+import static lu.pcy113.l3.lexer.TokenType.PLUS_ASSIGN;
+import static lu.pcy113.l3.lexer.TokenType.PLUS_PLUS;
 import static lu.pcy113.l3.lexer.TokenType.RETURN;
 import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
 import static lu.pcy113.l3.lexer.TokenType.SHORT;
@@ -106,19 +117,39 @@ public class L3Lexer {
 
 				switch (current) {
 				case '+':
-					type = PLUS;
+					if (peek() == '=') {
+						consume();
+						type = PLUS_ASSIGN;
+					} else if (peek() == '+') {
+						consume();
+						type = PLUS_PLUS;
+					} else {
+						type = PLUS;
+					}
 					flushToken();
 					break next;
 				case '-':
 					if (peek() == '>') {
+						consume();
 						type = ARROW;
+					} else if (peek() == '=') {
+						consume();
+						type = MINUS_ASSIGN;
+					} else if (peek() == '-') {
+						consume();
+						type = MINUS_MINUS;
 					} else {
 						type = MINUS;
 					}
 					flushToken();
 					break next;
 				case '*':
-					type = MUL;
+					if (peek() == '=') {
+						consume();
+						type = MUL_ASSIGN;
+					} else {
+						type = MUL;
+					}
 					flushToken();
 					break next;
 				case '/':
@@ -130,8 +161,12 @@ public class L3Lexer {
 						}
 						flushToken();
 						break next;
+					} else if (peek() == '=') {
+						consume();
+						type = DIV_ASSIGN;
+					} else {
+						type = DIV;
 					}
-					type = DIV;
 					flushToken();
 					break next;
 
@@ -273,8 +308,12 @@ public class L3Lexer {
 					if (peek() == '|') {
 						consume();
 						type = OR;
-					} else
+					} else if (peek() == '=') {
+						consume();
+						type = BIT_OR_ASSIGN;
+					} else {
 						type = BIT_OR;
+					}
 					flushToken();
 					break next;
 
@@ -282,13 +321,22 @@ public class L3Lexer {
 					if (peek() == '&') {
 						consume();
 						type = AND;
-					} else
+					} else if (peek() == '=') {
+						consume();
+						type = BIT_AND_ASSIGN;
+					} else {
 						type = BIT_AND;
+					}
 					flushToken();
 					break next;
 
 				case '%':
-					type = MODULO;
+					if (peek() == '=') {
+						consume();
+						type = MODULO_ASSIGN;
+					} else {
+						type = MODULO;
+					}
 					flushToken();
 					break next;
 
@@ -301,8 +349,9 @@ public class L3Lexer {
 					if (peek() == '=') {
 						consume();
 						type = NOT_EQUALS;
-					} else
+					} else {
 						type = NOT;
+					}
 					flushToken();
 					break next;
 
@@ -310,6 +359,9 @@ public class L3Lexer {
 					if (peek() == '^') {
 						consume();
 						type = XOR;
+					} else if (peek() == '=') {
+						consume();
+						type = BIT_XOR_ASSIGN;
 					} else {
 						type = BIT_XOR;
 					}
@@ -317,7 +369,12 @@ public class L3Lexer {
 					break next;
 
 				case '~':
-					type = BIT_NOT;
+					if (peek() == '=') {
+						consume();
+						type = BIT_NOT_ASSIGN;
+					} else {
+						type = BIT_NOT;
+					}
 					flushToken();
 					break next;
 
@@ -325,24 +382,27 @@ public class L3Lexer {
 					if (peek() == '=') {
 						consume();
 						type = EQUALS;
-					} else
+					} else {
 						type = ASSIGN;
+					}
 					flushToken();
 					break next;
 				case '<':
 					if (peek() == '=') {
 						consume();
 						type = LESS_EQUALS;
-					} else
+					} else {
 						type = LESS;
+					}
 					flushToken();
 					break next;
 				case '>':
 					if (peek() == '=') {
 						consume();
 						type = GREATER_EQUALS;
-					} else
+					} else {
 						type = GREATER;
+					}
 					flushToken();
 					break next;
 

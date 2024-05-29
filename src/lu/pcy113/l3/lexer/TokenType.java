@@ -56,7 +56,11 @@ public enum TokenType {
 
 	GOTO("goto"), YIELD("yield"),
 
+	ASSIGN('='),
+
 	BIT_OR('|'), BIT_AND('&'), BIT_XOR('^'), BIT_NOT('~'),
+
+	BIT_OR_ASSIGN(ASSIGN, "|="), BIT_AND_ASSIGN(ASSIGN, "&="), BIT_XOR_ASSIGN(ASSIGN, "^="), BIT_NOT_ASSIGN(ASSIGN, "~="),
 
 	OR("||"), AND("&&"), NOT('!'), XOR("^^"),
 
@@ -64,7 +68,9 @@ public enum TokenType {
 
 	PLUS('+'), MINUS('-'), MUL('*'), DIV('/'), MODULO('%'),
 
-	ASSIGN('='),
+	PLUS_PLUS("++"), MINUS_MINUS("--"),
+
+	PLUS_ASSIGN(ASSIGN, "+="), MINUS_ASSIGN(ASSIGN, "-="), MUL_ASSIGN(ASSIGN, "*="), DIV_ASSIGN(ASSIGN, "/="), MODULO_ASSIGN(ASSIGN, "%="),
 
 	EQUALS("=="), NOT_EQUALS("!="),
 
