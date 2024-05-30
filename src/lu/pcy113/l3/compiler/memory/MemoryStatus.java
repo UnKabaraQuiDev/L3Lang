@@ -1,5 +1,7 @@
 package lu.pcy113.l3.compiler.memory;
 
+import java.io.PrintStream;
+
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.Node;
 
@@ -28,5 +30,7 @@ public interface MemoryStatus {
 	Node popStack() throws CompilerException;
 
 	void clearStack();
+
+	void dump(PrintStream out);
 
 }

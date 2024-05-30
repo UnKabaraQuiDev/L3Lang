@@ -21,19 +21,19 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 		ExprNode right = (ExprNode) ((BinaryOpNode) node).getRight();
 		TokenType operator = ((BinaryOpNode) node).getOperator();
 
-		if (right instanceof NumLitNode) {
-			compiler.compile(right);
-		} else {
-			compiler.compile(right);
-		}
-		String regRight = mem.getLatest();
-
 		if (left instanceof NumLitNode) {
 			compiler.compile(left);
 		} else {
 			compiler.compile(left);
 		}
 		String regLeft = mem.getLatest();
+		
+		if (right instanceof NumLitNode) {
+			compiler.compile(right);
+		} else {
+			compiler.compile(right);
+		}
+		String regRight = mem.getLatest();
 
 		switch (operator) {
 		case OR:
@@ -106,7 +106,7 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 		}
 
 		mem.setLatest(regLeft);
-
+		
 	}
 
 }

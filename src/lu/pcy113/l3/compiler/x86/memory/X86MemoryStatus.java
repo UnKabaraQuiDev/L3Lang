@@ -1,5 +1,6 @@
 package lu.pcy113.l3.compiler.x86.memory;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -94,7 +95,7 @@ public class X86MemoryStatus implements MemoryStatus {
 	public void setLatest(String latest) {
 		this.latest = latest;
 	}
-	
+
 	@Override
 	public void freeAll() {
 		freeRegisters.addAll(usedRegisters);
@@ -136,7 +137,7 @@ public class X86MemoryStatus implements MemoryStatus {
 		if (node instanceof LetDefNode) {
 			node.getClosestContainer().getLetDefDescriptor((LetDefNode) node).setStackOffset(offset);
 		} else {
-			throw new CompilerException("Can't set byte offset of node: "+node+".");
+			throw new CompilerException("Can't set byte offset of node: " + node + ".");
 		}
 	}
 
@@ -144,7 +145,7 @@ public class X86MemoryStatus implements MemoryStatus {
 		if (node instanceof LetDefNode) {
 			return ((LetDefNode) node).getType().getBytesSize();
 		} else {
-			throw new CompilerException("Can't get byte size of node: "+node+".");
+			throw new CompilerException("Can't get byte size of node: " + node + ".");
 		}
 	}
 
@@ -158,6 +159,14 @@ public class X86MemoryStatus implements MemoryStatus {
 	public void clearStack() {
 		stack.clear();
 		currentStackOffset = 0;
+	}
+
+	@Override
+	public void dump(PrintStream out) {
+		out.println("- - <" + this.getClass().getName() + "> - -");
+		out.println("Free: " + freeRegisters);
+		out.println("Used: " + usedRegisters);
+		out.println("Latest: " + latest);
 	}
 
 }
