@@ -6,14 +6,20 @@ import java.io.IOException;
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.L3Compiler;
 import lu.pcy113.l3.compiler.x86.consumers.X86_FileConsumer;
+import lu.pcy113.l3.compiler.x86.consumers.X86_FunBodyDefConsumer;
+import lu.pcy113.l3.compiler.x86.consumers.X86_FunDefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_LetDefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_PackageDefConsumer;
+import lu.pcy113.l3.compiler.x86.consumers.X86_ReturnConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_RuntimeConsumer;
 import lu.pcy113.l3.compiler.x86.memory.X86MemoryStatus;
+import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
+import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
+import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 import lu.pcy113.pclib.GlobalLogger;
 
@@ -25,6 +31,9 @@ public class X86Compiler extends L3Compiler {
 	private X86_PackageDefConsumer packageDefConsumer = new X86_PackageDefConsumer();
 	private X86_LetDefConsumer letDefConsumer = new X86_LetDefConsumer();
 	private X86_FileConsumer fileConsumer = new X86_FileConsumer();
+	private X86_FunDefConsumer funDefConsumer = new X86_FunDefConsumer();
+	private X86_ReturnConsumer returnConsumer = new X86_ReturnConsumer();
+	private X86_FunBodyDefConsumer funBodyDefConsumer = new X86_FunBodyDefConsumer();
 
 	public X86Compiler(RuntimeNode env, File binDirPath, String fileName) {
 		super(env, new File(binDirPath, fileName));
@@ -33,16 +42,19 @@ public class X86Compiler extends L3Compiler {
 		packageDefConsumer.attach(this);
 		letDefConsumer.attach(this);
 		fileConsumer.attach(this);
+		funDefConsumer.attach(this);
+		returnConsumer.attach(this);
+		funBodyDefConsumer.attach(this);
 	}
 
 	@Override
 	public void compile() throws CompilerException {
 		createFile();
 		fw = createWriter();
-		
+
 		writetextln("global _start");
 		writedataln("esp_start dd 0");
-		
+
 		writeln("BITS 64");
 		writeln("_start:");
 
@@ -59,9 +71,9 @@ public class X86Compiler extends L3Compiler {
 			String execOutFile = outFileExec.getPath();
 			String outAsmPath = outFileAsm.getPath();
 
-			exec("nasm -f elf32 -g -o " + oOutFile + " " + outAsmPath, outDir);
+			exec("nasm -f elf64 -g -o " + oOutFile + " " + outAsmPath, outDir);
 			// exec("gcc -m32 elf_i386 -o " + rmExtOutFile + " " + oOutFile, dir);
-			exec("ld -m elf_i386 -o " + execOutFile + " " + oOutFile, outDir);
+			exec("ld -o " + execOutFile + " " + oOutFile, outDir);
 			exec("./" + execOutFile, outDir);
 
 		} catch (IOException | InterruptedException e) {
@@ -78,16 +90,15 @@ public class X86Compiler extends L3Compiler {
 			packageDefConsumer.accept((PackageDefNode) node);
 		} else if (node instanceof LetDefNode) {
 			letDefConsumer.accept((LetDefNode) node);
+		} else if (node instanceof FunDefNode) {
+			funDefConsumer.accept((FunDefNode) node);
+		} else if (node instanceof ReturnNode) {
+			returnConsumer.accept((ReturnNode) node);
+		} else if (node instanceof FunBodyDefNode) {
+			funBodyDefConsumer.accept((FunBodyDefNode) node);
+		} else {
+			implement(node);
 		}
-	}
-
-	public void compilePrintWrite() throws CompilerException {
-		// pointer in ecx
-		writeinstln("; Print write");
-		writeinstln("mov eax, 4  ; Write");
-		writeinstln("mov ebx, 1  ; Stdout");
-		writeinstln("mov edx, 1  ; Length");
-		writeinstln("int 0x80  ; Syscall");
 	}
 
 	public void implement() throws CompilerException {
@@ -95,7 +106,7 @@ public class X86Compiler extends L3Compiler {
 	}
 
 	public void implement(Object obj) throws CompilerException {
-		throw new CompilerException("not implemented: " + obj.getClass().getName());
+		throw new CompilerException("not implemented: " + obj.getClass().getName() + " (" + obj + ")");
 	}
 
 	public void warning(String msg) {
@@ -109,6 +120,35 @@ public class X86Compiler extends L3Compiler {
 	@Override
 	public X86MemoryStatus getMemoryStatus() {
 		return memoryStatus;
+	}
+
+	public String getDataType(int bytes) {
+		switch (bytes) {
+		case 1:
+			return "db";
+		case 2:
+			return "dw";
+		case 4:
+			return "dd";
+		case 8:
+			return "dq";
+		}
+		return null;
+	}
+
+	public String getMovType(int bytes) {
+		switch (bytes) {
+		case 1:
+			return "byte";
+		case 2:
+			return "word";
+		case 4:
+			return "dword";
+		case 8:
+			return "qword";
+		}
+		return null;
+
 	}
 
 }

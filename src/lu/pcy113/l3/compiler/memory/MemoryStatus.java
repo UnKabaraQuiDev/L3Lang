@@ -14,4 +14,6 @@ public interface MemoryStatus {
 	
 	void freeAll();
 	
+	String getAsSize(String reg, int bytes);
+	
 }

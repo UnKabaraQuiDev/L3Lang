@@ -15,7 +15,6 @@ import lu.pcy113.l3.parser.ast.Node;
 
 public class ScopeContainerNode extends Node implements ScopeContainer {
 
-	private int startStackIndex;
 	private HashMap<String, List<ScopeDescriptor>> descriptors = new HashMap<>();
 
 	@Override
@@ -30,14 +29,6 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 			return false;
 
 		return parent.containsDescriptor(name);
-	}
-
-	public int getStartStackIndex() {
-		return startStackIndex;
-	}
-
-	public void setStartStackIndex(int startStackIndex) {
-		this.startStackIndex = startStackIndex;
 	}
 
 	@Override
@@ -124,19 +115,24 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public FunScopeDescriptor getFunDescriptor(FunCallNode node) throws CompilerException {
-		// TODO
-		/*
-		 * Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getValue());
-		 * 
-		 * col = col.stream().filter(c -> c instanceof FunScopeDescriptor).filter(c -> ((FunScopeDescriptor) c).getNode().getArgs().argsEquals(node.getArgs())).collect(Collectors.toCollection(ArrayList::new));
-		 * 
-		 * if (col.size() > 1) { throw new CompilerException("FunDefNode: " + node + ", defined multiple times with the same arguments:\n" + col.stream().map(c -> ((FunScopeDescriptor) c).getNode().toString() + " (" + ((FunScopeDescriptor)
-		 * c).getNode().getArgs().toString(0) + ")").collect(Collectors.joining(", \n"))); }
-		 * 
-		 * return (FunScopeDescriptor) col.stream().findFirst().orElseThrow(() -> new CompilerException("FunDefNode: " + node + " (" + node.getArgs().toString(0) + ")" + ", not defined."));
-		 */
-		return null;
+	public FunScopeDescriptor getFunDefDescriptor(FunCallNode node) throws CompilerException {
+		Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().asString());
+
+		col = col.stream().filter(c -> c instanceof FunScopeDescriptor).filter(c -> {
+			try {
+				return ((FunScopeDescriptor) c).getNode().getParams().paramsEquals(node.getParams());
+			} catch (CompilerException e) {
+				e.printStackTrace();
+				return false;
+			}
+		}).collect(Collectors.toCollection(ArrayList::new));
+
+		if (col.size() > 1) {
+			throw new CompilerException("FunDefNode: " + node + ", defined multiple times with the same arguments:\n"
+					+ col.stream().map(c -> ((FunScopeDescriptor) c).getNode().toString() + " (" + ((FunScopeDescriptor) c).getNode().getParams().toString(0) + ")").collect(Collectors.joining(", \n")));
+		}
+
+		return (FunScopeDescriptor) col.stream().findFirst().orElseThrow(() -> new CompilerException("FunDefNode: " + node + " (" + node.getParams().toString(0) + ")" + ", not defined."));
 	}
 
 	@Override
@@ -156,8 +152,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public FunScopeDescriptor getFunDescriptor(FunDefNode node) throws CompilerException {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((FunDefNode) node).getIdent().getValue());
+	public FunScopeDescriptor getFunDefDescriptor(FunDefNode node) throws CompilerException {
+		Collection<ScopeDescriptor> col = this.getDescriptors(((FunDefNode) node).getIdent().getLeaf().getValue());
 
 		return (FunScopeDescriptor) col.stream().filter(c -> c instanceof FunScopeDescriptor).filter(c -> ((FunScopeDescriptor) c).getNode().equals(node)).findFirst()
 				.orElseThrow(() -> new CompilerException("FunDefNode: " + node + ", not defined."));
@@ -178,16 +174,19 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public boolean containsFunDescriptor(FunCallNode node) {
-		// TODO
-		/*
-		 * Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getValue());
-		 * 
-		 * col = col.stream().filter(c -> c instanceof FunScopeDescriptor).filter(c -> ((FunScopeDescriptor) c).getNode().getArgs().argsEquals(node.getArgs())).collect(Collectors.toCollection(ArrayList::new));
-		 * 
-		 * return col.stream().findFirst().isPresent();
-		 */
-		return false;
+	public boolean containsFunDefDescriptor(FunCallNode node) {
+		Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getLeaf().getValue());
+
+		col = col.stream().filter(c -> c instanceof FunScopeDescriptor).filter(c -> {
+			try {
+				return ((FunScopeDescriptor) c).getNode().getParams().paramsEquals(node.getParams());
+			} catch (CompilerException e) {
+				e.printStackTrace();
+				return false;
+			}
+		}).collect(Collectors.toCollection(ArrayList::new));
+
+		return col.stream().findFirst().isPresent();
 	}
 
 	@Override
@@ -198,8 +197,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public boolean containsFunDescriptor(FunDefNode node) {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((FunDefNode) node).getIdent().getValue());
+	public boolean containsFunDefDescriptor(FunDefNode node) {
+		Collection<ScopeDescriptor> col = this.getDescriptors(((FunDefNode) node).getIdent().getLeaf().getValue());
 
 		return col.stream().filter(c -> c instanceof FunScopeDescriptor).filter(c -> ((FunScopeDescriptor) c).getNode().equals(node)).findFirst().isPresent();
 	}
@@ -212,22 +211,26 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	}
 
 	@Override
-	public StructScopeDescriptor getStructScopeDescriptor(StructDefNode node) throws CompilerException {
-		Collection<ScopeDescriptor> col = this.getDescriptors(node.getIdent().getValue());
-
-		return (StructScopeDescriptor) col.stream().filter(c -> c instanceof StructScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("StructDefNode: " + node + ", not defined."));
+	public FunScopeDescriptor addFunDefDescriptor(FunDefNode node) {
+		FunScopeDescriptor fun = new FunScopeDescriptor(node.getIdent(), node);
+		addDescriptor(node.getIdent().getLeaf().getValue(), fun);
+		return fun;
 	}
 
 	@Override
-	public boolean containsStructScopeDescriptor(StructDefNode node) {
-		Collection<ScopeDescriptor> col = this.getDescriptors(node.getIdent().getValue());
-
-		return col.stream().filter(c -> c instanceof StructScopeDescriptor).findFirst().isPresent();
+	public LetScopeDescriptor addLetDefDescriptor(LetDefNode node) {
+		LetScopeDescriptor fun = new LetScopeDescriptor(node.getIdent(), node);
+		addDescriptor(node.getIdent().getLeaf().getValue(), fun);
+		return fun;
 	}
 
 	@Override
-	public StructScopeDescriptor getStructScopeDescriptor(String ident) throws CompilerException {
-		return (StructScopeDescriptor) this.getDescriptors(ident).stream().filter(c -> c instanceof StructScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Struct: " + ident + ", not defined."));
+	public Collection<ScopeDescriptor> getFunDefDescriptors(String ident) throws CompilerException {
+		Collection<ScopeDescriptor> col = this.getDescriptors(ident);
+
+		col = col.stream().filter(c -> c instanceof FunScopeDescriptor).collect(Collectors.toCollection(ArrayList::new));
+
+		return col;
 	}
 
 }

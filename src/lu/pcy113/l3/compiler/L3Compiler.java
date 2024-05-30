@@ -74,6 +74,7 @@ public abstract class L3Compiler {
 	public void writeln(String string) throws CompilerException {
 		try {
 			fw.write(string + "\n");
+			fw.flush();
 		} catch (IOException e) {
 			throw new CompilerException("Could not write to output writer to: " + outFileAsm, e);
 		}

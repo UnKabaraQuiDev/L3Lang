@@ -23,7 +23,7 @@ public class IdentifierLitNode extends Node {
 		tokens.add(consume);
 		return this;
 	}
-
+	
 	public IdentifierToken getLeaf() {
 		return tokens.getLast();
 	}

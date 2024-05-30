@@ -13,15 +13,18 @@ import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.ArrayAccessNode;
 import lu.pcy113.l3.parser.ast.ArrayAllocNode;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
+import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
-import lu.pcy113.l3.parser.ast.FunParamDefNode;
-import lu.pcy113.l3.parser.ast.FunParamsDefNode;
+import lu.pcy113.l3.parser.ast.FunCallParamsNode;
+import lu.pcy113.l3.parser.ast.FunDefParamNode;
+import lu.pcy113.l3.parser.ast.FunDefParamsNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetRefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.PointerDerefNode;
+import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
@@ -83,6 +86,29 @@ public class L3Parser {
 			implement(peek().getType());
 		}
 	}
+	
+	private void parseFunLineExpr(FunDefNode fun, FunBodyDefNode body, ScopeContainerNode parent) throws ParserException {
+		if (peek(TokenType.LET)) {
+			parseLetDef(parent);
+			consume(TokenType.SEMICOLON);
+		} else if (peek(TokenType.RETURN)) {
+			parseReturn(fun, parent);
+		} else {
+			implement(peek().getType());
+		}
+	}
+
+	private void parseReturn(FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+		consume(TokenType.RETURN);
+		
+		if(fun.getReturnType() instanceof VoidTypeNode) {
+			parent.add(new ReturnNode());
+			consume(TokenType.SEMICOLON);
+		}else {
+			parent.add(new ReturnNode(parseExpression()));
+			consume(TokenType.SEMICOLON);
+		}
+	}
 
 	private FunDefNode parseFunDef(ScopeContainerNode parent) throws ParserException {
 		consume(TokenType.FUN);
@@ -100,7 +126,11 @@ public class L3Parser {
 		if (peek(TokenType.SEMICOLON)) {
 			consume(TokenType.SEMICOLON);
 		} else {
+			consume(TokenType.CURLY_OPEN);
 
+			funDef.add(parseFunBody(funDef));
+
+			consume(TokenType.CURLY_CLOSE);
 		}
 
 		parent.add(funDef);
@@ -109,8 +139,23 @@ public class L3Parser {
 		return funDef;
 	}
 
-	private FunParamsDefNode parseFunParamsDef() throws ParserException {
-		FunParamsDefNode params = new FunParamsDefNode();
+	private FunBodyDefNode parseFunBody(FunDefNode fun) throws ParserException {
+		FunBodyDefNode body = new FunBodyDefNode();
+
+		while (!peek(TokenType.CURLY_CLOSE)) {
+
+			parseFunLineExpr(fun, body, body);
+
+			if (!hasNext()) {
+				throw new ParserException("Unterminated function: " + peek(-1).getPosition());
+			}
+		}
+
+		return body;
+	}
+
+	private FunDefParamsNode parseFunParamsDef() throws ParserException {
+		FunDefParamsNode params = new FunDefParamsNode();
 
 		while (!peek(TokenType.PAREN_CLOSE)) {
 			params.add(parseFunParamDef());
@@ -122,7 +167,7 @@ public class L3Parser {
 		return params;
 	}
 
-	private FunParamDefNode parseFunParamDef() {
+	private FunDefParamNode parseFunParamDef() {
 		return null;
 	}
 
@@ -380,9 +425,11 @@ public class L3Parser {
 			consume(TokenType.HASH);
 		consume(TokenType.PAREN_OPEN);
 
-		FunCallNode call = new FunCallNode(ident, preset);
+		FunCallParamsNode params = new FunCallParamsNode();
 
-		parseFunArgs().forEach(call::addParam);
+		parseFunArgs().forEach(params::add);
+
+		FunCallNode call = new FunCallNode(ident, params, preset);
 
 		consume(TokenType.PAREN_CLOSE);
 

@@ -1,18 +1,21 @@
 package lu.pcy113.l3.parser.ast.scope;
 
+import java.util.stream.Collectors;
+
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.TokenType;
-import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
-import lu.pcy113.l3.parser.ast.FunParamsDefNode;
+import lu.pcy113.l3.parser.ast.FunDefParamsNode;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class FunDefNode extends ScopeContainerNode {
 
-	private IdentifierToken ident;
+	private IdentifierLitNode ident;
 
-	public FunDefNode(TypeNode type, IdentifierLitNode ident2, FunParamsDefNode funParamsDef) {
+	public FunDefNode(TypeNode type, IdentifierLitNode ident, FunDefParamsNode funParamsDef) {
+		this.ident = ident;
 		add(type);
 		add(funParamsDef);
 	}
@@ -21,12 +24,12 @@ public class FunDefNode extends ScopeContainerNode {
 		return (TypeNode) children.get(0);
 	}
 
-	public IdentifierToken getIdent() {
+	public IdentifierLitNode getIdent() {
 		return ident;
 	}
 
-	public FunParamsDefNode getParams() {
-		return (FunParamsDefNode) children.get(1);
+	public FunDefParamsNode getParams() {
+		return (FunDefParamsNode) children.get(1);
 	}
 
 	public boolean hasBody() {
@@ -43,11 +46,22 @@ public class FunDefNode extends ScopeContainerNode {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + getReturnType() + ": " + ident.getValue() + ")";
+		return super.toString() + "(" + getReturnType() + ": " + ident.asString() + ")";
 	}
 
 	public boolean isMain() {
-		return ident.getValue().equals("main") && this.getParams().isLeaf() && getReturnType() instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) getReturnType()).getType().equals(TokenType.INT_8);
+		return ident.asString().equals("main") && this.getParams().isLeaf() && getReturnType() instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) getReturnType()).getType().equals(TokenType.INT_8);
+	}
+
+	public int getMemorySize() throws CompilerException {
+		int size = 0;
+		for (ScopeDescriptor desc : getBody().getLocalDescriptors().values().parallelStream().flatMap(c -> c.stream()).collect(Collectors.toSet())) {
+			if (desc instanceof LetScopeDescriptor) {
+				System.err.println("desc for: " + desc.getIdentifier() + " = " + ((LetScopeDescriptor) desc).getNode().getType().getBytesSize());
+				size += ((LetScopeDescriptor) desc).getNode().getType().getBytesSize();
+			}
+		}
+		return size;
 	}
 
 }

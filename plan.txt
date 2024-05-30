@@ -67,6 +67,15 @@
 - ModifierNode (on LetDefNode, FunDefNode, FieldDefNode)
 - AnnotationNode (on ClassDefNode, StructDefNode, InterfaceDefNode, UnionDefNode, EnumDefNode, LetDefNode, FunDefNode, FieldDefNode)
 
+CALLER: sub rsp, (size)
+CALLER: push rbp
+- - -
+| CALLEE: mov rbp, rsp
+| CALLEE: mov [rbp+1+(size<rbp>]], 1
+| CALLEE: ret
+- - -
+CALLER: pop rbp
+
 // Registers: https://www.google.com/url?sa=i&url=https%3A%2F%2Fflint.cs.yale.edu%2Fcs421%2Fpapers%2Fx86-asm%2Fasm.html&psig=AOvVaw0rCnty8jhAqtjqMHjZcsUA&ust=1716928948284000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCPCNrfLYroYDFQAAAAAdAAAAABAE
 
 // build symbol table (populate LetTypeDefDescriptors at compile-time, or change a flag to make it defined in the current scope)

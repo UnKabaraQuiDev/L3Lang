@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
-import lu.pcy113.l3.parser.ast.FieldAccessNode;
 
 public interface ScopeContainer {
 
@@ -29,33 +29,33 @@ public interface ScopeContainer {
 	Collection<ScopeDescriptor> getDescriptors(String name);
 
 	ScopeContainer getContainer(String name);
-
+	
+	FunScopeDescriptor addFunDefDescriptor(FunDefNode node);
+	
+	LetScopeDescriptor addLetDefDescriptor(LetDefNode node);
+	
 	boolean addDescriptor(String name, ScopeDescriptor scopeDescriptor);
 
-	boolean containsFunDescriptor(FunCallNode node);
+	boolean containsFunDefDescriptor(FunCallNode node);
 
+	boolean containsFunDefDescriptor(FunDefNode node);
+	
 	boolean containsLetDefDescriptor(LetDefNode node);
-
-	boolean containsFunDescriptor(FunDefNode node);
 
 	boolean containsLetDefDescriptor(FieldAccessNode node);
 
-	boolean containsStructScopeDescriptor(StructDefNode node) throws CompilerException;
-
-	FunScopeDescriptor getFunDescriptor(FunCallNode node) throws CompilerException;
+	FunScopeDescriptor getFunDefDescriptor(FunCallNode node) throws CompilerException;
+	
+	FunScopeDescriptor getFunDefDescriptor(FunDefNode node) throws CompilerException;
+	
+	Collection<ScopeDescriptor> getFunDefDescriptors(String ident) throws CompilerException;
 
 	LetScopeDescriptor getLetDefDescriptor(LetDefNode node) throws CompilerException;
-
-	FunScopeDescriptor getFunDescriptor(FunDefNode node) throws CompilerException;
 
 	LetScopeDescriptor getLetDefDescriptor(LetSetNode node) throws CompilerException;
 
 	LetScopeDescriptor getLetDefDescriptor(FieldAccessNode node) throws CompilerException;
 
 	LetScopeDescriptor getLetDefDescriptor(String ident) throws CompilerException;
-
-	StructScopeDescriptor getStructScopeDescriptor(StructDefNode node) throws CompilerException;
-
-	StructScopeDescriptor getStructScopeDescriptor(String ident) throws CompilerException;
 
 }
