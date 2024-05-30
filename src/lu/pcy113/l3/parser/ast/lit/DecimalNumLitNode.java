@@ -1,6 +1,6 @@
 package lu.pcy113.l3.parser.ast.lit;
 
-public class DecimalNumLitNode extends NumLitNode {
+public class DecimalNumLitNode extends NumLitNode<Double> {
 
 	private double value;
 
@@ -17,8 +17,9 @@ public class DecimalNumLitNode extends NumLitNode {
 	public boolean isInteger() {
 		return false;
 	}
-
-	public double getValue() {
+	
+	@Override
+	public Double getValue() {
 		return value;
 	}
 

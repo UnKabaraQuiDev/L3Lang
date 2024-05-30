@@ -12,7 +12,7 @@ import lu.pcy113.l3.parser.ast.ArrayAccessNode;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetRefNode;
-import lu.pcy113.l3.parser.ast.LetTypeSetNode;
+import lu.pcy113.l3.parser.ast.LetSetNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
@@ -248,7 +248,7 @@ public class L3ExprParser {
 			break;
 		}
 
-		return new LetTypeSetNode(var, expr);
+		return new LetSetNode(var, expr);
 	}
 
 	private boolean hasNext() {
@@ -283,7 +283,7 @@ public class L3ExprParser {
 
 	private Token consume(TokenType... types) throws ParserException {
 		Token peek = peek();
-		if (Arrays.stream(types).filter(peek.getType()::softEquals).collect(Collectors.counting()) > 0)
+		if (Arrays.stream(types).filter(peek.getType()::matches).collect(Collectors.counting()) > 0)
 			return consume();
 		else
 			throw new ParserException(peek, types);
@@ -305,25 +305,25 @@ public class L3ExprParser {
 	private boolean peek(TokenType type) {
 		if (!hasNext())
 			return false;
-		return peek().getType().softEquals(type);
+		return peek().getType().matches(type);
 	}
 
 	private boolean peek(int x, TokenType type) {
 		if (!hasNext(x))
 			return false;
-		return peek(x).getType().softEquals(type);
+		return peek(x).getType().matches(type);
 	}
 
 	private boolean peek(TokenType... types) {
 		if (!hasNext())
 			return false;
 		TokenType peek = peek().getType();
-		return Arrays.stream(types).map(peek::softEquals).collect(Collectors.reducing((a, b) -> a || b)).orElse(false);
+		return Arrays.stream(types).map(peek::matches).collect(Collectors.reducing((a, b) -> a || b)).orElse(false);
 	}
 
 	private boolean peek(int x, TokenType... types) {
 		TokenType peek = peek(x).getType();
-		return Arrays.stream(types).map(peek::softEquals).collect(Collectors.reducing((a, b) -> a || b)).orElse(false);
+		return Arrays.stream(types).map(peek::matches).collect(Collectors.reducing((a, b) -> a || b)).orElse(false);
 	}
 
 	public RuntimeNode getRoot() {

@@ -2,12 +2,16 @@ package lu.pcy113.l3.compiler.memory;
 
 public interface MemoryStatus {
 
-	String getFreeRegister();
+	String alloc();
 
-	void freeRegister(String reg);
+	void free(String reg);
 
-	boolean hasFreeRegister();
+	boolean hasFree();
 	
-	boolean isRegisterFree(String reg);
+	boolean isFree(String reg);
+	
+	boolean alloc(String reg);
+	
+	void freeAll();
 	
 }

@@ -290,7 +290,7 @@ public class L3Lexer {
 						checkOthers(current);
 						break next;
 					}
-					if (type != null && type.softEquals(TYPE) && peek("s")) {
+					if (type != null && type.matches(TYPE) && peek("s")) {
 						consume();
 						try {
 							type = TokenType.valueOf(type.name() + "_S");

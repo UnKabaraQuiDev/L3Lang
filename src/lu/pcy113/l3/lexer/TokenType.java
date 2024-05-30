@@ -119,8 +119,8 @@ public enum TokenType {
 		this.parent = parent;
 	}
 
-	public boolean softEquals(TokenType type) {
-		return this.equals(type) || (parent != null ? parent.softEquals(type) : false);
+	public boolean matches(TokenType type) {
+		return this.equals(type) || (parent != null ? parent.matches(type) : false);
 	}
 
 	public boolean isFixed() {

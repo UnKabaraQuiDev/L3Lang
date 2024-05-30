@@ -4,6 +4,7 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
+import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 
 public class FieldAccessNode extends ExprNode implements RecursiveArithmeticOp {
 
@@ -13,14 +14,22 @@ public class FieldAccessNode extends ExprNode implements RecursiveArithmeticOp {
 		this.ident = ident;
 	}
 
+	public boolean isPrimitive() throws CompilerException {
+		return getClosestContainer().getLetDefDescriptor(this).getNode().getType() instanceof PrimitiveTypeNode;
+	}
+
+	public boolean isNumber() throws CompilerException {
+		return isPrimitive() && getClosestContainer().getLetDefDescriptor(this).getNode().getType() instanceof PrimitiveTypeNode;
+	}
+
 	@Override
 	public boolean isDecimal() throws CompilerException {
-		return getClosestContainer().getLetTypeDefDescriptor(this).getNode().getType().isDecimal();
+		return isNumber() && ((PrimitiveTypeNode) getClosestContainer().getLetDefDescriptor(this).getNode().getType()).isDecimal();
 	}
 
 	@Override
 	public boolean isInteger() throws CompilerException {
-		return getClosestContainer().getLetTypeDefDescriptor(this).getNode().getType().isInteger();
+		return isNumber() && ((PrimitiveTypeNode) getClosestContainer().getLetDefDescriptor(this).getNode().getType()).isInteger();
 	}
 
 	public IdentifierLitNode getIdent() {
@@ -33,7 +42,7 @@ public class FieldAccessNode extends ExprNode implements RecursiveArithmeticOp {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + ident.toString()  + ")";
+		return super.toString() + "(" + ident.toString() + ")";
 	}
 
 }

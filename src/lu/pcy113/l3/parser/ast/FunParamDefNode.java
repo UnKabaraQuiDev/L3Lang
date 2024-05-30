@@ -1,21 +1,36 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
+
 public class FunParamDefNode extends Node {
 
-	public boolean argsEquals(FunArgsValNode args) {
-		
-		if(this.getChildren().size() != args.getChildren().size()) {
-			return false;
-		}
-		
-		for(int i = 0; i < args.getChildren().size(); i++) {
-			if(!((FunArgDefNode) this.getChildren().get(i)).getLet().getType().equals(((FunArgValNode) args.getChildren().get(i)).getType())) {
-				return false;
-			}
-		}
-		
-		return true;
-		
+	private IdentifierLitNode ident;
+
+	public FunParamDefNode(TypeNode type, IdentifierLitNode ident) {
+		add(type);
+		this.ident = ident;
+	}
+
+	public TypeNode getType() {
+		return (TypeNode) children.get(0);
+	}
+
+	public boolean hasExpr() {
+		return children.size() >= 2;
+	}
+
+	public Node getExpr() {
+		return children.get(1);
+	}
+
+	public IdentifierLitNode getIdent() {
+		return ident;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + "(" + ident.asString() + ", " + getType().toString() + ")";
 	}
 
 }

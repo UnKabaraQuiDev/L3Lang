@@ -17,12 +17,12 @@ public class ArrayAccessNode extends ExprNode implements RecursiveArithmeticOp {
 
 	@Override
 	public boolean isDecimal() throws CompilerException {
-		return getClosestContainer().getLetTypeDefDescriptor(ident).getNode().getType().isDecimal();
+		return getClosestContainer().getLetDefDescriptor(ident).getNode().getType().isDecimal();
 	}
 
 	@Override
 	public boolean isInteger() throws CompilerException {
-		return getClosestContainer().getLetTypeDefDescriptor(ident).getNode().getType().isInteger();
+		return getClosestContainer().getLetDefDescriptor(ident).getNode().getType().isInteger();
 	}
 
 	public Node getOffset() {

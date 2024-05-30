@@ -5,21 +5,21 @@ import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 
-public class LetTypeSetNode extends ExprNode implements RecursiveArithmeticOp {
+public class LetSetNode extends ExprNode implements RecursiveArithmeticOp {
 
-	public LetTypeSetNode(Node let, Node expr) {
+	public LetSetNode(Node let, Node expr) {
 		add(let);
 		add(expr);
 	}
 	
 	@Override
 	public boolean isDecimal() throws L3Exception {
-		return getClosestContainer().getLetTypeDefDescriptor(this).getNode().getType().isDecimal();
+		return getClosestContainer().getLetDefDescriptor(this).getNode().getType().isDecimal();
 	}
 	
 	@Override
 	public boolean isInteger() throws L3Exception {
-		return getClosestContainer().getLetTypeDefDescriptor(this).getNode().getType().isInteger();
+		return getClosestContainer().getLetDefDescriptor(this).getNode().getType().isInteger();
 	}
 
 	public Node getLet() {

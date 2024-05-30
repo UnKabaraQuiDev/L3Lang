@@ -10,6 +10,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
 import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.compiler.x86.X86Compiler;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.parser.L3Parser;
@@ -49,6 +50,7 @@ public class PrivateMain {
 		parser.parse();
 
 		FileNode fileNode = parser.getRoot();
+		fileNode.setMain(true);
 		// fileNode.containsMainFunDescriptor();
 
 		RuntimeNode runtimeNode = new RuntimeNode(fileNode);
@@ -58,8 +60,8 @@ public class PrivateMain {
 		createParent(astFile);
 		Files.write(Paths.get(astFile.getPath()), runtimeNode.toString(0).getBytes(), StandardOpenOption.CREATE);
 		
-		/*X86Compiler compiler = new X86Compiler(runtimeNode, l3Dir, mainFile);
-		compiler.compile();*/
+		X86Compiler compiler = new X86Compiler(runtimeNode, binDir, mainFile);
+		compiler.compile();
 	}
 
 	private static void createParent(File file) {

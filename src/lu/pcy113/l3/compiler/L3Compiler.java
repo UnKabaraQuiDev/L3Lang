@@ -59,19 +59,19 @@ public abstract class L3Compiler {
 		System.out.println("--- Process exited with code: " + exitCode);
 	}
 
-	protected void writeinstln(String string) throws CompilerException {
+	public void writeinstln(String string) throws CompilerException {
 		writeln("\t" + string);
 	}
 
-	protected void writedataln(String string) throws CompilerException {
+	public void writedataln(String string) throws CompilerException {
 		dataBuilder.append("\t" + string + "\n");
 	}
 
-	protected void writetextln(String string) throws CompilerException {
+	public void writetextln(String string) throws CompilerException {
 		textBuilder.append("\t" + string + "\n");
 	}
 
-	protected void writeln(String string) throws CompilerException {
+	public void writeln(String string) throws CompilerException {
 		try {
 			fw.write(string + "\n");
 		} catch (IOException e) {

@@ -2,9 +2,10 @@ package lu.pcy113.l3.parser.ast.scope;
 
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
-import lu.pcy113.l3.parser.ast.FunParamDefNode;
-import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
+import lu.pcy113.l3.parser.ast.FunParamsDefNode;
+import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class FunDefNode extends ScopeContainerNode {
 
@@ -23,12 +24,16 @@ public class FunDefNode extends ScopeContainerNode {
 		return ident;
 	}
 
-	public FunParamDefNode getArgs() {
-		return (FunParamDefNode) children.get(1);
+	public FunParamsDefNode getArgs() {
+		return (FunParamsDefNode) children.get(1);
 	}
 
 	public FunBodyDefNode getBody() {
 		return (FunBodyDefNode) children.get(2);
+	}
+
+	public boolean matchReturnType(Class<? extends TypeNode> clazz) {
+		return clazz.isInstance(getReturnType().getClass());
 	}
 
 	@Override
@@ -37,7 +42,7 @@ public class FunDefNode extends ScopeContainerNode {
 	}
 
 	public boolean isMain() {
-		return ident.getValue().equals("main") && this.getArgs().isLeaf() && this.getReturnType().getType().softEquals(TokenType.INT);
+		return ident.getValue().equals("main") && this.getArgs().isLeaf() && getReturnType() instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) getReturnType()).getType().equals(TokenType.INT_8);
 	}
 
 }

@@ -1,6 +1,6 @@
 package lu.pcy113.l3.parser.ast.lit;
 
-public class IntegerNumLitNode extends NumLitNode {
+public class IntegerNumLitNode extends NumLitNode<Long> {
 
 	private long value;
 
@@ -18,7 +18,8 @@ public class IntegerNumLitNode extends NumLitNode {
 		return true;
 	}
 
-	public long getValue() {
+	@Override
+	public Long getValue() {
 		return value;
 	}
 
