@@ -12,22 +12,18 @@ public class X86_RuntimeConsumer extends CompilerConsumer<X86Compiler, RuntimeNo
 	@Override
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, RuntimeNode node) throws CompilerException {
 		compiler.writeinstln("mov rbp, rsp");
-		
-		compiler.writeinstln("sub rsp, 8  ; Freeing space for main-fun return");
-		
-		compiler.writeinstln("push rbp");
-		compiler.writeinstln("mov rbp, rsp");
-		compiler.writeinstln("add rbp, 8");
-		compiler.writeinstln("call "+node.getMainFile().getMainFunDescriptor().getAsmName()+"  ; Call main");
-		compiler.writeinstln("pop rbp");
-		
+
+		compiler.writeinstln("sub rsp, " + node.getMainFile().getMainFunDescriptor().getNode().getReturnType().getBytesSize() + "  ; Freeing space for main-fun return");
+
+		compiler.writeinstln("call " + node.getMainFile().getMainFunDescriptor().getAsmName() + "  ; Call main");
+		// compiler.writeinstln("add rsp, "+node.getMainFile().getMainFunDescriptor().getNode().getMemorySize());
+
 		compiler.writeinstln("; Final syscall exit");
 		compiler.writeinstln("mov byte al, 60");
-		// compiler.writeinstln("add rsp, 1");
 		compiler.writeinstln("mov byte dil, [rsp+8]");
 		compiler.writeinstln("syscall");
-		
+
 		compiler.compile(node.getMainFile());
 	}
-	
+
 }

@@ -47,7 +47,7 @@ public class FileNode extends ScopeBodyNode {
 	public FunScopeDescriptor getMainFunDescriptor() throws CompilerException {
 		return (FunScopeDescriptor) super.getLocalDescriptors("main").stream().filter(c -> c instanceof FunScopeDescriptor)
 				.filter(c -> ((FunScopeDescriptor) c).getNode().isMain()).findFirst()
-				.orElseThrow(() -> new CompilerException("No main function found in FileNode (int main(void))"));
+				.orElseThrow(() -> new CompilerException("No main function found in FileNode (int8 main(void))"));
 	}
 
 	@Override

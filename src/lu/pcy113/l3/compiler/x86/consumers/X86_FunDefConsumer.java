@@ -15,7 +15,8 @@ public class X86_FunDefConsumer extends CompilerConsumer<X86Compiler, FunDefNode
 		GlobalLogger.log("FunDef: "+node);
 		
 		compiler.writeln(node.getFunDefDescriptor(node).getAsmName()+":  ; Fun: "+node.getIdent().asString());
-		
+		compiler.writeinstln("push rbp");
+		compiler.writeinstln("mov rbp, rsp");
 		compiler.compile(node.getBody());
 	}
 

@@ -15,7 +15,7 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, LetDefNode node) throws CompilerException {
 		GlobalLogger.log("LetDef: " + node);
 
-		final int size = node.getType().getBytesSize();
+		int size = node.getType().getBytesSize();
 
 		if (node.getExpr() instanceof NumLitNode) {
 
@@ -28,8 +28,11 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 			compiler.writeinstln("mov " + reg + ", " + ((NumLitNode) node.getExpr()).getValue());
 			if (size >= 4) {
 				node.getType().setBytesSize(8);
+			} else if (size >= 1) {
+				node.getType().setBytesSize(2);
 			}
-			compiler.writeinstln("push " + compiler.getMovType(size) + " " + mem.getAsSize(reg, size) + "  ; Alloc-ed: " + size);
+			size = node.getType().getBytesSize();
+			compiler.writeinstln("push " + compiler.getMovType(size) + " " + mem.getAsSize(reg, size) + "  ; Alloc-ed: " + size + " for " + node.getIdent().asString());
 
 			mem.free(reg);
 		}

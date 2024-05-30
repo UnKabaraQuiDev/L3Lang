@@ -15,13 +15,14 @@ public class X86_ReturnConsumer extends CompilerConsumer<X86Compiler, ReturnNode
 		GlobalLogger.log("Return: " + node);
 
 		if (node.hasExpr()) {
-			node.getFunDefParent().getReturnType().setBytesSize(8);
 			int size = node.getFunDefParent().getReturnType().getBytesSize();
-			compiler.writeinstln("mov " + compiler.getMovType(size) + " [rbp], " + mem.getAsSize("rax", size));
+			// +24 bc rsp (call return), rbp and return rbp are on the stack
+			compiler.writeinstln("mov al, 3");
+			compiler.writeinstln("mov " + compiler.getMovType(size) + " [rbp+24], " + mem.getAsSize("rax", size));
 		}
 
 		compiler.writeinstln("mov rsp, rbp");
-		compiler.writeinstln("sub rsp, 16");
+		compiler.writeinstln("pop rbp");
 
 		compiler.writeinstln("ret");
 	}
