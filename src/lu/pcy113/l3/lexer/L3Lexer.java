@@ -3,7 +3,6 @@ package lu.pcy113.l3.lexer;
 import static lu.pcy113.l3.lexer.TokenType.AND;
 import static lu.pcy113.l3.lexer.TokenType.ARROW;
 import static lu.pcy113.l3.lexer.TokenType.AS;
-import static lu.pcy113.l3.lexer.TokenType.ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIN_NUM_LIT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_AND;
 import static lu.pcy113.l3.lexer.TokenType.BIT_AND_ASSIGN;
@@ -75,6 +74,7 @@ import static lu.pcy113.l3.lexer.TokenType.RETURN;
 import static lu.pcy113.l3.lexer.TokenType.SEMICOLON;
 import static lu.pcy113.l3.lexer.TokenType.SHORT;
 import static lu.pcy113.l3.lexer.TokenType.STATIC;
+import static lu.pcy113.l3.lexer.TokenType.STRICT_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.STRING_LIT;
 import static lu.pcy113.l3.lexer.TokenType.STRUCT;
 import static lu.pcy113.l3.lexer.TokenType.SWITCH;
@@ -383,7 +383,7 @@ public class L3Lexer {
 						consume();
 						type = EQUALS;
 					} else {
-						type = ASSIGN;
+						type = STRICT_ASSIGN;
 					}
 					flushToken();
 					break next;

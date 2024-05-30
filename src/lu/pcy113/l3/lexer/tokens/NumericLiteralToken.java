@@ -15,7 +15,7 @@ public class NumericLiteralToken extends LiteralToken<Number> {
 	public NumericLiteralToken(TokenType type, int line, int column, String literal) throws LexerException {
 		super(type, line, column);
 
-		literal = literal.trim().replace('_', ' ');
+		literal = literal.trim().replace("_", "");
 
 		this.literal = literal;
 		if (type.equals(TokenType.DEC_NUM_LIT)) {
@@ -43,14 +43,14 @@ public class NumericLiteralToken extends LiteralToken<Number> {
 			} catch (NumberFormatException e) {
 				throw new LexerException(e, "Invalid number format: " + e.getMessage(), line, column, literal);
 			}
-		}else if (type.equals(TokenType.NUM_LIT)) {
+		} else if (type.equals(TokenType.NUM_LIT)) {
 			try {
 				value = Long.parseLong(literal);
 			} catch (NumberFormatException e) {
 				throw new LexerException(e, "Invalid number format: " + e.getMessage(), line, column, literal);
 			}
 		}
-		
+
 		if (value instanceof Long) {
 			if ((long) value <= Byte.MAX_VALUE) {
 				valueType = ValueType.INT_8;
@@ -66,6 +66,14 @@ public class NumericLiteralToken extends LiteralToken<Number> {
 
 	public String getLiteral() {
 		return literal;
+	}
+
+	public boolean isDecimal() {
+		return valueType.equals(ValueType.DECIMAL);
+	}
+
+	public boolean isInteger() {
+		return !isDecimal();
 	}
 
 	@Override

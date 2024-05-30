@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 
 public abstract class L3Compiler {
@@ -18,8 +19,8 @@ public abstract class L3Compiler {
 	public L3Compiler(RuntimeNode env, File outFile) {
 		this.root = env;
 		this.outDir = outFile.getAbsoluteFile().getParentFile();
-		this.outFileAsm = new File(outFile.getPath()+".asm");
-		this.outFileObj = new File(outFile.getPath()+".o");
+		this.outFileAsm = new File(outFile.getPath() + ".asm");
+		this.outFileObj = new File(outFile.getPath() + ".o");
 		this.outFileExec = outFile;
 	}
 
@@ -149,5 +150,7 @@ public abstract class L3Compiler {
 	public File getOutDir() {
 		return outDir;
 	}
+
+	public abstract MemoryStatus getMemoryStatus();
 
 }

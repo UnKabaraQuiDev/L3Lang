@@ -1,0 +1,4 @@
+package lu.lang.base;
+
+let int x = 0;
+let int32 b = 12;

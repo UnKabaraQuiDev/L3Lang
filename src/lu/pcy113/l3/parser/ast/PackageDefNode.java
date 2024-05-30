@@ -1,22 +1,23 @@
 package lu.pcy113.l3.parser.ast;
 
 import lu.pcy113.l3.lexer.tokens.Token;
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 
 public class PackageDefNode extends Node {
 
 	private Token token;
-	private String value;
+	private IdentifierLitNode value;
 
-	public PackageDefNode(Token token, String value) {
+	public PackageDefNode(Token token, IdentifierLitNode identifierLitNode) {
 		this.token = token;
-		this.value = value;
+		this.value = identifierLitNode;
 	}
 
 	public Token getToken() {
 		return token;
 	}
 
-	public String getValue() {
+	public IdentifierLitNode getValue() {
 		return value;
 	}
 	

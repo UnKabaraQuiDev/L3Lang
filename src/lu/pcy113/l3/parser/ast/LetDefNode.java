@@ -1,19 +1,17 @@
 package lu.pcy113.l3.parser.ast;
 
-import lu.pcy113.l3.lexer.tokens.IdentifierToken;
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class LetDefNode extends Node {
 
-	private IdentifierToken ident;
-	private boolean iStatic, arg;
-	private int stackIndex = 0, stackSize = 4;
+	private IdentifierLitNode ident;
+	private boolean iStatic;
 
-	public LetDefNode(TypeNode type, IdentifierToken ident, boolean iStatic, boolean arg) {
+	public LetDefNode(TypeNode type, IdentifierLitNode ident, boolean iStatic) {
 		add(type);
 		this.ident = ident;
 		this.iStatic = iStatic;
-		this.arg = arg;
 	}
 
 	public TypeNode getType() {
@@ -28,7 +26,7 @@ public class LetDefNode extends Node {
 		return children.get(1);
 	}
 
-	public IdentifierToken getIdent() {
+	public IdentifierLitNode getIdent() {
 		return ident;
 	}
 
@@ -36,29 +34,9 @@ public class LetDefNode extends Node {
 		return iStatic;
 	}
 
-	public int getStackSize() {
-		return stackSize;
-	}
-
-	public void setStackSize(int stackSize) {
-		this.stackSize = stackSize;
-	}
-
-	public int getStackIndex() {
-		return stackIndex;
-	}
-
-	public void setStackIndex(int stackIndex) {
-		this.stackIndex = stackIndex;
-	}
-
-	public boolean isArg() {
-		return arg;
-	}
-
 	@Override
 	public String toString() {
-		return super.toString() + "(" + ident.getValue() + ", " + getType().toString() + ", index=" + stackIndex + ", size=" + stackSize + ")";
+		return super.toString() + "(" + ident.asString() + ", " + getType().toString() + ")";
 	}
 
 }

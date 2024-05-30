@@ -56,7 +56,7 @@ public enum TokenType {
 
 	GOTO("goto"), YIELD("yield"),
 
-	ASSIGN('='),
+	ASSIGN(), STRICT_ASSIGN(ASSIGN, '='),
 
 	BIT_OR('|'), BIT_AND('&'), BIT_XOR('^'), BIT_NOT('~'),
 

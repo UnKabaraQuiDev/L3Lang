@@ -1,4 +1,4 @@
-package lu.pcy113.l3.compiler;
+package lu.pcy113.l3.compiler.x86;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,19 +6,21 @@ import java.util.List;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
+import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.compiler.L3Compiler;
+import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.MemoryUtil;
-import lu.pcy113.l3.parser.ast.ArrayInit;
 import lu.pcy113.l3.parser.ast.ArrayAllocNode;
+import lu.pcy113.l3.parser.ast.ArrayInit;
 import lu.pcy113.l3.parser.ast.ComparisonOpNode;
 import lu.pcy113.l3.parser.ast.ConArgValNode;
 import lu.pcy113.l3.parser.ast.ConArgsValNode;
-import lu.pcy113.l3.parser.ast.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FinallyDefNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
 import lu.pcy113.l3.parser.ast.FunArgDefNode;
@@ -27,17 +29,18 @@ import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.IfContainerNode;
 import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
-import lu.pcy113.l3.parser.ast.LetTypeSetNode;
 import lu.pcy113.l3.parser.ast.LetRefNode;
+import lu.pcy113.l3.parser.ast.LetTypeSetNode;
 import lu.pcy113.l3.parser.ast.Node;
-import lu.pcy113.l3.parser.ast.TypeAllocNode;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
+import lu.pcy113.l3.parser.ast.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
-import lu.pcy113.l3.parser.ast.FieldAccessNode;
+import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.expr.LogicalOpNode;
+import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.lit.StringLitNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
@@ -669,9 +672,9 @@ public class X86Compiler extends L3Compiler {
 
 				}
 
-			} else if (node.getExpr() instanceof TypeAllocNode) {
+			} else if (node.getExpr() instanceof UserTypeAllocNode) {
 
-				TypeAllocNode init = (TypeAllocNode) node.getExpr();
+				UserTypeAllocNode init = (UserTypeAllocNode) node.getExpr();
 				StructScopeDescriptor structDesc = node.getClosestContainer().getStructScopeDescriptor(((IdentifierToken) node.getType().getIdent()).getValue());
 				StructDefNode structDef = structDesc.getNode();
 
@@ -1193,8 +1196,14 @@ public class X86Compiler extends L3Compiler {
 
 	}
 
-	private void warn(String msg) {
+	private void warning(String msg) {
 		GlobalLogger.warning(msg);
+	}
+
+	@Override
+	public MemoryStatus getMemoryStatus() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

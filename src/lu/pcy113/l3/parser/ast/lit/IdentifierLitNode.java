@@ -38,7 +38,11 @@ public class IdentifierLitNode extends Node {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + tokens.stream().map((t) -> t.getValue()).collect(Collectors.joining(".")) + ")";
+		return super.toString() + "(" + asString() + ")";
+	}
+
+	public String asString() {
+		return tokens.stream().map((t) -> t.getValue()).collect(Collectors.joining("."));
 	}
 
 }

@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lu.pcy113.l3.L3Exception;
-import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
+import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.utils.StringUtils;
 
@@ -27,13 +27,13 @@ public class FunCallNode extends ExprNode implements RecursiveArithmeticOp {
 	}
 
 	@Override
-	public boolean isFloat() throws L3Exception {
-		return getClosestContainer().getFunDescriptor(this).getNode().getReturnType().isFloat();
+	public boolean isDecimal() throws L3Exception {
+		return getClosestContainer().getFunDescriptor(this).getNode().getReturnType().isDecimal();
 	}
 
 	@Override
-	public boolean isInt() throws L3Exception {
-		return getClosestContainer().getFunDescriptor(this).getNode().getReturnType().isInt();
+	public boolean isInteger() throws L3Exception {
+		return getClosestContainer().getFunDescriptor(this).getNode().getReturnType().isInteger();
 	}
 
 	public IdentifierLitNode getIdent() {

@@ -1,9 +1,9 @@
 package lu.pcy113.l3.parser.ast;
 
 import lu.pcy113.l3.compiler.CompilerException;
-import lu.pcy113.l3.compiler.ast.RecursiveArithmeticOp;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
+import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 
 public class ArrayAccessNode extends ExprNode implements RecursiveArithmeticOp {
@@ -16,13 +16,13 @@ public class ArrayAccessNode extends ExprNode implements RecursiveArithmeticOp {
 	}
 
 	@Override
-	public boolean isFloat() throws CompilerException {
-		return getClosestContainer().getLetTypeDefDescriptor(ident).getNode().getType().isFloat();
+	public boolean isDecimal() throws CompilerException {
+		return getClosestContainer().getLetTypeDefDescriptor(ident).getNode().getType().isDecimal();
 	}
 
 	@Override
-	public boolean isInt() throws CompilerException {
-		return getClosestContainer().getLetTypeDefDescriptor(ident).getNode().getType().isInt();
+	public boolean isInteger() throws CompilerException {
+		return getClosestContainer().getLetTypeDefDescriptor(ident).getNode().getType().isInteger();
 	}
 
 	public Node getOffset() {

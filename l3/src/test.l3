@@ -1,7 +1,0 @@
-package "";
-
-fun int8 main() {
-	let int8 bb = 2;
-	return bb;
-}
-

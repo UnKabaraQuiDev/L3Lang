@@ -1,33 +1,33 @@
 package lu.pcy113.l3.parser.ast.scope;
 
-import lu.pcy113.l3.lexer.tokens.IdentifierToken;
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 
 public class ScopeDescriptor {
 
 	private static int index = 0;
 
-	protected IdentifierToken ident;
+	protected IdentifierLitNode ident;
 	protected String asmName = "sd_" + index++;
-	
-	public ScopeDescriptor(IdentifierToken ident) {
+
+	public ScopeDescriptor(IdentifierLitNode ident) {
 		this.ident = ident;
 	}
 
-	public IdentifierToken getIdentifier() {
+	public IdentifierLitNode getIdentifier() {
 		return ident;
 	}
 
 	public String getAsmName() {
 		return asmName;
 	}
-	
+
 	public void setAsmName(String asmName) {
 		this.asmName = asmName;
 	}
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "(" + ident.getValue() + " -> " + getAsmName() + " " + ident.getLine() + ":" + ident.getColumn() + ")";
+		return this.getClass().getSimpleName() + "(" + ident.asString() + " -> " + getAsmName() + ")";
 	}
 
 }

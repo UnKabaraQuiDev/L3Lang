@@ -1,10 +1,11 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
-public class TypeAllocNode extends Node {
+public class UserTypeAllocNode extends ExprNode {
 
-	public TypeAllocNode(TypeNode type) {
+	public UserTypeAllocNode(TypeNode type) {
 		add(type);
 	}
 
