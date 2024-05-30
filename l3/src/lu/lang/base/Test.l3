@@ -1,10 +1,5 @@
 package lu.lang.base;
 
 fun int8 main() {
-	let int32 x = 12;
-	let int16 a = 12;
-	let int8 b = 12;
-	let int c = 12;
-
-	return 2;
+	return (12/4)*2;
 }

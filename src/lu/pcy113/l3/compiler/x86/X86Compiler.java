@@ -5,10 +5,12 @@ import java.io.IOException;
 
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.L3Compiler;
+import lu.pcy113.l3.compiler.x86.consumers.X86_BinaryOpConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_FileConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_FunBodyDefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_FunDefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_LetDefConsumer;
+import lu.pcy113.l3.compiler.x86.consumers.X86_NumLitConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_PackageDefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_ReturnConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_RuntimeConsumer;
@@ -18,6 +20,8 @@ import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
+import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
@@ -34,6 +38,8 @@ public class X86Compiler extends L3Compiler {
 	private X86_FunDefConsumer funDefConsumer = new X86_FunDefConsumer();
 	private X86_ReturnConsumer returnConsumer = new X86_ReturnConsumer();
 	private X86_FunBodyDefConsumer funBodyDefConsumer = new X86_FunBodyDefConsumer();
+	private X86_NumLitConsumer numLitConsumer = new X86_NumLitConsumer();
+	private X86_BinaryOpConsumer binaryOpConsumer = new X86_BinaryOpConsumer();
 
 	public X86Compiler(RuntimeNode env, File binDirPath, String fileName) {
 		super(env, new File(binDirPath, fileName));
@@ -45,6 +51,8 @@ public class X86Compiler extends L3Compiler {
 		funDefConsumer.attach(this);
 		returnConsumer.attach(this);
 		funBodyDefConsumer.attach(this);
+		numLitConsumer.attach(this);
+		binaryOpConsumer.attach(this);
 	}
 
 	@Override
@@ -96,6 +104,10 @@ public class X86Compiler extends L3Compiler {
 			returnConsumer.accept((ReturnNode) node);
 		} else if (node instanceof FunBodyDefNode) {
 			funBodyDefConsumer.accept((FunBodyDefNode) node);
+		} else if (node instanceof NumLitNode) {
+			numLitConsumer.accept((NumLitNode) node);
+		} else if (node instanceof BinaryOpNode) {
+			binaryOpConsumer.accept((BinaryOpNode) node);
 		} else {
 			implement(node);
 		}

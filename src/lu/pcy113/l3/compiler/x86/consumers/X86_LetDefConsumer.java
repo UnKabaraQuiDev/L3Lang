@@ -17,24 +17,25 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 
 		int size = node.getType().getBytesSize();
 
+		if (size >= 4) {
+			node.getType().setBytesSize(8);
+		} else if (size >= 1) {
+			node.getType().setBytesSize(2);
+		}
+		size = node.getType().getBytesSize();
+		
+		mem.pushStack(node);
+		
 		if (node.getExpr() instanceof NumLitNode) {
+			compiler.compile(node.getExpr());
 
-			if (!mem.hasFree()) {
-				throw new CompilerException("No more free registers.");
-			}
+			String reg = mem.getLatest();
 
-			String reg = mem.alloc();
-
-			compiler.writeinstln("mov " + reg + ", " + ((NumLitNode) node.getExpr()).getValue());
-			if (size >= 4) {
-				node.getType().setBytesSize(8);
-			} else if (size >= 1) {
-				node.getType().setBytesSize(2);
-			}
-			size = node.getType().getBytesSize();
-			compiler.writeinstln("push " + compiler.getMovType(size) + " " + mem.getAsSize(reg, size) + "  ; Alloc-ed: " + size + " for " + node.getIdent().asString());
+			compiler.writeinstln("push " + compiler.getMovType(size) + " " + mem.getAsSize("rax", size) + "  ; Alloc-ed: " + size + " for " + node.getIdent().asString());
 
 			mem.free(reg);
+		} else {
+			
 		}
 	}
 

@@ -7,7 +7,6 @@ public class LetScopeDescriptor extends ScopeDescriptor {
 
 	private LetDefNode node;
 
-	private int size;
 	private int offset;
 
 	public LetScopeDescriptor(IdentifierLitNode ident, LetDefNode node) {
@@ -15,24 +14,16 @@ public class LetScopeDescriptor extends ScopeDescriptor {
 		this.node = node;
 	}
 
-	public void setSize(int size) {
-		this.size = size;
+	public LetDefNode getNode() {
+		return node;
 	}
 
-	public void setOffset(int offset) {
+	public void setStackOffset(int offset) {
 		this.offset = offset;
 	}
 
-	public int getSize() {
-		return size;
-	}
-
-	public int getOffset() {
+	public int getStackOffset() {
 		return offset;
-	}
-
-	public LetDefNode getNode() {
-		return node;
 	}
 
 }

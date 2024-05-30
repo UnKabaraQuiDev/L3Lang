@@ -17,6 +17,8 @@ public class X86_FunBodyDefConsumer extends CompilerConsumer<X86Compiler, FunBod
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, FunBodyDefNode node) throws CompilerException {
 		GlobalLogger.log("FunBodyDef: " + node);
 
+		compiler.writeinstln(";  Fun body start - - -");
+		
 		for (Node n : node) {
 			if (n instanceof LetDefNode) {
 				compiler.compile((LetDefNode) n);
@@ -26,6 +28,8 @@ public class X86_FunBodyDefConsumer extends CompilerConsumer<X86Compiler, FunBod
 				compiler.implement(n);
 			}
 		}
+		
+		compiler.writeinstln(";  Fun body end - - -");
 	}
 
 }

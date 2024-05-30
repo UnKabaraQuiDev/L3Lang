@@ -18,6 +18,7 @@ public class X86_FunDefConsumer extends CompilerConsumer<X86Compiler, FunDefNode
 		compiler.writeinstln("push rbp");
 		compiler.writeinstln("mov rbp, rsp");
 		compiler.compile(node.getBody());
+		mem.clearStack();
 	}
 
 }

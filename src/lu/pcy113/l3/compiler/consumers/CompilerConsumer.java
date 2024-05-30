@@ -15,6 +15,10 @@ public abstract class CompilerConsumer<C extends L3Compiler, T extends Node> {
 	}
 
 	public final void accept(T node) throws CompilerException {
+		if(compiler == null) {
+			throw new RuntimeException(new CompilerException("This consumer ("+this.getClass().getName()+") wasn't attached to any compiler."));
+		}
+		
 		accept(compiler, compiler.getMemoryStatus(), node.getClosestContainer(), node);
 	}
 
