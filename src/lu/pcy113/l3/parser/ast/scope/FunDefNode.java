@@ -4,6 +4,7 @@ import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunParamsDefNode;
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
@@ -11,9 +12,9 @@ public class FunDefNode extends ScopeContainerNode {
 
 	private IdentifierToken ident;
 
-	public FunDefNode(TypeNode returnType, IdentifierToken ident) {
-		add(returnType);
-		this.ident = ident;
+	public FunDefNode(TypeNode type, IdentifierLitNode ident2, FunParamsDefNode funParamsDef) {
+		add(type);
+		add(funParamsDef);
 	}
 
 	public TypeNode getReturnType() {
@@ -24,8 +25,12 @@ public class FunDefNode extends ScopeContainerNode {
 		return ident;
 	}
 
-	public FunParamsDefNode getArgs() {
+	public FunParamsDefNode getParams() {
 		return (FunParamsDefNode) children.get(1);
+	}
+
+	public boolean hasBody() {
+		return children.size() > 2;
 	}
 
 	public FunBodyDefNode getBody() {
@@ -42,7 +47,7 @@ public class FunDefNode extends ScopeContainerNode {
 	}
 
 	public boolean isMain() {
-		return ident.getValue().equals("main") && this.getArgs().isLeaf() && getReturnType() instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) getReturnType()).getType().equals(TokenType.INT_8);
+		return ident.getValue().equals("main") && this.getParams().isLeaf() && getReturnType() instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) getReturnType()).getType().equals(TokenType.INT_8);
 	}
 
 }

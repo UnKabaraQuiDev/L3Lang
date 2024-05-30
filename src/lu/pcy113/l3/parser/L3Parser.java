@@ -14,6 +14,8 @@ import lu.pcy113.l3.parser.ast.ArrayAccessNode;
 import lu.pcy113.l3.parser.ast.ArrayAllocNode;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
+import lu.pcy113.l3.parser.ast.FunParamDefNode;
+import lu.pcy113.l3.parser.ast.FunParamsDefNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetRefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
@@ -30,6 +32,8 @@ import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.lit.IntegerNumLitNode;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
+import lu.pcy113.l3.parser.ast.scope.FunDefNode;
+import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 import lu.pcy113.l3.parser.ast.type.PointerTypeNode;
@@ -73,9 +77,53 @@ public class L3Parser {
 		if (peek(TokenType.LET)) {
 			parseLetDef(parent);
 			consume(TokenType.SEMICOLON);
+		} else if (peek(TokenType.FUN)) {
+			parseFunDef(parent);
 		} else {
 			implement(peek().getType());
 		}
+	}
+
+	private FunDefNode parseFunDef(ScopeContainerNode parent) throws ParserException {
+		consume(TokenType.FUN);
+
+		TypeNode type = parseType();
+
+		IdentifierLitNode ident = parseSimpleIdentLit();
+
+		consume(TokenType.PAREN_OPEN);
+
+		FunDefNode funDef = new FunDefNode(type, ident, parseFunParamsDef());
+
+		consume(TokenType.PAREN_CLOSE);
+
+		if (peek(TokenType.SEMICOLON)) {
+			consume(TokenType.SEMICOLON);
+		} else {
+
+		}
+
+		parent.add(funDef);
+		parent.addDescriptor(ident.asString(), new FunScopeDescriptor(ident, funDef));
+
+		return funDef;
+	}
+
+	private FunParamsDefNode parseFunParamsDef() throws ParserException {
+		FunParamsDefNode params = new FunParamsDefNode();
+
+		while (!peek(TokenType.PAREN_CLOSE)) {
+			params.add(parseFunParamDef());
+
+			if (peek(TokenType.COMMA))
+				consume(TokenType.COMMA);
+		}
+
+		return params;
+	}
+
+	private FunParamDefNode parseFunParamDef() {
+		return null;
 	}
 
 	private LetDefNode parseLetDef(ScopeContainerNode parent) throws ParserException {
