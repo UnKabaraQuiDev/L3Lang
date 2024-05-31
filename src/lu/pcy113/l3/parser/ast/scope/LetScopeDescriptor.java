@@ -8,6 +8,7 @@ public class LetScopeDescriptor extends ScopeDescriptor {
 	private LetDefNode node;
 
 	private int offset;
+	private boolean allocated = false;
 
 	public LetScopeDescriptor(IdentifierLitNode ident, LetDefNode node) {
 		super(ident);
@@ -24,6 +25,14 @@ public class LetScopeDescriptor extends ScopeDescriptor {
 
 	public int getStackOffset() {
 		return offset;
+	}
+
+	public boolean isAllocated() {
+		return allocated;
+	}
+
+	public void setAllocated(boolean allocated) {
+		this.allocated = allocated;
 	}
 
 }

@@ -5,7 +5,8 @@ import lu.pcy113.l3.compiler.consumers.CompilerConsumer;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86.X86Compiler;
 import lu.pcy113.l3.parser.ast.LetDefNode;
-import lu.pcy113.l3.parser.ast.lit.NumLitNode;
+import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
+import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 import lu.pcy113.pclib.GlobalLogger;
 
@@ -14,9 +15,11 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 	@Override
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, LetDefNode node) throws CompilerException {
 		GlobalLogger.log("LetDef: " + node);
-
+		
+		LetScopeDescriptor def = container.getLetDefDescriptor(node);
+		
 		int size = node.getType().getBytesSize();
-
+		
 		if (size >= 4) {
 			node.getType().setBytesSize(8);
 		} else if (size >= 1) {
@@ -26,7 +29,7 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 		
 		mem.pushStack(node);
 		
-		if (node.getExpr() instanceof NumLitNode) {
+		if (node.getExpr() instanceof RecursiveArithmeticOp) {
 			compiler.compile(node.getExpr());
 
 			String reg = mem.getLatest();
@@ -34,8 +37,10 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 			compiler.writeinstln("push " + compiler.getMovType(size) + " " + mem.getAsSize("rax", size) + "  ; Alloc-ed: " + size + " for " + node.getIdent().asString());
 
 			mem.free(reg);
-		} else {
 			
+			def.setAllocated(true);
+		} else {
+			compiler.implement();
 		}
 	}
 

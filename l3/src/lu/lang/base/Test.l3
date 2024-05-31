@@ -1,5 +1,8 @@
 package lu.lang.base;
 
 fun int8 main() {
-	return (12/4)*2/6%1;
+	let int64 c = 2*2;
+	let int16 d = 69;
+	
+	return c+d;
 }

@@ -27,6 +27,10 @@ public class IdentifierLitNode extends Node {
 	public IdentifierToken getLeaf() {
 		return tokens.getLast();
 	}
+	
+	public IdentifierToken getFirst() {
+		return tokens.getFirst();
+	}
 
 	public IdentifierToken get(int index) {
 		return tokens.get(index);

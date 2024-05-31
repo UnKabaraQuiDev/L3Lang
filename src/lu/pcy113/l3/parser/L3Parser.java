@@ -78,7 +78,7 @@ public class L3Parser {
 
 	private void parseLineExpr(ScopeContainerNode parent) throws ParserException {
 		if (peek(TokenType.LET)) {
-			parseLetDef(parent);
+			parseStaticLetDef(parent);
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.FUN)) {
 			parseFunDef(parent);
@@ -86,7 +86,7 @@ public class L3Parser {
 			implement(peek().getType());
 		}
 	}
-	
+
 	private void parseFunLineExpr(FunDefNode fun, FunBodyDefNode body, ScopeContainerNode parent) throws ParserException {
 		if (peek(TokenType.LET)) {
 			parseLetDef(parent);
@@ -100,11 +100,11 @@ public class L3Parser {
 
 	private void parseReturn(FunDefNode fun, ScopeContainerNode parent) throws ParserException {
 		consume(TokenType.RETURN);
-		
-		if(fun.getReturnType() instanceof VoidTypeNode) {
+
+		if (fun.getReturnType() instanceof VoidTypeNode) {
 			parent.add(new ReturnNode());
 			consume(TokenType.SEMICOLON);
-		}else {
+		} else {
 			parent.add(new ReturnNode(parseExpression()));
 			consume(TokenType.SEMICOLON);
 		}
@@ -134,6 +134,9 @@ public class L3Parser {
 		}
 
 		parent.add(funDef);
+		if (parent.localContainsDescriptor(ident.getFirst().getValue()) && parent.getLocalDescriptor(ident.getFirst().getValue()) instanceof FunScopeDescriptor) {
+			throw new ParserException("FunDef '" + ident.getFirst().getValue() + "' already declared in this scope (" + ident.getFirst().getPosition() + ").");
+		}
 		parent.addDescriptor(ident.asString(), new FunScopeDescriptor(ident, funDef));
 
 		return funDef;
@@ -171,19 +174,53 @@ public class L3Parser {
 		return null;
 	}
 
-	private LetDefNode parseLetDef(ScopeContainerNode parent) throws ParserException {
+	private LetDefNode parseStaticLetDef(ScopeContainerNode parent) throws ParserException {
 
 		consume(TokenType.LET);
 
-		boolean istatic = peek(TokenType.STATIC) ? consume(TokenType.STATIC) != null : false;
+		if (!peek(TokenType.STATIC)) {
+			throw new ParserException("Global (declared in file-scope) have to be static.");
+		}
 
 		TypeNode type = parseType();
 
 		IdentifierLitNode ident = parseSimpleIdentLit();
 
-		LetDefNode letDef = new LetDefNode(type, ident, istatic);
+		LetDefNode letDef = new LetDefNode(type, ident, true);
 
 		parent.add(letDef);
+		if (parent.localContainsDescriptor(ident.getFirst().getValue()) && parent.getLocalDescriptor(ident.getFirst().getValue()) instanceof LetScopeDescriptor) {
+			throw new ParserException("LetDef '" + ident.getFirst().getValue() + "' already declared in this scope (" + ident.getFirst().getPosition() + ").");
+		}
+		parent.addDescriptor(ident.asString(), new LetScopeDescriptor(ident, letDef));
+
+		if (peek(TokenType.STRICT_ASSIGN)) {
+			consume(TokenType.STRICT_ASSIGN);
+			letDef.add(parseExpression());
+		}
+
+		return letDef;
+
+	}
+
+	private LetDefNode parseLetDef(ScopeContainerNode parent) throws ParserException {
+
+		consume(TokenType.LET);
+
+		if (peek(TokenType.STATIC)) {
+			throw new ParserException("Only global (declared in file-scope) can be static.");
+		}
+
+		TypeNode type = parseType();
+
+		IdentifierLitNode ident = parseSimpleIdentLit();
+
+		LetDefNode letDef = new LetDefNode(type, ident, false);
+
+		parent.add(letDef);
+		if (parent.localContainsDescriptor(ident.getFirst().getValue()) && parent.getLocalDescriptor(ident.getFirst().getValue()) instanceof LetScopeDescriptor) {
+			throw new ParserException("LetDef '" + ident.getFirst().getValue() + "' already declared in this scope (" + ident.getFirst().getPosition() + ").");
+		}
 		parent.addDescriptor(ident.asString(), new LetScopeDescriptor(ident, letDef));
 
 		if (peek(TokenType.STRICT_ASSIGN)) {
