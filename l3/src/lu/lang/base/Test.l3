@@ -1,8 +1,10 @@
 package lu.lang.base;
 
 fun int8 main() {
-	let int64 c = 2*2;
-	let int16 d = 69;
+	let int8  a = 2*1;
+	let int16 b = 2*a;
+	let int32 c = 2*b;
+	let int64 d = 2*c;
 	
-	return c+d;
+	return d;
 }

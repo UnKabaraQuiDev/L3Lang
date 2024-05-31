@@ -16,10 +16,9 @@ public class X86_RuntimeConsumer extends CompilerConsumer<X86Compiler, RuntimeNo
 		compiler.writeinstln("sub rsp, " + node.getMainFile().getMainFunDescriptor().getNode().getReturnType().getBytesSize() + "  ; Freeing space for main-fun return");
 
 		compiler.writeinstln("call " + node.getMainFile().getMainFunDescriptor().getAsmName() + "  ; Call main");
-		// compiler.writeinstln("add rsp, "+node.getMainFile().getMainFunDescriptor().getNode().getMemorySize());
-
+		
 		compiler.writeinstln("; Final syscall exit");
-		compiler.writeinstln("mov byte al, 60");
+		compiler.writeinstln("mov qword rax, 60");
 		compiler.writeinstln("mov byte dil, [rsp+8]");
 		compiler.writeinstln("syscall");
 

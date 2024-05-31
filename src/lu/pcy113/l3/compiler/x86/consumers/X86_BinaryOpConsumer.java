@@ -27,7 +27,7 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 			compiler.compile(left);
 		}
 		String regLeft = mem.getLatest();
-		
+
 		if (right instanceof NumLitNode) {
 			compiler.compile(right);
 		} else {
@@ -38,10 +38,10 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 		switch (operator) {
 		case OR:
 		case PLUS:
-			compiler.writeinstln("add " + regLeft + ", " + regRight + "  ; " + left + " " + operator + " " + right + " -> " + regLeft);
+			compiler.writeinstln("add " + regLeft + ", " + regRight + "  ; " + left + " " + operator.name() + " " + right + " -> " + regLeft);
 			break;
 		case MINUS:
-			compiler.writeinstln("sub " + regLeft + ", " + regRight + "  ; " + left + " " + operator + " " + right + " -> " + regLeft);
+			compiler.writeinstln("sub " + regLeft + ", " + regRight + "  ; " + left + " " + operator.name() + " " + right + " -> " + regLeft);
 			break;
 		case MODULO:
 		case DIV:
@@ -56,7 +56,7 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 				regRight = regOther;
 			}
 			compiler.writeinstln("mov rdx, 0");
-			compiler.writeinstln("idiv " + regRight + "  ; " + left + " " + operator + " " + right + " -> " + regLeft);
+			compiler.writeinstln("idiv " + regRight + "  ; " + left + " " + operator.name() + " " + right + " -> " + regLeft);
 			if (TokenType.MODULO.equals(operator)) {
 				compiler.writeinstln("mov " + regLeft + ", rdx");
 			} else if (TokenType.DIV.equals(operator)) {
@@ -65,10 +65,10 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 			break;
 		case AND:
 		case MUL:
-			compiler.writeinstln("imul " + regLeft + ", " + regRight + "  ; " + left + " " + operator + " " + right + " -> " + regLeft);
+			compiler.writeinstln("imul " + regLeft + ", " + regRight + "  ; " + left + " " + operator.name() + " " + right + " -> " + regLeft);
 			break;
 		case XOR:
-			compiler.writeinstln("xor " + regLeft + ", " + regRight + "  ; " + left + " " + operator + " " + right + " -> " + regLeft);
+			compiler.writeinstln("xor " + regLeft + ", " + regRight + "  ; " + left + " " + operator.name() + " " + right + " -> " + regLeft);
 			break;
 		case EQUALS:
 			compiler.writeinstln("cmp " + regLeft + ", " + regRight + "");
@@ -106,7 +106,7 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 		}
 
 		mem.setLatest(regLeft);
-		
+
 	}
 
 }

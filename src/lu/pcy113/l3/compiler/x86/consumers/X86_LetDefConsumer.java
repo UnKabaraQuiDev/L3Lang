@@ -27,11 +27,11 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 		}
 		size = node.getType().getBytesSize();
 		
-		mem.pushStack(node);
-		
 		if (node.getExpr() instanceof RecursiveArithmeticOp) {
 			compiler.compile(node.getExpr());
-
+			
+			mem.pushStack(node);
+			
 			String reg = mem.getLatest();
 
 			compiler.writeinstln("push " + compiler.getMovType(size) + " " + mem.getAsSize("rax", size) + "  ; Alloc-ed: " + size + " for " + node.getIdent().asString());

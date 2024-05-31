@@ -35,7 +35,7 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 				}
 
 			} else {
-				throw new CompilerException("LetDef: " + ident + ", not found in current scope.");
+				throw new CompilerException("LetDef: '" + ident + "' not found in current scope.");
 			}
 		}
 	}
