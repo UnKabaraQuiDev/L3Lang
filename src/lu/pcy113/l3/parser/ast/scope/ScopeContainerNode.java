@@ -172,7 +172,7 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 
 		return (LetScopeDescriptor) col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Let: " + ident + ", not defined."));
 	}
-
+	
 	@Override
 	public boolean containsFunDefDescriptor(FunCallNode node) {
 		Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getLeaf().getValue());

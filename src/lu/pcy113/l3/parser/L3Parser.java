@@ -119,7 +119,8 @@ public class L3Parser {
 
 		consume(TokenType.PAREN_OPEN);
 
-		FunDefNode funDef = new FunDefNode(type, ident, parseFunParamsDef());
+		FunDefNode funDef = new FunDefNode(type, ident);
+		funDef.add(parseFunParamsDef(funDef));
 
 		consume(TokenType.PAREN_CLOSE);
 
@@ -157,11 +158,13 @@ public class L3Parser {
 		return body;
 	}
 
-	private FunDefParamsNode parseFunParamsDef() throws ParserException {
+	private FunDefParamsNode parseFunParamsDef(FunDefNode funDef) throws ParserException {
 		FunDefParamsNode params = new FunDefParamsNode();
 
 		while (!peek(TokenType.PAREN_CLOSE)) {
-			params.add(parseFunParamDef());
+			FunDefParamNode param = parseFunParamDef();
+			params.add(param);
+			funDef.addParamDefDescriptor(param);
 
 			if (peek(TokenType.COMMA))
 				consume(TokenType.COMMA);
@@ -170,8 +173,12 @@ public class L3Parser {
 		return params;
 	}
 
-	private FunDefParamNode parseFunParamDef() {
-		return null;
+	private FunDefParamNode parseFunParamDef() throws ParserException {
+		TypeNode type = parseType();
+		
+		IdentifierLitNode ident = parseSimpleIdentLit();
+		
+		return new FunDefParamNode(type, ident);
 	}
 
 	private LetDefNode parseStaticLetDef(ScopeContainerNode parent) throws ParserException {

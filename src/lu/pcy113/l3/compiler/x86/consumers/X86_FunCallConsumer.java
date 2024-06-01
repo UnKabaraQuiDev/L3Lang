@@ -25,7 +25,7 @@ public class X86_FunCallConsumer extends CompilerConsumer<X86Compiler, FunCallNo
 		int returnSize = funDef.getReturnType().getBytesSize();
 
 		funDef.getParams().normalizeSize();
-		int paramSize = funDef.getParams().getBytesSize();
+		int paramsSize = funDef.getParams().getBytesSize();
 
 		if (!funDef.getParams().paramsEquals(node.getParams())) {
 			throw new CompilerException("Method parameters do not match.");
@@ -37,10 +37,14 @@ public class X86_FunCallConsumer extends CompilerConsumer<X86Compiler, FunCallNo
 			compiler.writeinstln("sub rsp, " + returnSize + "  ; Freeing space for FunCall return");
 		}
 
-		for (Node n : node.getParams()) {
-			compiler.compile(n);
+		for (int i = 0; i < node.getParams().getChildren().size(); i++) {
+			Node n = node.getParams().getParam(i);
 
-			mem.pushStack(n);
+			compiler.compile(n);
+			int paramSize = funDef.getParams().getParam(i).getType().getBytesSize();
+			compiler.writeinstln("push " + compiler.getMovType(paramSize) + " " + mem.getAsSize(mem.getLatest(), paramSize));
+			mem.free(mem.getLatest());
+			// mem.pushStack(n);
 		}
 
 		if (!mem.isFree("rax")) {
@@ -51,14 +55,14 @@ public class X86_FunCallConsumer extends CompilerConsumer<X86Compiler, FunCallNo
 
 		compiler.writeinstln("call " + def.getAsmName() + "  ; Call: " + funDef.getIdent().getLeaf().getValue());
 
-		for (Node n : node.getParams()) {
-			mem.popStack();
+		/*
+		 * for (Node n : node.getParams()) { mem.popStack(); }
+		 */
+
+		if (paramsSize != 0) {
+			compiler.writeinstln("add rsp, " + paramsSize + "  ; Freeing mem from arguments");
 		}
 
-		if (paramSize != 0) {
-			compiler.writeinstln("add rsp, " + paramSize + "  ; Freeing mem from arguments");
-		}
-		
 		mem.setLatest("rax");
 	}
 

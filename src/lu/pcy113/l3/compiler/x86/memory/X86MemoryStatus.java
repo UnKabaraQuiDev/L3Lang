@@ -138,8 +138,6 @@ public class X86MemoryStatus implements MemoryStatus {
 	private void setStackOffset(Node node, int offset) throws CompilerException {
 		if (node instanceof LetDefNode) {
 			node.getClosestContainer().getLetDefDescriptor((LetDefNode) node).setStackOffset(offset);
-		} else if (node instanceof NumLitNode || node instanceof FieldAccessNode) {
-			// skip bc its ok
 		} else {
 			throw new CompilerException("Can't set byte offset of node: " + node + ".");
 		}
@@ -148,8 +146,6 @@ public class X86MemoryStatus implements MemoryStatus {
 	private int getStackSize(Node node) throws CompilerException {
 		if (node instanceof LetDefNode) {
 			return ((LetDefNode) node).getType().getBytesSize();
-		} else if (node instanceof NumLitNode || node instanceof FieldAccessNode) {
-			return 8;
 		} else {
 			throw new CompilerException("Can't get byte size of node: " + node + ".");
 		}

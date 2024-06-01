@@ -1,12 +1,16 @@
 package lu.lang.base;
 
-let static int8 CONST  = 6*2;
+let static int8 CONST  = 1;
 let static int8 CONST2 = 6;
 
-fun int8 func() {
-	return 4;
+fun int8 func(int8 x, int8 y, int8 d) {
+	return x*y/d;
+}
+
+fun int8 func1(int8 x, int8 y, int8 d) {
+	return x*y%d;
 }
 
 fun int8 main() {
-	return CONST+func();
+	return func(2, 4, 3)+func1(2, 4, 3);
 }

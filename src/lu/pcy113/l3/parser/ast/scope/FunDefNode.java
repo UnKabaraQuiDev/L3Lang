@@ -1,10 +1,12 @@
 package lu.pcy113.l3.parser.ast.scope;
 
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
+import lu.pcy113.l3.parser.ast.FunDefParamNode;
 import lu.pcy113.l3.parser.ast.FunDefParamsNode;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
@@ -14,10 +16,29 @@ public class FunDefNode extends ScopeContainerNode {
 
 	private IdentifierLitNode ident;
 
-	public FunDefNode(TypeNode type, IdentifierLitNode ident, FunDefParamsNode funParamsDef) {
+	public FunDefNode(TypeNode type, IdentifierLitNode ident) {
 		this.ident = ident;
 		add(type);
-		add(funParamsDef);
+	}
+
+	public void addParamDefDescriptor(FunDefParamNode param) {
+		super.addDescriptor(param.getIdent().getFirst().getValue(), new ParamScopeDescriptor(param.getIdent(), param));
+	}
+
+	public ParamScopeDescriptor getParamDefDescriptor(String ident) throws CompilerException {
+		Collection<ScopeDescriptor> col = this.getLocalDescriptors(ident);
+
+		return (ParamScopeDescriptor) col.stream().filter(c -> c instanceof ParamScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Let: " + ident + ", not defined."));
+	}
+	
+	public ParamScopeDescriptor getParamDefDescriptor(FunDefParamNode param) throws CompilerException {
+		return getParamDefDescriptor(param.getIdent().getFirst().getValue());
+	}
+	
+	public boolean isParamDefDescriptor(String ident) {
+		Collection<ScopeDescriptor> col = this.getLocalDescriptors(ident);
+		
+		return col.stream().filter(c -> c instanceof ParamScopeDescriptor).findFirst().isPresent();
 	}
 
 	public TypeNode getReturnType() {

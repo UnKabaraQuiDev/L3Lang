@@ -4,6 +4,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
+import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 import lu.pcy113.l3.utils.StringUtils;
 
@@ -34,6 +36,30 @@ public class Node implements Iterable<Node> {
 
 	public Node getParent() {
 		return parent;
+	}
+	
+	public boolean hasFunDefParent() {
+		Node parent = this;
+		while (!(parent instanceof FunDefNode)) {
+			parent = parent.parent;
+
+			if (parent == null) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public FunDefNode getFunDefParent() throws CompilerException {
+		Node parent = this;
+		while (!(parent instanceof FunDefNode)) {
+			parent = parent.parent;
+
+			if (parent == null) {
+				throw new CompilerException("Parent is null.");
+			}
+		}
+		return (FunDefNode) parent;
 	}
 
 	@SuppressWarnings("unchecked")

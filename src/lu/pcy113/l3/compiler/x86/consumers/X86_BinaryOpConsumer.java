@@ -17,8 +17,6 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, BinaryOpNode node) throws CompilerException {
 		GlobalLogger.log("BinOp: " + node);
 
-		mem.dump(System.out);
-		
 		ExprNode left = (ExprNode) ((BinaryOpNode) node).getLeft();
 		ExprNode right = (ExprNode) ((BinaryOpNode) node).getRight();
 		TokenType operator = ((BinaryOpNode) node).getOperator();
@@ -30,11 +28,8 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 		}
 		String regLeft = mem.getLatest();
 		compiler.writeinstln("push "+regLeft);
-		mem.pushStack(left);
 		mem.free(regLeft);
 
-		mem.dump(System.out);
-		
 		if (right instanceof NumLitNode) {
 			compiler.compile(right);
 		} else {
@@ -42,13 +37,8 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 		}
 		String regRight = mem.getLatest();
 		
-		mem.dump(System.out);
-		
-		mem.alloc(regLeft);
+		regLeft = mem.alloc();
 		compiler.writeinstln("pop "+regLeft);
-		mem.popStack();
-		
-		mem.dump(System.out);
 		
 		switch (operator) {
 		case OR:
