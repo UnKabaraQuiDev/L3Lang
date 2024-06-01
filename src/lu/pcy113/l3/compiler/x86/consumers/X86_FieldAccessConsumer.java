@@ -8,11 +8,14 @@ import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
+import lu.pcy113.pclib.GlobalLogger;
 
 public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, FieldAccessNode> {
 
 	@Override
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, FieldAccessNode node) throws CompilerException {
+		GlobalLogger.log("FieldAccess: " + node);
+		
 		if (node.getIdent().size() > 1) {
 			compiler.implement();
 		} else {

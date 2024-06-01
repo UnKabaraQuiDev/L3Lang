@@ -1,5 +1,6 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 

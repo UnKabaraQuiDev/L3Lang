@@ -17,7 +17,7 @@ public class FunDefParamsNode extends Node {
 		}
 
 		for (int i = 0; i < args.getChildren().size(); i++) {
-			if(!getParam(i).getType().typeMatches(args.getParam(i))) {
+			if (!getParam(i).getType().typeMatches(args.getParam(i))) {
 				return false;
 			}
 		}
@@ -25,9 +25,23 @@ public class FunDefParamsNode extends Node {
 		return true;
 
 	}
-	
+
 	public FunDefParamNode getParam(int i) {
 		return (FunDefParamNode) children.get(i);
+	}
+
+	public void normalizeSize() throws CompilerException {
+		for (int i = 0; i < children.size(); i++) {
+			getParam(i).getType().normalizeSize();
+		}
+	}
+
+	public int getBytesSize() throws CompilerException {
+		int size = 0;
+		for (int i = 0; i < children.size(); i++) {
+			size += getParam(i).getType().getBytesSize();
+		}
+		return size;
 	}
 
 }

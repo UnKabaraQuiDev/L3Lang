@@ -3,6 +3,10 @@ package lu.lang.base;
 let static int8 CONST  = 6*2;
 let static int8 CONST2 = 6;
 
+fun int8 func() {
+	return 4;
+}
+
 fun int8 main() {
-	return CONST+CONST2;
+	return CONST+func();
 }

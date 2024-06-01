@@ -14,8 +14,10 @@ import java.util.stream.IntStream;
 
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.Node;
+import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 
 public class X86MemoryStatus implements MemoryStatus {
 
@@ -136,6 +138,8 @@ public class X86MemoryStatus implements MemoryStatus {
 	private void setStackOffset(Node node, int offset) throws CompilerException {
 		if (node instanceof LetDefNode) {
 			node.getClosestContainer().getLetDefDescriptor((LetDefNode) node).setStackOffset(offset);
+		} else if (node instanceof NumLitNode || node instanceof FieldAccessNode) {
+			// skip bc its ok
 		} else {
 			throw new CompilerException("Can't set byte offset of node: " + node + ".");
 		}
@@ -144,6 +148,8 @@ public class X86MemoryStatus implements MemoryStatus {
 	private int getStackSize(Node node) throws CompilerException {
 		if (node instanceof LetDefNode) {
 			return ((LetDefNode) node).getType().getBytesSize();
+		} else if (node instanceof NumLitNode || node instanceof FieldAccessNode) {
+			return 8;
 		} else {
 			throw new CompilerException("Can't get byte size of node: " + node + ".");
 		}

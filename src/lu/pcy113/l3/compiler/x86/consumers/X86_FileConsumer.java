@@ -14,13 +14,15 @@ public class X86_FileConsumer extends CompilerConsumer<X86Compiler, FileNode> {
 
 	@Override
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, FileNode node) throws CompilerException {
-		if (node.isMain()) {
-			FunDefNode main = node.getMainFunDescriptor().getNode();
-		}
 		for (Node n : node) {
-			if ((!(n instanceof FunDefNode) || (((FunDefNode) n).isMain() && node.isMain())) && !(n instanceof LetDefNode)) {
-				compiler.compile(n);
+			if (n instanceof LetDefNode) {
+				continue;
 			}
+			if (n instanceof FunDefNode && (((FunDefNode) n).isMain() && !node.isMain())) {
+				continue;
+			}
+			
+			compiler.compile(n);
 		}
 	}
 

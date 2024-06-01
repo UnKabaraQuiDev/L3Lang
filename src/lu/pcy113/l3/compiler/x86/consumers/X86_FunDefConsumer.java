@@ -14,10 +14,13 @@ public class X86_FunDefConsumer extends CompilerConsumer<X86Compiler, FunDefNode
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, FunDefNode node) throws CompilerException {
 		GlobalLogger.log("FunDef: "+node);
 		
+		mem.freeAll();
+		
 		compiler.writeln(node.getFunDefDescriptor(node).getAsmName()+":  ; Fun: "+node.getIdent().asString());
 		compiler.writeinstln("push rbp");
 		compiler.writeinstln("mov rbp, rsp");
 		compiler.compile(node.getBody());
+		
 		mem.clearStack();
 	}
 
