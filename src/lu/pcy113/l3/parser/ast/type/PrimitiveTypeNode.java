@@ -24,6 +24,16 @@ public class PrimitiveTypeNode extends TypeNode {
 	public boolean isInteger() {
 		return type.matches(TokenType.INT);
 	}
+	
+	@Override
+	public void normalizeSize() throws CompilerException {
+		int size = getBytesSize();
+		if (size >= 4) {
+			setBytesSize(8);
+		} else if (size >= 1) {
+			setBytesSize(2);
+		}
+	}
 
 	@Override
 	public boolean typeMatches(ExprNode param) throws CompilerException {

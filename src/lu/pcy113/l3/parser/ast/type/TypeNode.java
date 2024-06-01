@@ -15,4 +15,6 @@ public abstract class TypeNode extends Node {
 
 	public abstract boolean typeMatches(ExprNode param) throws CompilerException;
 
+	public abstract void normalizeSize() throws CompilerException;
+
 }

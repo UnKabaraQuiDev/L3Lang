@@ -18,7 +18,12 @@ public class UserTypeNode extends TypeNode {
 
 	@Override
 	public boolean typeMatches(ExprNode param) throws CompilerException {
-		return false; // TODO
+		throw new CompilerException("Not implemented.");
+	}
+	
+	@Override
+	public void normalizeSize() throws CompilerException {
+		throw new CompilerException("Not implemented.");
 	}
 
 	@Override

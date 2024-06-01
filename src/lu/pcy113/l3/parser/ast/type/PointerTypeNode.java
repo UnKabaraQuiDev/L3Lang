@@ -13,18 +13,23 @@ public class PointerTypeNode extends TypeNode {
 	public TypeNode getNode() {
 		return (TypeNode) children.get(0);
 	}
-	
+
 	@Override
 	public boolean typeMatches(ExprNode param) {
 		// TODO
 		return false;
 	}
-	
+
+	@Override
+	public void normalizeSize() throws CompilerException {
+		// Do nothing
+	}
+
 	@Override
 	public int getBytesSize() throws CompilerException {
 		return sizeOverride ? bytesOverride : MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE);
 	}
-	
+
 	@Override
 	public void setBytesSize(int bytes) {
 		sizeOverride = true;

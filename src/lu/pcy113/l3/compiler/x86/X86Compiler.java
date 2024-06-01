@@ -65,13 +65,13 @@ public class X86Compiler extends L3Compiler {
 		fw = createWriter();
 
 		writetextln("global _start");
-		writedataln("esp_start dd 0");
 
 		writeln("BITS 64");
 		writeln("_start:");
 
 		compile(root);
 
+		appendBSS();
 		appendText();
 		appendData();
 
@@ -143,13 +143,13 @@ public class X86Compiler extends L3Compiler {
 	public String getDataType(int bytes) {
 		switch (bytes) {
 		case 1:
-			return "db";
+			return "b";
 		case 2:
-			return "dw";
+			return "w";
 		case 4:
-			return "dd";
+			return "d";
 		case 8:
-			return "dq";
+			return "q";
 		}
 		return null;
 	}

@@ -179,8 +179,10 @@ public class L3Parser {
 		consume(TokenType.LET);
 
 		if (!peek(TokenType.STATIC)) {
-			throw new ParserException("Global (declared in file-scope) have to be static.");
+			throw new ParserException("Global LetDef (declared in file-scope) have to be static.");
 		}
+		
+		consume(TokenType.STATIC);
 
 		TypeNode type = parseType();
 

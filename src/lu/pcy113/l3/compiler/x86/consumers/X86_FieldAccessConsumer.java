@@ -17,26 +17,27 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 			compiler.implement();
 		} else {
 			String ident = node.getIdent().getLeaf().getValue();
-			if (container.containsDescriptor(ident)) {
-
-				LetScopeDescriptor def = container.getLetDefDescriptor(ident);
-				LetDefNode letDef = def.getNode();
-
-				int size = letDef.getType().getBytesSize();
-
-				if (def.isAllocated()) {
-
-					String reg = mem.alloc();
-
-					compiler.writeinstln("mov " + mem.getAsSize(reg, size) + ", [rbp-" + (size + def.getStackOffset()) + "]");
-
-				} else {
-					throw new CompilerException("LetDef: " + ident + ", isn't accessible in current scope.");
-				}
-
-			} else {
+			if (!container.containsDescriptor(ident)) {
 				throw new CompilerException("LetDef: '" + ident + "' not found in current scope.");
 			}
+
+			LetScopeDescriptor def = container.getLetDefDescriptor(ident);
+			LetDefNode letDef = def.getNode();
+
+			int size = letDef.getType().getBytesSize();
+
+			if (!def.isAllocated()) {
+				throw new CompilerException("LetDef: " + ident + ", isn't accessible in current scope.");
+			}
+
+			String reg = mem.alloc();
+
+			if (letDef.isiStatic()) {
+				compiler.writeinstln("mov " + mem.getAsSize(reg, size) + ", [" + def.getAsmName() + "]  ; Load: " + letDef.getIdent());
+			} else {
+				compiler.writeinstln("mov " + mem.getAsSize(reg, size) + ", [rbp-" + (size + def.getStackOffset()) + "]  ; Load: " + letDef.getIdent());
+			}
+
 		}
 	}
 

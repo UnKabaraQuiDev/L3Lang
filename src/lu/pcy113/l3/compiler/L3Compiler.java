@@ -14,7 +14,7 @@ public abstract class L3Compiler {
 	protected RuntimeNode root;
 	protected File outFileAsm, outFileObj, outFileExec, outDir;
 	protected FileWriter fw;
-	protected StringBuilder dataBuilder, textBuilder;
+	protected StringBuilder dataBuilder, textBuilder, bssBuilder;
 
 	public L3Compiler(RuntimeNode env, File outFile) {
 		this.root = env;
@@ -66,11 +66,15 @@ public abstract class L3Compiler {
 	public void writedataln(String string) throws CompilerException {
 		dataBuilder.append("\t" + string + "\n");
 	}
+	
+	public void writebssln(String string) throws CompilerException {
+		bssBuilder.append("\t" + string + "\n");
+	}
 
 	public void writetextln(String string) throws CompilerException {
 		textBuilder.append("\t" + string + "\n");
 	}
-
+	
 	public void writeln(String string) throws CompilerException {
 		try {
 			fw.write(string + "\n");
@@ -88,13 +92,22 @@ public abstract class L3Compiler {
 			throw new CompilerException("Could not append data section to output writer: " + outFileAsm, e);
 		}
 	}
-
+	
+	protected void appendBSS() throws CompilerException {
+		try {
+			fw.write("section .bss\n");
+			fw.write(bssBuilder.toString());
+		} catch (IOException e) {
+			throw new CompilerException("Could not append bss section to output writer: " + outFileAsm, e);
+		}
+	}
+	
 	protected void appendText() throws CompilerException {
 		try {
 			fw.write("section .text\n");
 			fw.write(textBuilder.toString());
 		} catch (IOException e) {
-			throw new CompilerException("Could not append data section to output writer: " + outFileAsm, e);
+			throw new CompilerException("Could not append text section to output writer: " + outFileAsm, e);
 		}
 	}
 
@@ -111,6 +124,7 @@ public abstract class L3Compiler {
 		try {
 			dataBuilder = new StringBuilder();
 			textBuilder = new StringBuilder();
+			bssBuilder = new StringBuilder();
 			return new FileWriter(outFileAsm);
 		} catch (IOException e) {
 			throw new CompilerException("Could not create output writer to: " + outFileAsm, e);
