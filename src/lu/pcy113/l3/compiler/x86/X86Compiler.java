@@ -16,6 +16,7 @@ import lu.pcy113.l3.compiler.x86.consumers.X86_NumLitConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_PackageDefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_ReturnConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_RuntimeConsumer;
+import lu.pcy113.l3.compiler.x86.consumers.X86_UnaryOpConsumer;
 import lu.pcy113.l3.compiler.x86.memory.X86MemoryStatus;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
@@ -25,6 +26,7 @@ import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.expr.UnaryOpNode;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
@@ -46,6 +48,7 @@ public class X86Compiler extends L3Compiler {
 	private X86_BinaryOpConsumer binaryOpConsumer = new X86_BinaryOpConsumer();
 	private X86_FieldAccessConsumer fieldAccessConsumer = new X86_FieldAccessConsumer();
 	private X86_FunCallConsumer funCallConsumer = new X86_FunCallConsumer();
+	private X86_UnaryOpConsumer unaryOpConsumer = new X86_UnaryOpConsumer();
 
 	public X86Compiler(RuntimeNode env, File binDirPath, String fileName) {
 		super(env, new File(binDirPath, fileName));
@@ -61,6 +64,7 @@ public class X86Compiler extends L3Compiler {
 		binaryOpConsumer.attach(this);
 		fieldAccessConsumer.attach(this);
 		funCallConsumer.attach(this);
+		unaryOpConsumer.attach(this);
 	}
 
 	@Override
@@ -120,6 +124,8 @@ public class X86Compiler extends L3Compiler {
 			fieldAccessConsumer.accept((FieldAccessNode) node);
 		} else if (node instanceof FunCallNode) {
 			funCallConsumer.accept((FunCallNode) node);
+		} else if (node instanceof UnaryOpNode) {
+			unaryOpConsumer.accept((UnaryOpNode) node);
 		} else {
 			implement(node);
 		}

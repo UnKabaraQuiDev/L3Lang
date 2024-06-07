@@ -38,7 +38,7 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 
 				String reg = mem.alloc();
 
-				compiler.writeinstln("mov " + mem.getAsSize(reg, size) + ", [rbp+" + (16 + (paramsSize - def.getStackOffset())) + "]  ; Load: " + letDef.getIdent());
+				compiler.writeinstln("mov " + mem.getAsSize(reg, size) + ", [rbp+" + (8 + (paramsSize - def.getStackOffset())) + "]  ; Load param: " + letDef.getIdent()+" > "+def.getStackOffset()+"/"+paramsSize);
 
 			} else { // in global-scope / static, or not a parameter but local variable
 
@@ -58,9 +58,9 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 				String reg = mem.alloc();
 
 				if (letDef.isiStatic()) {
-					compiler.writeinstln("mov " + mem.getAsSize(reg, size) + ", [" + def.getAsmName() + "]  ; Load: " + letDef.getIdent());
+					compiler.writeinstln("mov " + mem.getAsSize(reg, size) + ", [" + def.getAsmName() + "]  ; Load static var: " + letDef.getIdent());
 				} else {
-					compiler.writeinstln("mov " + mem.getAsSize(reg, size) + ", [rbp-" + (size + def.getStackOffset()) + "]  ; Load: " + letDef.getIdent());
+					compiler.writeinstln("mov " + mem.getAsSize(reg, size) + ", [rbp-" + (size + def.getStackOffset()) + "]  ; Load local var: " + letDef.getIdent());
 				}
 
 			}

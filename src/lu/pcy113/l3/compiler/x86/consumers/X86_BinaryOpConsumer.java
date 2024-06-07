@@ -27,7 +27,7 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 			compiler.compile(left);
 		}
 		String regLeft = mem.getLatest();
-		compiler.writeinstln("push "+regLeft);
+		compiler.writeinstln("push " + regLeft);
 		mem.free(regLeft);
 
 		if (right instanceof NumLitNode) {
@@ -36,10 +36,10 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 			compiler.compile(right);
 		}
 		String regRight = mem.getLatest();
-		
+
 		regLeft = mem.alloc();
-		compiler.writeinstln("pop "+regLeft);
-		
+		compiler.writeinstln("pop " + regLeft);
+
 		switch (operator) {
 		case OR:
 		case PLUS:
@@ -50,8 +50,9 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 			break;
 		case MODULO:
 		case DIV:
-			if (regLeft != "rax") {
+			if (!regLeft.equals("rax") && !mem.isFree("rax")) {
 				String regOther = mem.alloc();
+				compiler.writeinstln(";  Swapping regs: " + regLeft + " & " + regRight + " through " + regOther);
 				compiler.writeinstln("mov " + regOther + ", " + regLeft);
 				compiler.writeinstln("mov " + regLeft + ", " + regRight);
 				compiler.writeinstln("mov " + regRight + ", " + regOther);
@@ -59,11 +60,14 @@ public class X86_BinaryOpConsumer extends CompilerConsumer<X86Compiler, BinaryOp
 				regOther = regLeft;
 				regLeft = regRight;
 				regRight = regOther;
+			} else if (!regLeft.equals("rax") && mem.isFree("rax")) {
+				compiler.writeinstln("mov qword rax, "+regLeft);
 			}
-			compiler.writeinstln("mov rdx, 0");
+			// compiler.writeinstln("mov qword rax, "+regLeft);
+			compiler.writeinstln("mov qword rdx, 0");
 			compiler.writeinstln("idiv " + regRight + "  ; " + left + " " + operator.name() + " " + right + " -> " + regLeft);
 			if (TokenType.MODULO.equals(operator)) {
-				compiler.writeinstln("mov " + regLeft + ", rdx");
+				compiler.writeinstln("mov " + regLeft + ", rdx  ; Bc its mod");
 			} else if (TokenType.DIV.equals(operator)) {
 				compiler.writeinstln("mov " + regLeft + ", rax");
 			}

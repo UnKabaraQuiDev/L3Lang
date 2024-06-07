@@ -175,9 +175,9 @@ public class L3Parser {
 
 	private FunDefParamNode parseFunParamDef() throws ParserException {
 		TypeNode type = parseType();
-		
+
 		IdentifierLitNode ident = parseSimpleIdentLit();
-		
+
 		return new FunDefParamNode(type, ident);
 	}
 
@@ -188,7 +188,7 @@ public class L3Parser {
 		if (!peek(TokenType.STATIC)) {
 			throw new ParserException("Global LetDef (declared in file-scope) have to be static.");
 		}
-		
+
 		consume(TokenType.STATIC);
 
 		TypeNode type = parseType();
@@ -334,10 +334,22 @@ public class L3Parser {
 	}
 
 	private ExprNode parseFactor() throws ParserException {
-		ExprNode left = parsePrimary();
+		ExprNode left;
+
+		if (peek(TokenType.BIT_NOT)) {
+			left = new UnaryOpNode(consume(TokenType.BIT_NOT).getType(), parsePrimary(), true);
+		} else if (peek(TokenType.NOT)) {
+			left = new UnaryOpNode(consume(TokenType.NOT).getType(), parsePrimary(), true);
+		} else {
+			left = parsePrimary();
+		}
 
 		if (peek(TokenType.ASSIGN)) {
 			left = parseLetSet(left);
+		} else if (peek(TokenType.PLUS_PLUS)) {
+			left = new UnaryOpNode(consume(TokenType.PLUS_PLUS).getType(), left);
+		} else if (peek(TokenType.MINUS_MINUS)) {
+			left = new UnaryOpNode(consume(TokenType.MINUS_MINUS).getType(), left);
 		}
 
 		while (peek(TokenType.MUL, TokenType.DIV, TokenType.MODULO, TokenType.BIT_XOR, TokenType.BIT_AND, TokenType.BIT_OR)) {
