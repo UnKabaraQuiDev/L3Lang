@@ -17,7 +17,7 @@ public class X86_IfContainerConsumer extends CompilerConsumer<X86Compiler, IfCon
 
 	@Override
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, IfContainerNode node) throws CompilerException {
-		GlobalLogger.log("FunDef: " + node);
+		GlobalLogger.log("IfContainer: " + node);
 		
 		compiler.writeln("; If container start - - -");
 		

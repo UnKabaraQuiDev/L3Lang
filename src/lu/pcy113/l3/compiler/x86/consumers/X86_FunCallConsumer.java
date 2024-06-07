@@ -4,7 +4,6 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.consumers.CompilerConsumer;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86.X86Compiler;
-import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.lit.StringLitNode;

@@ -9,6 +9,10 @@ import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 import lu.pcy113.pclib.GlobalLogger;
 
+/**
+ * @deprecated replaced by {@link X86_ScopeBodyConsumer} 
+ */
+@Deprecated
 public class X86_FunBodyDefConsumer extends CompilerConsumer<X86Compiler, FunBodyDefNode> {
 
 	@Override

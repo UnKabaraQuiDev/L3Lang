@@ -2,16 +2,18 @@ package lu.pcy113.l3.parser.ast;
 
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 
-public class ScopeBodyNode extends ScopeContainerNode {
+public class ScopeBodyNode extends ScopeContainerNode implements AsmNamed {
 
-	private String clnAsmName;
+	private String asmName;
 
-	public String getClnAsmName() {
-		return clnAsmName;
+	@Override
+	public String getAsmName() {
+		return asmName;
 	}
 
-	public void setClnAsmName(String clnAsmName) {
-		this.clnAsmName = clnAsmName;
+	@Override
+	public void setAsmName(String asmName) {
+		this.asmName = asmName;
 	}
 
 }

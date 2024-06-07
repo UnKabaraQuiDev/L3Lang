@@ -16,6 +16,7 @@ import lu.pcy113.l3.parser.ast.ArrayAllocNode;
 import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FinallyDefNode;
+import lu.pcy113.l3.parser.ast.ForDefNode;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.FunCallParamsNode;
@@ -102,12 +103,46 @@ public class L3Parser {
 			parseReturn(fun, parent);
 		} else if (peek(TokenType.IF)) {
 			parseIfContainer(fun, parent);
+		} else if (peek(TokenType.FOR)) {
+			parseFor(fun, parent);
 		} else if (peek(TokenType.IDENT)) {
-			parent.add(parseIdent());
+			parent.add(parseExpression());
 			consume(TokenType.SEMICOLON);
 		} else {
 			implement(peek().getType());
 		}
+	}
+
+	private void parseFor(FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+		consume(TokenType.FOR);
+		consume(TokenType.PAREN_OPEN);
+
+		ForDefNode def = new ForDefNode();
+
+		if (!peek(TokenType.SEMICOLON)) {
+			LetDefNode let = parseLetDef(def);
+			def.setLet(true);
+			consume(TokenType.SEMICOLON);
+		}
+		
+		if (!peek(TokenType.SEMICOLON)) {
+			ExprNode condition = parseExpression();
+			def.add(condition);
+			def.setCondition(true);
+			consume(TokenType.SEMICOLON);
+		}
+		
+		if (!peek(TokenType.PAREN_CLOSE)) {
+			ExprNode inc = parseExpression();
+			def.add(inc);
+			def.setInc(true);
+		}
+
+		consume(TokenType.PAREN_CLOSE);
+
+		def.add(parseFunScopeBody(fun));
+		
+		parent.add(def);
 	}
 
 	private void parseIfContainer(FunDefNode fun, ScopeContainerNode parent) throws ParserException {
@@ -191,7 +226,7 @@ public class L3Parser {
 		consume(TokenType.FUN);
 
 		TypeNode type = parseType();
-		
+
 		IdentifierLitNode ident = parseSimpleIdentLit();
 
 		consume(TokenType.PAREN_OPEN);
@@ -322,7 +357,7 @@ public class L3Parser {
 		TypeNode node = null;
 
 		if (peek(TokenType.IDENT)) {
-			
+
 			IdentifierLitNode ident = parseIdentLit();
 			node = new UserTypeNode(ident);
 
