@@ -14,8 +14,8 @@ fun int64 mod(int64 x, int64 y, int64 d) {
 fun int8 main() {
 	let int x = 1;
 	
-	for(let int y = 0; y < 12; y++) {
-		x += 1;
+	while(x < 12) {
+		x++;
 	}
 	
 	return x;

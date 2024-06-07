@@ -33,6 +33,7 @@ import lu.pcy113.l3.parser.ast.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
+import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
@@ -105,12 +106,33 @@ public class L3Parser {
 			parseIfContainer(fun, parent);
 		} else if (peek(TokenType.FOR)) {
 			parseFor(fun, parent);
+		} else if (peek(TokenType.WHILE)) {
+			parseWhile(fun, parent);
 		} else if (peek(TokenType.IDENT)) {
 			parent.add(parseExpression());
 			consume(TokenType.SEMICOLON);
 		} else {
 			implement(peek().getType());
 		}
+	}
+
+	private void parseWhile(FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+		consume(TokenType.WHILE);
+		consume(TokenType.PAREN_OPEN);
+		
+		WhileDefNode def = new WhileDefNode();
+		
+		if (!peek(TokenType.PAREN_CLOSE)) {
+			ExprNode condition = parseExpression();
+			def.add(condition);
+			def.setCondition(true);
+		}
+
+		consume(TokenType.PAREN_CLOSE);
+
+		def.add(parseFunScopeBody(fun));
+		
+		parent.add(def);
 	}
 
 	private void parseFor(FunDefNode fun, ScopeContainerNode parent) throws ParserException {

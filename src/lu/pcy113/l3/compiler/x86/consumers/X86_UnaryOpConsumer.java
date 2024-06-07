@@ -56,6 +56,7 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 			LetSetNode artificialNode = new LetSetNode((FieldAccessNode) expr, new RegisterValueNode(reg, expr.isDecimal(), expr.isInteger()));
 			node.getParent().add(artificialNode);
 			compiler.compile(artificialNode);
+			node.getParent().remove(artificialNode);
 		}
 		
 	}

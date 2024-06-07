@@ -21,6 +21,7 @@ import lu.pcy113.l3.compiler.x86.consumers.X86_ReturnConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_RuntimeConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_ScopeBodyConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_UnaryOpConsumer;
+import lu.pcy113.l3.compiler.x86.consumers.X86_WhileDefConsumer;
 import lu.pcy113.l3.compiler.x86.memory.X86MemoryStatus;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
@@ -33,6 +34,7 @@ import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.RegisterValueNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
+import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.expr.UnaryOpNode;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
@@ -59,6 +61,7 @@ public class X86Compiler extends L3Compiler {
 	private X86_IfContainerConsumer ifContainerConsumer = new X86_IfContainerConsumer();
 	private X86_ScopeBodyConsumer scopeBodyConsumer = new X86_ScopeBodyConsumer();
 	private X86_ForDefConsumer forDefConsumer = new X86_ForDefConsumer();
+	private X86_WhileDefConsumer whileDefConsumer = new X86_WhileDefConsumer();
 	private X86_LetSetConsumer letSetConsumer = new X86_LetSetConsumer();
 	private X86_RegisterValueConsumer registerValueConsumer = new X86_RegisterValueConsumer();
 
@@ -81,6 +84,7 @@ public class X86Compiler extends L3Compiler {
 		forDefConsumer.attach(this);
 		letSetConsumer.attach(this);
 		registerValueConsumer.attach(this);
+		whileDefConsumer.attach(this);
 	}
 
 	@Override
@@ -146,6 +150,8 @@ public class X86Compiler extends L3Compiler {
 			scopeBodyConsumer.accept((ScopeBodyNode) node);
 		} else if (node instanceof ForDefNode) {
 			forDefConsumer.accept((ForDefNode) node);
+		} else if (node instanceof WhileDefNode) {
+			whileDefConsumer.accept((WhileDefNode) node);
 		} else if (node instanceof LetSetNode) {
 			letSetConsumer.accept((LetSetNode) node);
 		} else if (node instanceof RegisterValueNode) {

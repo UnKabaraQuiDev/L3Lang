@@ -22,6 +22,14 @@ public class Node implements Iterable<Node> {
 		this.parent = parent;
 	}
 
+	public Node remove(Node child) {
+		if (child == null)
+			return this;
+		child.unregister(this);
+		children.remove(child);
+		return this;
+	}
+
 	public Node add(Node child) {
 		if (child == null)
 			return null;
@@ -34,10 +42,14 @@ public class Node implements Iterable<Node> {
 		this.parent = parent;
 	}
 
+	private void unregister(Node parent) {
+		this.parent = null;
+	}
+
 	public Node getParent() {
 		return parent;
 	}
-	
+
 	public boolean hasFunDefParent() {
 		Node parent = this;
 		while (!(parent instanceof FunDefNode)) {
@@ -49,7 +61,7 @@ public class Node implements Iterable<Node> {
 		}
 		return true;
 	}
-	
+
 	public FunDefNode getFunDefParent() throws CompilerException {
 		Node parent = this;
 		while (!(parent instanceof FunDefNode)) {
