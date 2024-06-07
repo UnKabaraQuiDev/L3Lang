@@ -25,4 +25,8 @@ public class StringLiteralToken extends LiteralToken<String> {
 		return StringLiteralToken.class.getName()+"[line="+line+", column="+column+", type="+type+", value="+value+"]";
 	}
 
+	public String getEscapedValue() {
+		return getValue().replace("\\", "\\\\");
+	}
+
 }

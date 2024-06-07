@@ -1,16 +1,18 @@
 package lu.pcy113.l3.parser.ast.lit;
 
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.CharLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.parser.ast.ArrayInit;
 import lu.pcy113.l3.parser.ast.Node;
+import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.type.PointerTypeNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.l3.utils.StringUtils;
 
-public class StringLitNode extends Node implements ArrayInit {
+public class StringLitNode extends ExprNode implements ArrayInit {
 
 	private int length, stackSize;
 	private StringLiteralToken string;
@@ -78,6 +80,16 @@ public class StringLitNode extends Node implements ArrayInit {
 		String tab = StringUtils.repeat("\t", indent);
 		String ret = tab + toString();
 		return ret;
+	}
+
+	@Override
+	public boolean isDecimal() throws CompilerException {
+		return false;
+	}
+
+	@Override
+	public boolean isInteger() throws CompilerException {
+		return false; // TODO or is it ?
 	}
 
 }

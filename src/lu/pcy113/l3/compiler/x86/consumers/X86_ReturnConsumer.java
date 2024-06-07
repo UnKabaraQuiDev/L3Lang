@@ -32,7 +32,7 @@ public class X86_ReturnConsumer extends CompilerConsumer<X86Compiler, ReturnNode
 
 				// compiler.writeinstln("mov " + compiler.getMovType(size) + " [rbp+24], " + mem.getAsSize(reg, size));
 
-				// mem.free(reg);
+				mem.free(reg);
 			} else {
 				compiler.implement();
 			}

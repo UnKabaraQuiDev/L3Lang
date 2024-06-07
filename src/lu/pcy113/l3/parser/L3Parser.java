@@ -9,6 +9,7 @@ import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
+import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.ArrayAccessNode;
 import lu.pcy113.l3.parser.ast.ArrayAllocNode;
@@ -39,6 +40,7 @@ import lu.pcy113.l3.parser.ast.lit.DecimalNumLitNode;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.lit.IntegerNumLitNode;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
+import lu.pcy113.l3.parser.ast.lit.StringLitNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
@@ -100,6 +102,9 @@ public class L3Parser {
 			parseReturn(fun, parent);
 		} else if (peek(TokenType.IF)) {
 			parseIfContainer(fun, parent);
+		} else if (peek(TokenType.IDENT)) {
+			parent.add(parseIdent());
+			consume(TokenType.SEMICOLON);
 		} else {
 			implement(peek().getType());
 		}
@@ -109,7 +114,7 @@ public class L3Parser {
 		IfContainerNode ifContainer = new IfContainerNode();
 
 		parseIf(ifContainer, fun, parent);
-		
+
 		while (peek(TokenType.ELSE) && peek(1, TokenType.IF)) {
 			consume(TokenType.ELSE);
 			parseIf(ifContainer, fun, parent);
@@ -122,7 +127,7 @@ public class L3Parser {
 		if (peek(TokenType.ELSE)) {
 			parseElse(ifContainer, fun, parent);
 		}
-		
+
 		parent.add(ifContainer);
 	}
 
@@ -186,7 +191,7 @@ public class L3Parser {
 		consume(TokenType.FUN);
 
 		TypeNode type = parseType();
-
+		
 		IdentifierLitNode ident = parseSimpleIdentLit();
 
 		consume(TokenType.PAREN_OPEN);
@@ -317,8 +322,8 @@ public class L3Parser {
 		TypeNode node = null;
 
 		if (peek(TokenType.IDENT)) {
+			
 			IdentifierLitNode ident = parseIdentLit();
-
 			node = new UserTypeNode(ident);
 
 		} else if (peek(TokenType.PRIMITIVE_TYPE)) {
@@ -328,6 +333,7 @@ public class L3Parser {
 
 		} else if (peek(TokenType.VOID)) {
 
+			consume(TokenType.VOID);
 			return new VoidTypeNode();
 
 		} else {
@@ -442,6 +448,10 @@ public class L3Parser {
 
 			return parseNumLit();
 
+		} else if (peek(TokenType.STRING_LIT)) {
+
+			return parseStringLit();
+
 		} else if (peek(TokenType.IDENT)) {
 
 			return parseIdent();
@@ -493,6 +503,11 @@ public class L3Parser {
 		} else {
 			throw new RuntimeException("Unexpected token: " + peek().getType());
 		}
+	}
+
+	private StringLitNode parseStringLit() throws ParserException {
+		StringLiteralToken numLit = (StringLiteralToken) consume(TokenType.STRING_LIT);
+		return new StringLitNode(numLit);
 	}
 
 	private NumLitNode parseNumLit() throws ParserException {
