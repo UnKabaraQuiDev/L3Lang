@@ -1,28 +1,21 @@
 package lu.pcy113.l3.parser.ast;
 
-import lu.pcy113.l3.lexer.tokens.Token;
-import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
+public class FinallyDefNode extends Node implements AsmNamed {
 
-public class FinallyDefNode extends Node {
-
-	private Token token;
 	private String asmName;
 
-	public FinallyDefNode(Token token) {
-		this.token = token;
+	public FinallyDefNode(ScopeBodyNode body) {
+		add(body);
 	}
 
-	public Token getToken() {
-		return token;
-	}
-
+	@Override
 	public String getAsmName() {
 		return asmName;
 	}
 
+	@Override
 	public void setAsmName(String asmName) {
 		this.asmName = asmName;
-		getBody().setClnAsmName(asmName + "_cln");
 	}
 
 	public ScopeBodyNode getBody() {

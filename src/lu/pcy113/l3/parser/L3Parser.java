@@ -12,12 +12,16 @@ import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.parser.ast.ArrayAccessNode;
 import lu.pcy113.l3.parser.ast.ArrayAllocNode;
+import lu.pcy113.l3.parser.ast.ElseDefNode;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
+import lu.pcy113.l3.parser.ast.FinallyDefNode;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.FunCallParamsNode;
 import lu.pcy113.l3.parser.ast.FunDefParamNode;
 import lu.pcy113.l3.parser.ast.FunDefParamsNode;
+import lu.pcy113.l3.parser.ast.IfContainerNode;
+import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetRefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
@@ -25,6 +29,7 @@ import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
+import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
@@ -93,9 +98,76 @@ public class L3Parser {
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.RETURN)) {
 			parseReturn(fun, parent);
+		} else if (peek(TokenType.IF)) {
+			parseIfContainer(fun, parent);
 		} else {
 			implement(peek().getType());
 		}
+	}
+
+	private void parseIfContainer(FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+		IfContainerNode ifContainer = new IfContainerNode();
+
+		parseIf(ifContainer, fun, parent);
+		
+		while (peek(TokenType.ELSE) && peek(1, TokenType.IF)) {
+			consume(TokenType.ELSE);
+			parseIf(ifContainer, fun, parent);
+		}
+
+		if (peek(TokenType.FINALLY)) {
+			parseFinally(ifContainer, fun, parent);
+		}
+
+		if (peek(TokenType.ELSE)) {
+			parseElse(ifContainer, fun, parent);
+		}
+		
+		parent.add(ifContainer);
+	}
+
+	private void parseElse(IfContainerNode ifContainer, FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+		consume(TokenType.ELSE);
+
+		ScopeBodyNode body = parseFunScopeBody(fun);
+
+		ElseDefNode ifDef = new ElseDefNode(body);
+		ifContainer.add(ifDef);
+	}
+
+	private ScopeBodyNode parseFunScopeBody(FunDefNode fun) throws ParserException {
+		ScopeBodyNode body = new ScopeBodyNode();
+		if (peek(TokenType.CURLY_OPEN)) {
+			consume(TokenType.CURLY_OPEN);
+			while (!peek(TokenType.CURLY_CLOSE)) {
+				parseFunLineExpr(fun, null, body);
+			}
+			consume(TokenType.CURLY_CLOSE);
+		} else {
+			parseFunLineExpr(fun, null, body);
+		}
+		return body;
+	}
+
+	private void parseFinally(IfContainerNode ifContainer, FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+		consume(TokenType.FINALLY);
+
+		ScopeBodyNode body = parseFunScopeBody(fun);
+
+		FinallyDefNode ifDef = new FinallyDefNode(body);
+		ifContainer.add(ifDef);
+	}
+
+	private void parseIf(IfContainerNode ifContainer, FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+		consume(TokenType.IF);
+		consume(TokenType.PAREN_OPEN);
+		ExprNode conditionExpr = parseExpression();
+		consume(TokenType.PAREN_CLOSE);
+
+		ScopeBodyNode body = parseFunScopeBody(fun);
+
+		IfDefNode ifDef = new IfDefNode(conditionExpr, body);
+		ifContainer.add(ifDef);
 	}
 
 	private void parseReturn(FunDefNode fun, ScopeContainerNode parent) throws ParserException {

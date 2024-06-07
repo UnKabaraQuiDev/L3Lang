@@ -18,6 +18,11 @@ public class X86_FunCallConsumer extends CompilerConsumer<X86Compiler, FunCallNo
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, FunCallNode node) throws CompilerException {
 		GlobalLogger.log("FunCall: " + node);
 
+		if(node.isPreset()) {
+			compilePreset(compiler, mem, container, node);
+			return;
+		}
+		
 		FunScopeDescriptor def = container.getFunDefDescriptor(node);
 		FunDefNode funDef = def.getNode();
 
@@ -55,15 +60,15 @@ public class X86_FunCallConsumer extends CompilerConsumer<X86Compiler, FunCallNo
 
 		compiler.writeinstln("call " + def.getAsmName() + "  ; Call: " + funDef.getIdent().getLeaf().getValue());
 
-		/*
-		 * for (Node n : node.getParams()) { mem.popStack(); }
-		 */
-
 		if (paramsSize != 0) {
 			compiler.writeinstln("add rsp, " + paramsSize + "  ; Freeing mem from arguments");
 		}
 
 		mem.setLatest("rax");
+	}
+
+	private void compilePreset(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, FunCallNode node) {
+		
 	}
 
 }

@@ -1,34 +1,30 @@
 package lu.pcy113.l3.parser.ast;
 
-import lu.pcy113.l3.lexer.tokens.Token;
+import lu.pcy113.l3.parser.ast.expr.ExprNode;
 
-public class IfDefNode extends Node {
+public class IfDefNode extends Node implements AsmNamed {
 
-	private Token token;
 	private String asmName;
-	
-	public IfDefNode(Token token, Node condition) {
-		add(condition);
-		this.token = token;
+
+	public IfDefNode(ExprNode conditionExpr, ScopeBodyNode body) {
+		add(conditionExpr);
+		add(body);
 	}
-	
-	public Token getToken() {
-		return token;
-	}
-	
+
+	@Override
 	public String getAsmName() {
 		return asmName;
 	}
-	
+
+	@Override
 	public void setAsmName(String asmName) {
 		this.asmName = asmName;
-		getBody().setClnAsmName(asmName+"_cln");
 	}
-	
+
 	public Node getCondition() {
 		return children.get(0);
 	}
-	
+
 	public ScopeBodyNode getBody() {
 		return (ScopeBodyNode) children.get(1);
 	}

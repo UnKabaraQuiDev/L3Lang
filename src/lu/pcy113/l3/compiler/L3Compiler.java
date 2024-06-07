@@ -28,13 +28,13 @@ public abstract class L3Compiler {
 
 	private int sectionIndex = 1;
 
-	protected String newSection() {
+	public String newSection() {
 		return "sec_" + (sectionIndex++);
 	}
 
 	private int varIndex = 1;
 
-	protected String newVar() {
+	public String newVar() {
 		return "var_" + (varIndex++);
 	}
 
