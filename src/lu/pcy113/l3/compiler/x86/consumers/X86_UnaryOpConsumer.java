@@ -25,9 +25,15 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 		if (!(expr instanceof FieldAccessNode)) {
 			throw new CompilerException("What do you think you're doing ?");
 		}
-
-		compiler.compile(expr);
+		
+		FieldAccessNode fieldAccess = (FieldAccessNode) expr;
+		
+		compiler.compile(fieldAccess);
 		String reg = mem.getLatest();
+
+		// add prefix for PLUS_PLUS and MINUS_MINUS, save old value in reg, then return reg with mem.setLatest()
+
+		String oldReg = mem.alloc();
 
 		if (node.isPrefix()) {
 			switch (type) {
@@ -39,6 +45,14 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 				break;
 			case BIT_NOT:
 				compiler.writeinstln("not " + reg + "  ; UnaryNode: " + type.name() + " " + node.toString());
+				break;
+			case PLUS_PLUS:
+				compiler.writeinstln("mov " + oldReg + ", " + reg+"  ; UnaryNode: save value bc prefix operation");
+				compiler.writeinstln("inc " + reg + "  ; UnaryNode: " + type.name() + " " + node.toString());
+				break;
+			case MINUS_MINUS:
+				compiler.writeinstln("mov " + oldReg + ", " + reg+"  ; UnaryNode: save value bc prefix operation");
+				compiler.writeinstln("dec " + reg + "  ; UnaryNode: " + type.name() + " " + node.toString());
 				break;
 			default:
 				throw new CompilerException("Prefix operation not supported: " + type);
@@ -58,10 +72,15 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 			throw new CompilerException("Unary operation not supported: " + type);
 		}
 
-		LetSetNode artificialNode = new LetSetNode((FieldAccessNode) expr, new RegisterValueNode(reg, expr.isDecimal(), expr.isInteger()));
+		LetSetNode artificialNode = new LetSetNode(fieldAccess, new RegisterValueNode(reg, fieldAccess.isDecimal(), fieldAccess.isInteger()));
 		node.getParent().add(artificialNode);
 		compiler.compile(artificialNode);
 		node.getParent().remove(artificialNode);
+		
+		if(node.isPrefix() && (type.equals(TokenType.PLUS_PLUS) || type.equals(TokenType.MINUS_MINUS))) {
+			mem.free(reg);
+			mem.setLatest(oldReg);
+		}
 
 	}
 

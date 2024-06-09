@@ -18,5 +18,5 @@ fun int8 main() {
 		x++;
 	}
 	
-	return x;
+	return x + (++x);
 }
