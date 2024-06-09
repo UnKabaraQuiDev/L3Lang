@@ -12,7 +12,7 @@ fun int64 mod(int64 x, int64 y, int64 d) {
 }
 
 fun int8 main() {
-	let int x = 1;
+	let int8 x = 1;
 	
 	while(x < 12) {
 		x++;

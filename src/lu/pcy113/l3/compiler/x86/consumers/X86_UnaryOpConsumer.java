@@ -22,19 +22,23 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 		TokenType type = node.getOperator();
 		ExprNode expr = node.getExpr();
 
+		if (!(expr instanceof FieldAccessNode)) {
+			throw new CompilerException("What do you think you're doing ?");
+		}
+
 		compiler.compile(expr);
 		String reg = mem.getLatest();
-		
+
 		if (node.isPrefix()) {
 			switch (type) {
 			case NOT:
+				compiler.writeinstln("not " + reg + "  ; UnaryNode: " + type.name() + " " + node.toString());
+				compiler.writeinstln("cmp " + reg + ", 0");
+				compiler.writeinstln("setg " + mem.getAsSize(reg, 1));
+				compiler.writeinstln("movzx " + reg + ", " + mem.getAsSize(reg, 1) + "  ; UnaryNode: normalized logical 'not'");
+				break;
 			case BIT_NOT:
 				compiler.writeinstln("not " + reg + "  ; UnaryNode: " + type.name() + " " + node.toString());
-				if (type.equals(TokenType.NOT)) {
-					compiler.writeinstln("cmp " + reg + ", 0");
-					compiler.writeinstln("setg " + mem.getAsSize(reg, 1));
-					compiler.writeinstln("movzx " + reg + ", " + mem.getAsSize(reg, 1));
-				}
 				break;
 			default:
 				throw new CompilerException("Prefix operation not supported: " + type);
@@ -50,15 +54,15 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 			default:
 				throw new CompilerException("Postfix operation not supported: " + type);
 			}
+		} else {
+			throw new CompilerException("Unary operation not supported: " + type);
 		}
 
-		if(expr instanceof FieldAccessNode) {
-			LetSetNode artificialNode = new LetSetNode((FieldAccessNode) expr, new RegisterValueNode(reg, expr.isDecimal(), expr.isInteger()));
-			node.getParent().add(artificialNode);
-			compiler.compile(artificialNode);
-			node.getParent().remove(artificialNode);
-		}
-		
+		LetSetNode artificialNode = new LetSetNode((FieldAccessNode) expr, new RegisterValueNode(reg, expr.isDecimal(), expr.isInteger()));
+		node.getParent().add(artificialNode);
+		compiler.compile(artificialNode);
+		node.getParent().remove(artificialNode);
+
 	}
 
 }
