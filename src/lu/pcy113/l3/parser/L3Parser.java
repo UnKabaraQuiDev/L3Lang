@@ -119,9 +119,9 @@ public class L3Parser {
 	private void parseWhile(FunDefNode fun, ScopeContainerNode parent) throws ParserException {
 		consume(TokenType.WHILE);
 		consume(TokenType.PAREN_OPEN);
-		
+
 		WhileDefNode def = new WhileDefNode();
-		
+
 		if (!peek(TokenType.PAREN_CLOSE)) {
 			ExprNode condition = parseExpression();
 			def.add(condition);
@@ -131,7 +131,15 @@ public class L3Parser {
 		consume(TokenType.PAREN_CLOSE);
 
 		def.add(parseFunScopeBody(fun));
-		
+
+		if (peek(TokenType.FINALLY)) {
+			parseFinally(def, fun, parent);
+		}
+
+		if (peek(TokenType.ELSE)) {
+			parseElse(def, fun, parent);
+		}
+
 		parent.add(def);
 	}
 
@@ -144,16 +152,18 @@ public class L3Parser {
 		if (!peek(TokenType.SEMICOLON)) {
 			LetDefNode let = parseLetDef(def);
 			def.setLet(true);
-			consume(TokenType.SEMICOLON);
 		}
 		
+		consume(TokenType.SEMICOLON);
+
 		if (!peek(TokenType.SEMICOLON)) {
 			ExprNode condition = parseExpression();
 			def.add(condition);
 			def.setCondition(true);
-			consume(TokenType.SEMICOLON);
 		}
 		
+		consume(TokenType.SEMICOLON);
+
 		if (!peek(TokenType.PAREN_CLOSE)) {
 			ExprNode inc = parseExpression();
 			def.add(inc);
@@ -164,6 +174,14 @@ public class L3Parser {
 
 		def.add(parseFunScopeBody(fun));
 		
+		if (peek(TokenType.FINALLY)) {
+			parseFinally(def, fun, parent);
+		}
+
+		if (peek(TokenType.ELSE)) {
+			parseElse(def, fun, parent);
+		}
+
 		parent.add(def);
 	}
 
@@ -188,13 +206,13 @@ public class L3Parser {
 		parent.add(ifContainer);
 	}
 
-	private void parseElse(IfContainerNode ifContainer, FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+	private void parseElse(Node def, FunDefNode fun, ScopeContainerNode parent) throws ParserException {
 		consume(TokenType.ELSE);
 
 		ScopeBodyNode body = parseFunScopeBody(fun);
 
-		ElseDefNode ifDef = new ElseDefNode(body);
-		ifContainer.add(ifDef);
+		ElseDefNode elseDef = new ElseDefNode(body);
+		def.add(elseDef);
 	}
 
 	private ScopeBodyNode parseFunScopeBody(FunDefNode fun) throws ParserException {
@@ -211,16 +229,16 @@ public class L3Parser {
 		return body;
 	}
 
-	private void parseFinally(IfContainerNode ifContainer, FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+	private void parseFinally(Node def, FunDefNode fun, ScopeContainerNode parent) throws ParserException {
 		consume(TokenType.FINALLY);
 
 		ScopeBodyNode body = parseFunScopeBody(fun);
 
 		FinallyDefNode ifDef = new FinallyDefNode(body);
-		ifContainer.add(ifDef);
+		def.add(ifDef);
 	}
 
-	private void parseIf(IfContainerNode ifContainer, FunDefNode fun, ScopeContainerNode parent) throws ParserException {
+	private void parseIf(Node ifContainer, FunDefNode fun, ScopeContainerNode parent) throws ParserException {
 		consume(TokenType.IF);
 		consume(TokenType.PAREN_OPEN);
 		ExprNode conditionExpr = parseExpression();

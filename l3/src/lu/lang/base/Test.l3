@@ -1,22 +1,13 @@
 package lu.lang.base;
 
-let static int8 CONST  = 1;
-let static int8 CONST2 = 6;
-
-fun int64 div(int64 x, int64 y, int64 d) {
-	return x*y/d;
-}
-
-fun int64 mod(int64 x, int64 y, int64 d) {
-	return x*y%d;
-}
-
 fun int8 main() {
 	let int8 x = 1;
 	
-	while(x < 12) {
-		x++;
+	for(; x == 2;) {
+		x = 4;
+	} else {
+		x = 3;
 	}
 	
-	return x + (++x);
+	return x;
 }

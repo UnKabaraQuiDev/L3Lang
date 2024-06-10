@@ -24,20 +24,44 @@ public class X86_WhileDefConsumer extends CompilerConsumer<X86Compiler, WhileDef
 
 		body.setAsmName(node.getAsmName() + "_body");
 
-		compiler.writeln(body.getAsmName() + ":");
-
 		if (node.hasCondition()) {
-			compiler.writeinstln("; Condition:");
+			compiler.writeinstln("; First condition:");
 			compiler.compile(node.getCondition());
 
-			compiler.writeinstln("jz " + node.getAsmName() + "_end");
+			mem.free(mem.getLatest());
+
+			compiler.writeinstln("jne " + node.getAsmName() + "_else");
 		}
 
+		compiler.writeln(body.getAsmName() + ":");
 		compiler.writeinstln("; Body:");
 
 		compiler.compile(body);
 
+		if (node.hasCondition()) {
+			compiler.writeinstln("; In-body condition:");
+			compiler.compile(node.getCondition());
+
+			mem.free(mem.getLatest());
+
+			compiler.writeinstln("jne " + node.getAsmName() + "_final");
+		}
+
 		compiler.writeinstln("jmp " + body.getAsmName());
+
+		compiler.writeln(node.getAsmName() + "_final:");
+
+		if (node.hasFinally()) {
+			compiler.compile(node.getFinally().getBody());
+		}
+		
+		compiler.writeinstln("jmp " + node.getAsmName() + "_end");
+
+		compiler.writeln(node.getAsmName() + "_else:");
+
+		if (node.hasElse()) {
+			compiler.compile(node.getElse().getBody());
+		}
 
 		compiler.writeln(node.getAsmName() + "_end:");
 

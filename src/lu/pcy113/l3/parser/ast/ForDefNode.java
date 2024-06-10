@@ -1,5 +1,6 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
 
 public class ForDefNode extends ScopeContainerNode implements AsmNamed {
@@ -60,8 +61,24 @@ public class ForDefNode extends ScopeContainerNode implements AsmNamed {
 		return children.get(index - 1);
 	}
 
+	public boolean hasFinally() {
+		return children.stream().anyMatch(n -> n instanceof FinallyDefNode);
+	}
+
+	public boolean hasElse() {
+		return children.stream().anyMatch(n -> n instanceof ElseDefNode);
+	}
+
+	public FinallyDefNode getFinally() throws CompilerException {
+		return (FinallyDefNode) children.stream().filter(n -> n instanceof FinallyDefNode).findFirst().orElseThrow(() -> new CompilerException("While node has no finally statement."));
+	}
+
+	public ElseDefNode getElse() throws CompilerException {
+		return (ElseDefNode) children.stream().filter(n -> n instanceof ElseDefNode).findFirst().orElseThrow(() -> new CompilerException("While node has no else statement."));
+	}
+
 	public ScopeBodyNode getBody() {
-		return (ScopeBodyNode) children.getLast();
+		return (ScopeBodyNode) children.get((hasCondition() ? 1 : 0) + (hasInc() ? 1 : 0) + (hasLet() ? 1 : 0));
 	}
 
 }

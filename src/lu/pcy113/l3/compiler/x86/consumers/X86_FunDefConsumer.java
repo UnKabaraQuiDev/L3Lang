@@ -23,7 +23,6 @@ public class X86_FunDefConsumer extends CompilerConsumer<X86Compiler, FunDefNode
 			FunDefParamNode param = node.getParams().getParam(i);
 			node.getParamDefDescriptor(param).setStackOffset(offset);
 			offset += param.getType().getBytesSize();
-			System.out.println("arg; "+param.getIdent()+" > "+node.getParamDefDescriptor(param).getStackOffset());
 		}
 		
 		compiler.writeln(node.getFunDefDescriptor(node).getAsmName() + ":  ; Fun: " + node.getIdent().asString());
