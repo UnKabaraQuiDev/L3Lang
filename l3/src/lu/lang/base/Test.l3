@@ -1,11 +1,11 @@
 package lu.lang.base;
 
 fun int8 main() {
-	let int8 x = 1;
+	let int8s x = 2*2+2;
 	
 	for(; x == 2;) {
 		x = 4;
-	} else {
+	} finally {x = 5;}else {
 		x = 3;
 	}
 	
