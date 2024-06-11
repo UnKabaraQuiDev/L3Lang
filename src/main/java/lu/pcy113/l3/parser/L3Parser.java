@@ -446,7 +446,7 @@ public class L3Parser {
 		}
 	}
 
-	public ExprNode parseExpression() throws ParserException {
+	private ExprNode parseExpression() throws ParserException {
 		return parseLogical();
 	}
 
@@ -501,7 +501,7 @@ public class L3Parser {
 			if (left instanceof FieldAccessNode) {
 				left = parseLetSet((FieldAccessNode) left);
 			} else {
-				throw new ParserException("Expression at: " + peek(-1).getPosition() + " isn't a FieldAccess (" + left.getClass().getSimpleName()+ ")");
+				throw new ParserException("Expression at: " + peek(-1).getPosition() + " isn't a FieldAccess (" + left.getClass().getSimpleName() + ")");
 			}
 		} else if (peek(TokenType.PLUS_PLUS)) {
 			left = new UnaryOpNode(consume(TokenType.PLUS_PLUS).getType(), left);
