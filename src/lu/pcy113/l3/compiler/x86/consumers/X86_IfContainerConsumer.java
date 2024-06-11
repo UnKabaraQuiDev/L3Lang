@@ -18,11 +18,11 @@ public class X86_IfContainerConsumer extends CompilerConsumer<X86Compiler, IfCon
 	@Override
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, IfContainerNode node) throws CompilerException {
 		GlobalLogger.log("IfContainer: " + node);
-		
+
 		compiler.writeln("; If container start - - -");
-		
+
 		node.setAsmName("." + compiler.newSection());
-		compiler.writeln(node.getAsmName() + ":  ; "+ node.getAsmName());
+		compiler.writeln(node.getAsmName() + ":  ; " + node.getAsmName());
 
 		for (int i = 0; i < node.getChildren().size(); i++) {
 			Node sub = node.getChildren().get(i);
@@ -37,13 +37,15 @@ public class X86_IfContainerConsumer extends CompilerConsumer<X86Compiler, IfCon
 				compiler.compile(((IfDefNode) sub).getCondition());
 				String reg = mem.getLatest();
 				compiler.writeinstln("cmp " + reg + ", 0");
-				compiler.writeinstln("ja " + ((IfDefNode) sub).getAsmName()+"  ; If: "+((IfDefNode) sub).getCondition());
+				compiler.writeinstln("jnz " + ((IfDefNode) sub).getAsmName() + "  ; If: " + ((IfDefNode) sub).getCondition());
 			} else if (sub instanceof FinallyDefNode) {
 				// pass
 			} else if (sub instanceof ElseDefNode) {
-				compiler.writeinstln("jmp " + ((ElseDefNode) sub).getAsmName()+"  ; Else");
+				compiler.writeinstln("jmp " + ((ElseDefNode) sub).getAsmName() + "  ; Else");
 			}
 		}
+
+		compiler.writeinstln("jmp " + node.getAsmName() + "_end");
 
 		for (int i = 0; i < node.getChildren().size(); i++) {
 			Node sub = node.getChildren().get(i);
@@ -55,7 +57,7 @@ public class X86_IfContainerConsumer extends CompilerConsumer<X86Compiler, IfCon
 				if (node.hasFinally()) {
 					compiler.writeinstln("jmp " + node.getFinally().getAsmName());
 				} else {
-					compiler.writeinstln("jmp " + node.getAsmName() + "_final");
+					compiler.writeinstln("jmp " + node.getAsmName() + "_end");
 				}
 			} else if (sub instanceof FinallyDefNode) {
 				compiler.compile(((FinallyDefNode) sub).getBody());

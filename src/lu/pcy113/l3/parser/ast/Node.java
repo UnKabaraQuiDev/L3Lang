@@ -26,8 +26,9 @@ public class Node implements Iterable<Node> {
 		if (child == null)
 			return this;
 		child.unregister(this);
-		children.remove(child);
-		return this;
+		if (children.remove(child))
+			return this;
+		return null;
 	}
 
 	public Node add(Node child) {

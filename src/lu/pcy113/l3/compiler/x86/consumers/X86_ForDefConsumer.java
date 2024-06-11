@@ -36,7 +36,8 @@ public class X86_ForDefConsumer extends CompilerConsumer<X86Compiler, ForDefNode
 
 			mem.free(mem.getLatest());
 
-			compiler.writeinstln("jne " + node.getAsmName() + "_else");
+			compiler.writeinstln("cmp " + mem.getLatest() + ", 0");
+			compiler.writeinstln("jz " + node.getAsmName() + "_else");
 		}
 
 		compiler.writeln(body.getAsmName() + ":");
@@ -44,29 +45,29 @@ public class X86_ForDefConsumer extends CompilerConsumer<X86Compiler, ForDefNode
 
 		compiler.compile(body);
 
+		if (node.hasInc()) {
+			compiler.writeinstln("; Inc:");
+			compiler.compile(node.getInc());
+		}
+
 		if (node.hasCondition()) {
 			compiler.writeinstln("; In-body condition:");
 			compiler.compile(node.getCondition());
 
 			mem.free(mem.getLatest());
 
-			compiler.writeinstln("jne " + node.getAsmName() + "_final");
-		}
-
-		if (node.hasInc()) {
-			compiler.writeinstln("; Inc:");
-			compiler.compile(node.getInc());
+			compiler.writeinstln("cmp " + mem.getLatest() + ", 0");
+			compiler.writeinstln("jz " + node.getAsmName() + "_final");
 		}
 
 		compiler.writeinstln("jmp " + body.getAsmName());
 
 		compiler.writeln(node.getAsmName() + "_final:");
-		
+
 		if (node.hasFinally()) {
 			compiler.compile(node.getFinally().getBody());
 		}
 		compiler.writeinstln("jmp " + node.getAsmName() + "_end");
-		
 
 		compiler.writeln(node.getAsmName() + "_else:");
 

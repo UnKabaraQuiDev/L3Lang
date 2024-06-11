@@ -25,9 +25,9 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 		if (!(expr instanceof FieldAccessNode)) {
 			throw new CompilerException("What do you think you're doing ?");
 		}
-		
+
 		FieldAccessNode fieldAccess = (FieldAccessNode) expr;
-		
+
 		compiler.compile(fieldAccess);
 		String reg = mem.getLatest();
 
@@ -47,11 +47,11 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 				compiler.writeinstln("not " + reg + "  ; UnaryNode: " + type.name() + " " + node.toString());
 				break;
 			case PLUS_PLUS:
-				compiler.writeinstln("mov " + oldReg + ", " + reg+"  ; UnaryNode: save value bc prefix operation");
+				compiler.writeinstln("mov " + oldReg + ", " + reg + "  ; UnaryNode: save value bc prefix operation");
 				compiler.writeinstln("inc " + reg + "  ; UnaryNode: " + type.name() + " " + node.toString());
 				break;
 			case MINUS_MINUS:
-				compiler.writeinstln("mov " + oldReg + ", " + reg+"  ; UnaryNode: save value bc prefix operation");
+				compiler.writeinstln("mov " + oldReg + ", " + reg + "  ; UnaryNode: save value bc prefix operation");
 				compiler.writeinstln("dec " + reg + "  ; UnaryNode: " + type.name() + " " + node.toString());
 				break;
 			default:
@@ -76,8 +76,8 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 		node.getParent().add(artificialNode);
 		compiler.compile(artificialNode);
 		node.getParent().remove(artificialNode);
-		
-		if(node.isPrefix() && (type.equals(TokenType.PLUS_PLUS) || type.equals(TokenType.MINUS_MINUS))) {
+
+		if (node.isPrefix() && (type.equals(TokenType.PLUS_PLUS) || type.equals(TokenType.MINUS_MINUS))) {
 			mem.free(reg);
 			mem.setLatest(oldReg);
 		}

@@ -16,19 +16,21 @@ public class X86_ScopeBodyConsumer extends CompilerConsumer<X86Compiler, ScopeBo
 	@Override
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, ScopeBodyNode node) throws CompilerException {
 		GlobalLogger.log("ScopeBody: " + node);
-		
+
 		int stackOffset = 0;
-		
-		for (Node n : node) {
+
+		for (int i = 0; i < node.getChildren().size(); i++) {
+			Node n = node.getChildren().get(i);
+
 			compiler.compile(n);
-			
-			if(n instanceof LetDefNode) {
+
+			if (n instanceof LetDefNode) {
 				stackOffset += ((LetDefNode) n).getType().getBytesSize();
 			}
 		}
-		
-		if(stackOffset != 0 && !(node instanceof FunBodyDefNode)) {
-			compiler.writeinstln("add rsp, "+stackOffset);
+
+		if (stackOffset != 0 && !(node instanceof FunBodyDefNode)) {
+			compiler.writeinstln("add rsp, " + stackOffset);
 		}
 	}
 
