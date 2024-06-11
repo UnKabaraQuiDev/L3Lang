@@ -19,16 +19,21 @@ public class X86_FunDefConsumer extends CompilerConsumer<X86Compiler, FunDefNode
 
 		node.getParams().normalizeSize();
 		int offset = 0; // node.getParams().getBytesSize();
-		for(int i = 0; i < node.getParams().getChildren().size(); i++) {
+		for (int i = 0; i < node.getParams().getChildren().size(); i++) {
 			FunDefParamNode param = node.getParams().getParam(i);
 			node.getParamDefDescriptor(param).setStackOffset(offset);
 			offset += param.getType().getBytesSize();
 		}
-		
+
 		compiler.writeln(node.getFunDefDescriptor(node).getAsmName() + ":  ; Fun: " + node.getIdent().asString());
 		compiler.writeinstln("push rbp");
 		compiler.writeinstln("mov rbp, rsp");
+
+		compiler.writeinstln(";  Fun body start - - -");
+		
 		compiler.compile(node.getBody());
+		
+		compiler.writeinstln(";  Fun body end - - -");
 
 		mem.clearStack();
 	}

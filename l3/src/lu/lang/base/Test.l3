@@ -2,7 +2,6 @@ package lu.lang.base;
 
 fun int8 main() {
 	let int8 x = 0;
-	
 	for (let int8 a = 0; a < 0; a++) {
 		x++;
 	}
