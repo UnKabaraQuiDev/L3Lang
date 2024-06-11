@@ -1,0 +1,63 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>lu.pcy113</groupId>
+	<artifactId>pdr.client</artifactId>
+	<version>0.0.2-SNAPSHOT</version>
+	<name>PDRClient</name>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
+
+	<profiles>
+		<profile>
+			<id>PrivateMain</id>
+			<properties>
+				<main.class>lu.pcy113.l3.PrivateMain</main.class>
+			</properties>
+		</profile>
+	</profiles>
+
+	<dependencies>
+		<dependency>
+			<groupId>lu.pcy113</groupId>
+			<artifactId>PCLib</artifactId>
+			<version>0.4</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.1.0</version>
+				<configuration>
+					<executable>java</executable>
+					<arguments>
+						<argument>-cp</argument>
+						<classpath />
+						<argument>${main.class}</argument>
+					</arguments>
+					<!--<mainClass>lu.pcy113.pdr.client.ClientMain</mainClass>-->
+					<!--<addResourcesToClasspath>true</addResourcesToClasspath>-->
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
