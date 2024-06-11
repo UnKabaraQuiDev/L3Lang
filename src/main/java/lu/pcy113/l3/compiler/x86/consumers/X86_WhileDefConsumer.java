@@ -29,8 +29,9 @@ public class X86_WhileDefConsumer extends CompilerConsumer<X86Compiler, WhileDef
 			compiler.compile(node.getCondition());
 
 			mem.free(mem.getLatest());
-
-			compiler.writeinstln("jne " + node.getAsmName() + "_else");
+			
+			compiler.writeinstln("cmp " + mem.getLatest() + ", 0");
+			compiler.writeinstln("jz " + node.getAsmName() + "_else");
 		}
 
 		compiler.writeln(body.getAsmName() + ":");
@@ -44,7 +45,8 @@ public class X86_WhileDefConsumer extends CompilerConsumer<X86Compiler, WhileDef
 
 			mem.free(mem.getLatest());
 
-			compiler.writeinstln("jne " + node.getAsmName() + "_final");
+			compiler.writeinstln("cmp " + mem.getLatest() + ", 0");
+			compiler.writeinstln("jz " + node.getAsmName() + "_final");
 		}
 
 		compiler.writeinstln("jmp " + body.getAsmName());
