@@ -153,7 +153,7 @@ public class L3Parser {
 			LetDefNode let = parseLetDef(def);
 			def.setLet(true);
 		}
-		
+
 		consume(TokenType.SEMICOLON);
 
 		if (!peek(TokenType.SEMICOLON)) {
@@ -161,7 +161,7 @@ public class L3Parser {
 			def.add(condition);
 			def.setCondition(true);
 		}
-		
+
 		consume(TokenType.SEMICOLON);
 
 		if (!peek(TokenType.PAREN_CLOSE)) {
@@ -173,7 +173,7 @@ public class L3Parser {
 		consume(TokenType.PAREN_CLOSE);
 
 		def.add(parseFunScopeBody(fun));
-		
+
 		if (peek(TokenType.FINALLY)) {
 			parseFinally(def, fun, parent);
 		}
@@ -498,7 +498,11 @@ public class L3Parser {
 		}
 
 		if (peek(TokenType.ASSIGN)) {
-			left = parseLetSet(left);
+			if (left instanceof FieldAccessNode) {
+				left = parseLetSet((FieldAccessNode) left);
+			} else {
+				throw new ParserException("Expression at: " + peek(-1).getPosition() + " isn't a FieldAccess (" + left.getClass().getSimpleName()+ ")");
+			}
 		} else if (peek(TokenType.PLUS_PLUS)) {
 			left = new UnaryOpNode(consume(TokenType.PLUS_PLUS).getType(), left);
 		} else if (peek(TokenType.MINUS_MINUS)) {
@@ -675,7 +679,7 @@ public class L3Parser {
 		return nodes;
 	}
 
-	private ExprNode parseLetSet(Node var) throws ParserException {
+	private ExprNode parseLetSet(FieldAccessNode var) throws ParserException {
 		TokenType type = consume(TokenType.ASSIGN).getType();
 
 		ExprNode expr = parseExpression();

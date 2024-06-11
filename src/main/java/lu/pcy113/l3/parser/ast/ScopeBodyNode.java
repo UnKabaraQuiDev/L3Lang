@@ -1,6 +1,8 @@
 package lu.pcy113.l3.parser.ast;
 
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
+import lu.pcy113.l3.utils.CompilerOptions;
 
 public class ScopeBodyNode extends ScopeContainerNode implements AsmNamed, ReturnSafeNode {
 
@@ -23,6 +25,10 @@ public class ScopeBodyNode extends ScopeContainerNode implements AsmNamed, Retur
 		for (Node n : this) {
 			if (n instanceof ReturnSafeNode) {
 				returnSafe |= ((ReturnSafeNode) n).isReturnSafe();
+			}
+
+			if (returnSafe && CompilerOptions.THROW_UNREACHABLE_CODE) {
+				throw new RuntimeException(new CompilerException("Code is unreachable: " + n.toString(0)));
 			}
 		}
 

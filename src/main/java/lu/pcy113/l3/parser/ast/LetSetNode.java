@@ -8,7 +8,7 @@ import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class LetSetNode extends ExprNode implements RecursiveArithmeticOp {
 
-	public LetSetNode(Node let, Node expr) {
+	public LetSetNode(FieldAccessNode let, Node expr) {
 		add(let);
 		add(expr);
 	}

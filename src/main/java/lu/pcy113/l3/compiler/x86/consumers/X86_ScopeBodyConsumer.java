@@ -27,6 +27,8 @@ public class X86_ScopeBodyConsumer extends CompilerConsumer<X86Compiler, ScopeBo
 			if (n instanceof LetDefNode) {
 				stackOffset += ((LetDefNode) n).getType().getBytesSize();
 			}
+			
+			mem.freeAll();
 		}
 
 		if (stackOffset != 0 && !(node instanceof FunBodyDefNode)) {
