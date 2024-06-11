@@ -2,7 +2,7 @@ package lu.pcy113.l3.parser.ast;
 
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 
-public class IfDefNode extends Node implements AsmNamed {
+public class IfDefNode extends Node implements AsmNamed, ReturnSafeNode {
 
 	private String asmName;
 
@@ -27,6 +27,11 @@ public class IfDefNode extends Node implements AsmNamed {
 
 	public ScopeBodyNode getBody() {
 		return (ScopeBodyNode) children.get(1);
+	}
+
+	@Override
+	public boolean isReturnSafe() {
+		return getBody().isReturnSafe();
 	}
 
 }

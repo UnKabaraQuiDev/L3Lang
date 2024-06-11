@@ -17,6 +17,10 @@ public class X86_FunDefConsumer extends CompilerConsumer<X86Compiler, FunDefNode
 
 		mem.freeAll();
 
+		if(!node.isReturnSafe()) {
+			throw new CompilerException("FunDef is not return-safe !");
+		}
+		
 		node.getParams().normalizeSize();
 		int offset = 0; // node.getParams().getBytesSize();
 		for (int i = 0; i < node.getParams().getChildren().size(); i++) {

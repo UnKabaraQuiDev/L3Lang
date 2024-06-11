@@ -1,14 +1,12 @@
 package lu.pcy113.l3.parser.ast;
 
-public class ReturnNode extends Node implements ReturnSafeNode {
+public class ThrowNode extends Node implements ReturnSafeNode {
 
-	private boolean _void;
-
-	public ReturnNode() {
+	public ThrowNode() {
 		this._void = true;
 	}
 
-	public ReturnNode(Node expr) {
+	public ThrowNode(Node expr) {
 		add(expr);
 		this._void = false;
 	}

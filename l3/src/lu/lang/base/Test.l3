@@ -1,5 +1,22 @@
 package lu.lang.base;
 
 fun int8 main() {
+	let int8 a = 12;
+	
+	if(a < 10) {
+	
+	}else if(a < 20) {
+	
+	}else if(a < 30) {
+	
+	}finally {
+		return a;
+	}else {
+		if(1) {
+		}finally {
+			return a;
+		}else
+		return a;
+	}
 	
 }

@@ -8,11 +8,13 @@ import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunDefParamNode;
 import lu.pcy113.l3.parser.ast.FunDefParamsNode;
+import lu.pcy113.l3.parser.ast.Node;
+import lu.pcy113.l3.parser.ast.ReturnSafeNode;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
-public class FunDefNode extends ScopeContainerNode {
+public class FunDefNode extends ScopeContainerNode implements ReturnSafeNode {
 
 	private IdentifierLitNode ident;
 
@@ -30,14 +32,14 @@ public class FunDefNode extends ScopeContainerNode {
 
 		return (ParamScopeDescriptor) col.stream().filter(c -> c instanceof ParamScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Let: " + ident + ", not defined."));
 	}
-	
+
 	public ParamScopeDescriptor getParamDefDescriptor(FunDefParamNode param) throws CompilerException {
 		return getParamDefDescriptor(param.getIdent().getFirst().getValue());
 	}
-	
+
 	public boolean isParamDefDescriptor(String ident) {
 		Collection<ScopeDescriptor> col = this.getLocalDescriptors(ident);
-		
+
 		return col.stream().filter(c -> c instanceof ParamScopeDescriptor).findFirst().isPresent();
 	}
 
@@ -78,11 +80,16 @@ public class FunDefNode extends ScopeContainerNode {
 		int size = 0;
 		for (ScopeDescriptor desc : getBody().getLocalDescriptors().values().parallelStream().flatMap(c -> c.stream()).collect(Collectors.toSet())) {
 			if (desc instanceof LetScopeDescriptor) {
-				System.err.println("desc for: " + desc.getIdentifier() + " = " + ((LetScopeDescriptor) desc).getNode().getType().getBytesSize());
+				// System.err.println("desc for: " + desc.getIdentifier() + " = " + ((LetScopeDescriptor) desc).getNode().getType().getBytesSize());
 				size += ((LetScopeDescriptor) desc).getNode().getType().getBytesSize();
 			}
 		}
 		return size;
+	}
+
+	@Override
+	public boolean isReturnSafe()  {
+		return getBody().isReturnSafe();
 	}
 
 }

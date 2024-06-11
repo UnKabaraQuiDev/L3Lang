@@ -1,6 +1,6 @@
 package lu.pcy113.l3.parser.ast;
 
-public class FinallyDefNode extends Node implements AsmNamed {
+public class FinallyDefNode extends Node implements AsmNamed, ReturnSafeNode {
 
 	private String asmName;
 
@@ -20,6 +20,11 @@ public class FinallyDefNode extends Node implements AsmNamed {
 
 	public ScopeBodyNode getBody() {
 		return (ScopeBodyNode) children.get(0);
+	}
+
+	@Override
+	public boolean isReturnSafe() {
+		return getBody().isReturnSafe();
 	}
 
 }
