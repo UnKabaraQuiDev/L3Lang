@@ -1,40 +1,27 @@
 package lu.pcy113.l3.parser.ast;
 
-import lu.pcy113.l3.lexer.TokenType;
-import lu.pcy113.l3.lexer.tokens.IdentifierToken;
-import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
-import lu.pcy113.l3.utils.FileUtils;
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 
 public class ImportDefNode extends Node {
 
-	private StringLiteralToken path;
-	private IdentifierToken ident;
+	private IdentifierLitNode path;
+	private IdentifierLitNode ident;
 
-	public ImportDefNode(StringLiteralToken strLit) {
+	public ImportDefNode(IdentifierLitNode strLit, IdentifierLitNode ident) {
 		this.path = strLit;
-		this.ident = new IdentifierToken(TokenType.IDENT, strLit.getLine(), strLit.getColumn(),
-				FileUtils.getExtension(path.getValue()));
+		this.ident = ident;
 	}
 
-	public ImportDefNode(StringLiteralToken strLit, IdentifierToken ident) {
-		this.path = strLit;
-		if (ident == null)
-			this.ident = new IdentifierToken(TokenType.IDENT, strLit.getLine(), strLit.getColumn(),
-					FileUtils.getExtension(path.getValue()));
-		else
-			this.ident = ident;
-	}
-
-	public StringLiteralToken getPath() {
+	public IdentifierLitNode getPath() {
 		return path;
 	}
 
-	public IdentifierToken getIdent() {
+	public IdentifierLitNode getIdent() {
 		return ident;
 	}
 
 	public String getIdentValue() {
-		return ident.getValue();
+		return ident.asString();
 	}
 
 }

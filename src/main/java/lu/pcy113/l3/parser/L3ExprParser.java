@@ -20,6 +20,7 @@ import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.expr.UnaryOpNode;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
+import lu.pcy113.l3.parser.ast.lit.IntegerNumLitNode;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.scope.RuntimeNode;
 
@@ -120,7 +121,8 @@ public class L3ExprParser {
 
 		} else if (peek(TokenType.NUM_LIT)) {
 
-			return new NumLitNode(consume());
+			// TODO
+			return null; // new IntegerNumLitNode(consume());
 
 		} else if (peek(TokenType.IDENT)) {
 
@@ -190,12 +192,15 @@ public class L3ExprParser {
 			consume(TokenType.HASH);
 		consume(TokenType.PAREN_OPEN);
 
-		FunCallNode call = new FunCallNode(ident, preset);
+		// TODO
+		FunCallNode call = null; // new FunCallNode(ident, preset);
 
 		int index = 0;
 		while (!peek(TokenType.PAREN_CLOSE)) {
 			ExprNode expr = parseExpression();
-			call.addParam(expr);
+			
+			// TODO
+			// call.addParam(expr);
 
 			if (peek(TokenType.COMMA))
 				consume(TokenType.COMMA);
@@ -248,7 +253,8 @@ public class L3ExprParser {
 			break;
 		}
 
-		return new LetSetNode(var, expr);
+		// TODO
+		return null; //new LetSetNode(var, expr);
 	}
 
 	private boolean hasNext() {

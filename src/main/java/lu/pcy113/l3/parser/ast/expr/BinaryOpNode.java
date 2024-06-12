@@ -1,6 +1,6 @@
 package lu.pcy113.l3.parser.ast.expr;
 
-import lu.pcy113.l3.L3Exception;
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.Node;
 
@@ -15,12 +15,12 @@ public class BinaryOpNode extends ExprNode implements RecursiveArithmeticOp {
 	}
 
 	@Override
-	public boolean isDecimal() throws L3Exception {
+	public boolean isDecimal() throws CompilerException {
 		return ((RecursiveArithmeticOp) getLeft()).isDecimal() || ((RecursiveArithmeticOp) getRight()).isDecimal();
 	}
 	
 	@Override
-	public boolean isInteger() throws L3Exception {
+	public boolean isInteger() throws CompilerException {
 		return !isDecimal();
 	}
 	

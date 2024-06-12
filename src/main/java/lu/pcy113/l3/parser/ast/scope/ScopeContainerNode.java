@@ -145,7 +145,8 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 
 	@Override
 	public LetScopeDescriptor getLetDefDescriptor(LetSetNode node) throws CompilerException {
-		Collection<ScopeDescriptor> col = this.getDescriptors(((LetSetNode) node).getLetIdent().getValue());
+		// TODO
+		Collection<ScopeDescriptor> col = this.getDescriptors(((LetSetNode) node).getLet().getIdent().getFirst().getValue());
 
 		return (LetScopeDescriptor) col.stream().filter(c -> c instanceof LetScopeDescriptor).filter(c -> ((LetScopeDescriptor) c).getNode().equals(node)).findFirst()
 				.orElseThrow(() -> new CompilerException("LetDef: " + node + ", not defined."));

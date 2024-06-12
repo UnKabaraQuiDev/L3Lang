@@ -15,16 +15,6 @@ public class ArrayAccessNode extends ExprNode implements RecursiveArithmeticOp {
 		this.ident = ident;
 	}
 
-	@Override
-	public boolean isDecimal() throws CompilerException {
-		return getClosestContainer().getLetDefDescriptor(ident).getNode().getType().isDecimal();
-	}
-
-	@Override
-	public boolean isInteger() throws CompilerException {
-		return getClosestContainer().getLetDefDescriptor(ident).getNode().getType().isInteger();
-	}
-
 	public Node getOffset() {
 		return children.get(0);
 	}
@@ -36,6 +26,18 @@ public class ArrayAccessNode extends ExprNode implements RecursiveArithmeticOp {
 	@Override
 	public String toString() {
 		return super.toString() + "(" + ident.toString() + ", offset=" + getOffset() + ")";
+	}
+
+	@Override
+	public boolean isDecimal() throws CompilerException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isInteger() throws CompilerException {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

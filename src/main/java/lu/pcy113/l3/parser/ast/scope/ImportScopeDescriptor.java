@@ -17,7 +17,7 @@ public class ImportScopeDescriptor extends ScopeDescriptor {
 
 	@Override
 	public String toString() {
-		return this.getClass().getSimpleName() + "(" + ident.getValue()+" (" + node.getPath().getValue() + ") -> " + getAsmName() + " " + ident.getLine() + ":" + ident.getColumn() + ")";
+		return this.getClass().getSimpleName() + "(" + ident.asString() + " (" + node.getPath().asString() + ") -> " + getAsmName() + ")";
 	}
 
 }
