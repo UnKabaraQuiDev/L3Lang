@@ -13,9 +13,11 @@ import lu.pcy113.l3.compiler.x86.consumers.X86_FunCallConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_FunDefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_IfContainerConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_LetDefConsumer;
+import lu.pcy113.l3.compiler.x86.consumers.X86_LetRefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_LetSetConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_NumLitConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_PackageDefConsumer;
+import lu.pcy113.l3.compiler.x86.consumers.X86_PointerDerefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_RegisterValueConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_ReturnConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_RuntimeConsumer;
@@ -28,6 +30,7 @@ import lu.pcy113.l3.parser.ast.ForDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.IfContainerNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
+import lu.pcy113.l3.parser.ast.LetRefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
@@ -36,6 +39,7 @@ import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.expr.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.expr.UnaryOpNode;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.scope.FileNode;
@@ -64,6 +68,8 @@ public class X86Compiler extends L3Compiler {
 	private X86_WhileDefConsumer whileDefConsumer = new X86_WhileDefConsumer();
 	private X86_LetSetConsumer letSetConsumer = new X86_LetSetConsumer();
 	private X86_RegisterValueConsumer registerValueConsumer = new X86_RegisterValueConsumer();
+	private X86_LetRefConsumer letRefConsumer = new X86_LetRefConsumer();
+	private X86_PointerDerefConsumer pointerDerefConsumer = new X86_PointerDerefConsumer();
 
 	public X86Compiler(RuntimeNode env, File binDirPath, String fileName) {
 		super(env, new File(binDirPath, fileName));
@@ -85,6 +91,8 @@ public class X86Compiler extends L3Compiler {
 		letSetConsumer.attach(this);
 		registerValueConsumer.attach(this);
 		whileDefConsumer.attach(this);
+		letRefConsumer.attach(this);
+		pointerDerefConsumer.attach(this);
 	}
 
 	@Override
@@ -156,6 +164,10 @@ public class X86Compiler extends L3Compiler {
 			letSetConsumer.accept((LetSetNode) node);
 		} else if (node instanceof RegisterValueNode) {
 			registerValueConsumer.accept((RegisterValueNode) node);
+		} else if (node instanceof LetRefNode) {
+			letRefConsumer.accept((LetRefNode) node);
+		} else if (node instanceof PointerDerefNode) {
+			pointerDerefConsumer.accept((PointerDerefNode) node);
 		} else {
 			implement(node);
 		}

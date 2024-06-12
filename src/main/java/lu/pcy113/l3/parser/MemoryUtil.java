@@ -6,7 +6,7 @@ import lu.pcy113.l3.lexer.TokenType;
 
 public final class MemoryUtil {
 
-	public static final TokenType POINTER_TYPE = TokenType.INT_32;
+	public static final TokenType POINTER_TYPE = TokenType.INT_64;
 	public static final TokenType INT_TYPE = TokenType.INT_32;
 
 	/**

@@ -1,9 +1,11 @@
 package lu.lang.base;
 
 fun int8 main() {
-	let int8 a = 12;
+	let int8 original = 12;
 	
-	a += 13;
+	let int8: ptr = :original;
 	
-	return --a;
+	$ptr = 13;
+
+	return $ptr;
 }

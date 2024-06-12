@@ -29,13 +29,14 @@ import lu.pcy113.l3.parser.ast.LetRefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.PackageDefNode;
-import lu.pcy113.l3.parser.ast.PointerDerefNode;
+import lu.pcy113.l3.parser.ast.PointerDerefSetNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
+import lu.pcy113.l3.parser.ast.expr.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.expr.UnaryOpNode;
 import lu.pcy113.l3.parser.ast.lit.DecimalNumLitNode;
@@ -108,7 +109,7 @@ public class L3Parser {
 			parseFor(fun, parent);
 		} else if (peek(TokenType.WHILE)) {
 			parseWhile(fun, parent);
-		} else if (peek(TokenType.IDENT)) {
+		} else if (peek(TokenType.IDENT) || peek(TokenType.PLUS_PLUS) || peek(TokenType.MINUS_MINUS) || peek(TokenType.DOLLAR)) {
 			parent.add(parseExpression());
 			consume(TokenType.SEMICOLON);
 		} else {
@@ -493,13 +494,18 @@ public class L3Parser {
 			left = new UnaryOpNode(consume(TokenType.BIT_NOT).getType(), parsePrimary(), true);
 		} else if (peek(TokenType.NOT)) {
 			left = new UnaryOpNode(consume(TokenType.NOT).getType(), parsePrimary(), true);
-		} else {
+		} /*
+			 * else if (peek(TokenType.COLON)) { consume(TokenType.COLON); left = new LetRefNode((FieldAccessNode) parseIdent()); }
+			 * else if (peek(TokenType.DOLLAR)) { consume(TokenType.DOLLAR); left = new PointerDerefNode(parseExpression()); }
+			 */else {
 			left = parsePrimary();
 		}
 
 		if (peek(TokenType.ASSIGN)) {
 			if (left instanceof FieldAccessNode) {
 				left = parseLetSet((FieldAccessNode) left);
+			} else if (left instanceof PointerDerefNode) {
+				left = parseLetSet((PointerDerefNode) left);
 			} else {
 				throw new ParserException("Expression at: " + peek(-1).getPosition() + " isn't a FieldAccess (" + left.getClass().getSimpleName() + ")");
 			}
@@ -545,12 +551,12 @@ public class L3Parser {
 		} else if (peek(TokenType.DOLLAR)) {
 
 			consume(TokenType.DOLLAR);
-			return new PointerDerefNode(parseIdent());
+			return new PointerDerefNode((FieldAccessNode) parseIdent());
 
 		} else if (peek(TokenType.COLON)) {
 
 			consume(TokenType.COLON);
-			return new LetRefNode(parseIdent());
+			return new LetRefNode((FieldAccessNode) parseIdent());
 
 		} else if (peek(TokenType.NEW)) {
 
@@ -619,12 +625,7 @@ public class L3Parser {
 
 			FieldAccessNode fieldAccessNode = new FieldAccessNode(ident);
 
-			if (peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
-				return new UnaryOpNode(consume().getType(), fieldAccessNode, false);
-			} else {
-				return fieldAccessNode;
-			}
-
+			return fieldAccessNode;
 		}
 		// throw new ParserException("Unexpected token: "+peek());
 	}
@@ -679,7 +680,7 @@ public class L3Parser {
 		return nodes;
 	}
 
-	private ExprNode parseLetSet(FieldAccessNode var) throws ParserException {
+	private ExprNode parseLetSet(RecursiveArithmeticOp var) throws ParserException {
 		TokenType type = consume(TokenType.ASSIGN).getType();
 
 		ExprNode expr = parseExpression();
@@ -715,8 +716,15 @@ public class L3Parser {
 		default:
 			break;
 		}
-
-		return new LetSetNode(var, expr);
+		
+		if (var instanceof FieldAccessNode) {
+			return new LetSetNode((FieldAccessNode) var, expr);
+		}else if(var instanceof PointerDerefNode) {
+			return new PointerDerefSetNode((PointerDerefNode) var, expr);
+		}
+		
+		implement(var);
+		return null;
 	}
 
 	private boolean hasNext() {
