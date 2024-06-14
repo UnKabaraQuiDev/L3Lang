@@ -25,9 +25,7 @@ public class ScopeBodyNode extends ScopeContainerNode implements AsmNamed, Retur
 		for (Node n : this) {
 			if (n instanceof ReturnSafeNode) {
 				returnSafe |= ((ReturnSafeNode) n).isReturnSafe();
-			}
-
-			if (returnSafe && CompilerOptions.THROW_UNREACHABLE_CODE) {
+			}else if (returnSafe && CompilerOptions.THROW_UNREACHABLE_CODE) {
 				throw new RuntimeException(new CompilerException("Code is unreachable: " + n.toString(0)));
 			}
 		}
