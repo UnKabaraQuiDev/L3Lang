@@ -17,7 +17,7 @@ public class X86_PointerDerefConsumer extends CompilerConsumer<X86Compiler, Poin
 
 	@Override
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, PointerDerefNode node) throws CompilerException {
-		GlobalLogger.log("FieldAccess: " + node);
+		GlobalLogger.log("PointerDeref: " + node);
 
 		String ident = node.getExpr().getIdent().getLeaf().getValue();
 

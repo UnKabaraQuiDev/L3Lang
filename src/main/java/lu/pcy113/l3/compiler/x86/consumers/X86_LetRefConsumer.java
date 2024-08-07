@@ -4,7 +4,6 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.consumers.CompilerConsumer;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86.X86Compiler;
-import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FunDefParamNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
