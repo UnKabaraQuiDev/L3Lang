@@ -12,13 +12,19 @@ public class LetSetNode extends ExprNode implements RecursiveArithmeticOp {
 		add(let);
 		add(expr);
 	}
-	
+
 	@Override
-	public boolean isDecimal() throws CompilerException {
+	public boolean isDouble() throws CompilerException {
 		TypeNode type = getClosestContainer().getLetDefDescriptor(this).getNode().getType();
-		return type instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) type).isDecimal();
+		return type instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) type).isDouble();
 	}
-	
+
+	@Override
+	public boolean isFloat() throws CompilerException {
+		TypeNode type = getClosestContainer().getLetDefDescriptor(this).getNode().getType();
+		return type instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) type).isFloat();
+	}
+
 	@Override
 	public boolean isInteger() throws CompilerException {
 		TypeNode type = getClosestContainer().getLetDefDescriptor(this).getNode().getType();
@@ -38,19 +44,10 @@ public class LetSetNode extends ExprNode implements RecursiveArithmeticOp {
 		return super.toString() + "(" + getLet() + ")";
 	}
 
-	/*public IdentifierToken getLetIdent() {
-		Node let = getLet();
-		if (let instanceof PointerDerefNode) {
-			PointerDerefNode llet = (PointerDerefNode) let;
-			if (llet.getNode() instanceof FieldAccessNode) {
-				return (IdentifierToken) ((FieldAccessNode) (llet).getNode()).getMainIdent();
-			} else if (llet.getNode() instanceof FunCallNode) {
-				return (IdentifierToken) ((FunCallNode) (llet).getNode()).getIdent();
-			}
-		} else if (let instanceof FieldAccessNode) {
-			return ((FieldAccessNode) let).getMainIdent();
-		}
-		return null;
-	}*/
+	/*
+	 * public IdentifierToken getLetIdent() { Node let = getLet(); if (let instanceof PointerDerefNode) { PointerDerefNode llet = (PointerDerefNode) let; if (llet.getNode() instanceof FieldAccessNode) { return (IdentifierToken)
+	 * ((FieldAccessNode) (llet).getNode()).getMainIdent(); } else if (llet.getNode() instanceof FunCallNode) { return (IdentifierToken) ((FunCallNode) (llet).getNode()).getIdent(); } } else if (let instanceof FieldAccessNode) { return
+	 * ((FieldAccessNode) let).getMainIdent(); } return null; }
+	 */
 
 }

@@ -5,7 +5,7 @@ fun int8 main() {
 	
 	let int8: ptr = :original;
 	
-	$ptr = 13;
+	$ptr = 13.2f;
 
 	return $ptr;
 }

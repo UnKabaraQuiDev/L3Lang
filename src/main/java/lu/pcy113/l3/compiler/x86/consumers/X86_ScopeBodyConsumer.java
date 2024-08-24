@@ -9,7 +9,7 @@ import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
-import lu.pcy113.pclib.GlobalLogger;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class X86_ScopeBodyConsumer extends CompilerConsumer<X86Compiler, ScopeBodyNode> {
 

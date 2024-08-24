@@ -13,13 +13,17 @@ public class BoolLitNode extends Node implements RecursiveArithmeticOp {
 	}
 
 	@Override
-	public boolean isDecimal() {
-		return value instanceof Float || value instanceof Double;
+	public boolean isDouble() {
+		return value instanceof Double;
+	}
+
+	public boolean isFloat() {
+		return value instanceof Float;
 	}
 
 	@Override
 	public boolean isInteger() {
-		return !isDecimal();
+		return !isDouble() && !isFloat();
 	}
 
 	public Object getValue() {

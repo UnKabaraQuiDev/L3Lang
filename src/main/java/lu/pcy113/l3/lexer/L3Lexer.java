@@ -29,10 +29,12 @@ import static lu.pcy113.l3.lexer.TokenType.DIV;
 import static lu.pcy113.l3.lexer.TokenType.DIV_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.DOLLAR;
 import static lu.pcy113.l3.lexer.TokenType.DOT;
+import static lu.pcy113.l3.lexer.TokenType.DOUBLE;
 import static lu.pcy113.l3.lexer.TokenType.ELSE;
 import static lu.pcy113.l3.lexer.TokenType.EQUALS;
 import static lu.pcy113.l3.lexer.TokenType.FALSE;
 import static lu.pcy113.l3.lexer.TokenType.FINALLY;
+import static lu.pcy113.l3.lexer.TokenType.FLOAT;
 import static lu.pcy113.l3.lexer.TokenType.FOR;
 import static lu.pcy113.l3.lexer.TokenType.FUN;
 import static lu.pcy113.l3.lexer.TokenType.GREATER;
@@ -531,17 +533,24 @@ public class L3Lexer {
 			case "long":
 				type = LONG;
 				break;
+			case "float":
+				type = FLOAT;
+				break;
+			case "double":
+				type = DOUBLE;
+				break;
 			}
 
 			flushToken();
 		} else if (type == null && Character.isDigit(current)) {
 			type = NUM_LIT;
 			strValue = "" + current;
-			while (Character.isLetterOrDigit(peek()) || peek() == '_' || peek() == '.') {
+			while (Character.isLetterOrDigit(peek()) || peek() == '_' || peek() == '.' || peek() == 'f') {
 				strValue += consume();
 			}
-			if (strValue.contains("."))
+			if (strValue.contains(".") || strValue.contains("f")) {
 				type = DEC_NUM_LIT;
+			}
 			flushToken();
 		}
 	}
@@ -554,9 +563,7 @@ public class L3Lexer {
 			tokens.add(new IdentifierToken(type, line, column - strValue.length(), strValue));
 		} else if (NUM_LIT.equals(type) || CHAR_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type)) {
 			tokens.add(new NumericLiteralToken(type, line, column - strValue.length(), strValue));
-		} /*
-			 * else if (CHAR_LIT.equals(type)) { tokens.add(new CharLiteralToken(type, line, column - strValue.length(), strValue.charAt(0))); }
-			 */ else if (STRING_LIT.equals(type)) {
+		} else if (STRING_LIT.equals(type)) {
 			tokens.add(new StringLiteralToken(type, line, column - strValue.length(), strValue));
 		} else if (COMMENT.equals(type)) {
 			tokens.add(new CommentToken(type, line, column - strValue.length(), strValue));

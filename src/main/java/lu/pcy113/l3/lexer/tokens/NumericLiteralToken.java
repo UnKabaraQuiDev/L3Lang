@@ -5,6 +5,7 @@ import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ValueType;
 import lu.pcy113.l3.utils.BinFormat;
 import lu.pcy113.l3.utils.HexFormat;
+import lu.pcy113.pclib.PCUtils;
 
 public class NumericLiteralToken extends LiteralToken<Number> {
 
@@ -15,13 +16,22 @@ public class NumericLiteralToken extends LiteralToken<Number> {
 	public NumericLiteralToken(TokenType type, int line, int column, String literal) throws LexerException {
 		super(type, line, column);
 
-		literal = literal.trim().replace("_", "");
+		boolean float_ = literal.endsWith("f");
+
+		literal = PCUtils.replaceLast(literal.trim().replace("_", ""), "f", "");
 
 		this.literal = literal;
-		if (type.equals(TokenType.DEC_NUM_LIT)) {
+		if (float_) {
+			try {
+				value = Float.parseFloat(literal);
+				valueType = ValueType.FLOAT;
+			} catch (NumberFormatException e) {
+				throw new LexerException(e, "Invalid number format: " + e.getMessage(), line, column, literal);
+			}
+		} else if (type.equals(TokenType.DEC_NUM_LIT)) {
 			try {
 				value = Double.parseDouble(literal);
-				valueType = ValueType.DECIMAL;
+				valueType = ValueType.DOUBLE;
 			} catch (NumberFormatException e) {
 				throw new LexerException(e, "Invalid number format: " + e.getMessage(), line, column, literal);
 			}
@@ -68,12 +78,16 @@ public class NumericLiteralToken extends LiteralToken<Number> {
 		return literal;
 	}
 
-	public boolean isDecimal() {
-		return valueType.equals(ValueType.DECIMAL);
+	public boolean isDouble() {
+		return valueType.equals(ValueType.DOUBLE);
+	}
+
+	public boolean isFloat() {
+		return valueType.equals(ValueType.FLOAT);
 	}
 
 	public boolean isInteger() {
-		return !isDecimal();
+		return !isDouble() && !isFloat();
 	}
 
 	@Override

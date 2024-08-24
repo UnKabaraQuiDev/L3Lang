@@ -2,7 +2,6 @@ package lu.pcy113.l3.parser.ast.scope;
 
 import java.util.stream.Collectors;
 
-import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 

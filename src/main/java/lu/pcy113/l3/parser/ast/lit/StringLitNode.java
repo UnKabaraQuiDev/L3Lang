@@ -30,11 +30,12 @@ public class StringLitNode extends ExprNode implements ArrayInit {
 	@Deprecated
 	public StringLitNode(CharLiteralToken charToken) {
 		throw new RuntimeException("Deprecated");
-		
-		/*this.string = charToken;
-		this.length = 1;
 
-		add(new NumLitNode((int) charToken.getValue()));*/
+		/*
+		 * this.string = charToken; this.length = 1;
+		 * 
+		 * add(new NumLitNode((int) charToken.getValue()));
+		 */
 	}
 
 	public StringLiteralToken getString() {
@@ -83,7 +84,12 @@ public class StringLitNode extends ExprNode implements ArrayInit {
 	}
 
 	@Override
-	public boolean isDecimal() throws CompilerException {
+	public boolean isDouble() throws CompilerException {
+		return false;
+	}
+
+	@Override
+	public boolean isFloat() throws CompilerException {
 		return false;
 	}
 

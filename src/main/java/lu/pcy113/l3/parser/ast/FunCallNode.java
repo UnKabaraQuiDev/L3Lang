@@ -34,8 +34,13 @@ public class FunCallNode extends ExprNode implements RecursiveArithmeticOp {
 	}
 
 	@Override
-	public boolean isDecimal() throws CompilerException {
-		return isNumber() && ((PrimitiveTypeNode) getClosestContainer().getFunDefDescriptor(this).getNode().getReturnType()).isDecimal();
+	public boolean isDouble() throws CompilerException {
+		return isNumber() && ((PrimitiveTypeNode) getClosestContainer().getFunDefDescriptor(this).getNode().getReturnType()).isDouble();
+	}
+
+	@Override
+	public boolean isFloat() throws CompilerException {
+		return isNumber() && ((PrimitiveTypeNode) getClosestContainer().getFunDefDescriptor(this).getNode().getReturnType()).isFloat();
 	}
 
 	@Override

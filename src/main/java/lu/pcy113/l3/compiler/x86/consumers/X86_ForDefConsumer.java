@@ -8,7 +8,7 @@ import lu.pcy113.l3.parser.ast.ForDefNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
-import lu.pcy113.pclib.GlobalLogger;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class X86_ForDefConsumer extends CompilerConsumer<X86Compiler, ForDefNode> {
 

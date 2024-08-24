@@ -6,12 +6,13 @@ import lu.pcy113.l3.parser.ast.expr.ExprNode;
 public class RegisterValueNode extends ExprNode {
 
 	private String reg;
-	private boolean dec, int_;
+	private boolean double_, int_, float_;
 
-	public RegisterValueNode(String r, boolean decimal, boolean integer) {
+	public RegisterValueNode(String r, boolean double_, boolean float_, boolean integer) {
 		this.reg = r;
-		this.dec = decimal;
+		this.double_ = double_;
 		this.int_ = integer;
+		this.float_ = float_;
 	}
 
 	public String getReg() {
@@ -23,8 +24,13 @@ public class RegisterValueNode extends ExprNode {
 	}
 
 	@Override
-	public boolean isDecimal() throws CompilerException {
-		return dec;
+	public boolean isDouble() throws CompilerException {
+		return double_;
+	}
+
+	@Override
+	public boolean isFloat() throws CompilerException {
+		return float_;
 	}
 
 	@Override

@@ -15,15 +15,20 @@ public class BinaryOpNode extends ExprNode implements RecursiveArithmeticOp {
 	}
 
 	@Override
-	public boolean isDecimal() throws CompilerException {
-		return ((RecursiveArithmeticOp) getLeft()).isDecimal() || ((RecursiveArithmeticOp) getRight()).isDecimal();
+	public boolean isDouble() throws CompilerException {
+		return ((RecursiveArithmeticOp) getLeft()).isDouble() || ((RecursiveArithmeticOp) getRight()).isDouble();
 	}
-	
+
+	@Override
+	public boolean isFloat() throws CompilerException {
+		return ((RecursiveArithmeticOp) getLeft()).isFloat() || ((RecursiveArithmeticOp) getRight()).isFloat();
+	}
+
 	@Override
 	public boolean isInteger() throws CompilerException {
-		return !isDecimal();
+		return !isDouble() && !isFloat();
 	}
-	
+
 	public Node getLeft() {
 		return children.get(0);
 	}

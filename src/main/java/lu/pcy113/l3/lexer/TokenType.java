@@ -22,8 +22,10 @@ public enum TokenType {
 
 	FLOAT(PRIMITIVE_TYPE, "float"),
 
-	FLOAT_32(FLOAT, "float32"), FLOAT_64(FLOAT, "float64"), FLOAT_128(FLOAT, "float128"),
-
+	FLOAT_32(FLOAT, "float32"), /*FLOAT_128(FLOAT, "float128"),*/
+	
+	DOUBLE(PRIMITIVE_TYPE, "double"),
+	
 	BOOLEAN(PRIMITIVE_TYPE),
 
 	TRUE("true"), FALSE("false"),

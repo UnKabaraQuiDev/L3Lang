@@ -44,7 +44,9 @@ public final class MemoryUtil {
 		switch (type) {
 		case CHAR:
 			return 1;
-		case DECIMAL:
+		case FLOAT:
+			return 4;
+		case DOUBLE:
 			return 8;
 		case INT_16:
 			return 2;

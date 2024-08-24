@@ -14,8 +14,13 @@ public class PointerDerefNode extends ExprNode implements RecursiveArithmeticOp 
 	}
 
 	@Override
-	public boolean isDecimal() throws CompilerException {
-		return getExpr().isDecimal();
+	public boolean isDouble() throws CompilerException {
+		return getExpr().isDouble();
+	}
+
+	@Override
+	public boolean isFloat() throws CompilerException {
+		return getExpr().isFloat();
 	}
 
 	@Override

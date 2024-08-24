@@ -17,12 +17,16 @@ public class PrimitiveTypeNode extends TypeNode {
 		return type;
 	}
 
-	public boolean isDecimal() {
-		return type.matches(TokenType.FLOAT);
-	}
-
 	public boolean isInteger() {
 		return type.matches(TokenType.INT);
+	}
+
+	public boolean isDouble() {
+		return type.matches(TokenType.DOUBLE);
+	}
+	
+	public boolean isFloat() {
+		return type.matches(TokenType.FLOAT);
 	}
 	
 	@Override
@@ -37,7 +41,7 @@ public class PrimitiveTypeNode extends TypeNode {
 
 	@Override
 	public boolean typeMatches(ExprNode param) throws CompilerException {
-		return (param.isDecimal() && this.isDecimal()) || (param.isInteger() && this.isInteger());
+		return (param.isDouble() && this.isDouble()) || (param.isInteger() && this.isInteger()) || (param.isFloat() && this.isFloat());
 	}
 
 	@Override

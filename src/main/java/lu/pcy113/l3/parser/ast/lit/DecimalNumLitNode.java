@@ -1,31 +1,40 @@
 package lu.pcy113.l3.parser.ast.lit;
 
-public class DecimalNumLitNode extends NumLitNode<Double> {
+public class DecimalNumLitNode extends NumLitNode<Number> {
 
-	private double value;
+	private Number value;
 
 	public DecimalNumLitNode(double value) {
 		this.value = value;
 	}
 
+	public DecimalNumLitNode(float value) {
+		this.value = value;
+	}
+
 	@Override
-	public boolean isDecimal() {
-		return true;
+	public boolean isFloat() {
+		return value instanceof Float;
+	}
+
+	@Override
+	public boolean isDouble() {
+		return value instanceof Double;
 	}
 
 	@Override
 	public boolean isInteger() {
 		return false;
 	}
-	
+
 	@Override
-	public Double getValue() {
+	public Number getValue() {
 		return value;
 	}
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + value + ")";
+		return super.toString() + "(" + value + " (" + (isInteger() ? "int" : (isFloat() ? "float" : (isDouble() ? "double" : "null"))) + "))";
 	}
 
 }

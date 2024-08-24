@@ -8,7 +8,7 @@ import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.PointerDerefSetNode;
 import lu.pcy113.l3.parser.ast.expr.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
-import lu.pcy113.pclib.GlobalLogger;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class X86_PointerDerefSetConsumer extends CompilerConsumer<X86Compiler, PointerDerefSetNode> {
 

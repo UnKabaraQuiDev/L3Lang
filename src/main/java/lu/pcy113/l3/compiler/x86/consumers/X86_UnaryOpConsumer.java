@@ -11,7 +11,7 @@ import lu.pcy113.l3.parser.ast.RegisterValueNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.UnaryOpNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
-import lu.pcy113.pclib.GlobalLogger;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNode> {
 
@@ -72,7 +72,7 @@ public class X86_UnaryOpConsumer extends CompilerConsumer<X86Compiler, UnaryOpNo
 			throw new CompilerException("Unary operation not supported: " + type);
 		}
 
-		LetSetNode artificialNode = new LetSetNode(fieldAccess, new RegisterValueNode(reg, fieldAccess.isDecimal(), fieldAccess.isInteger()));
+		LetSetNode artificialNode = new LetSetNode(fieldAccess, new RegisterValueNode(reg, fieldAccess.isDouble(), fieldAccess.isFloat(), fieldAccess.isInteger()));
 		node.getParent().add(artificialNode);
 		compiler.compile(artificialNode);
 		node.getParent().remove(artificialNode);

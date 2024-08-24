@@ -11,7 +11,7 @@ import lu.pcy113.l3.parser.ast.IfContainerNode;
 import lu.pcy113.l3.parser.ast.IfDefNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
-import lu.pcy113.pclib.GlobalLogger;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class X86_IfContainerConsumer extends CompilerConsumer<X86Compiler, IfContainerNode> {
 

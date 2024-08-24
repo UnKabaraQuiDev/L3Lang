@@ -8,7 +8,6 @@ import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.FunBodyDefNode;
 import lu.pcy113.l3.parser.ast.FunDefParamNode;
 import lu.pcy113.l3.parser.ast.FunDefParamsNode;
-import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.ReturnSafeNode;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;

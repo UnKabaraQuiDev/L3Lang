@@ -9,7 +9,12 @@ public class IntegerNumLitNode extends NumLitNode<Long> {
 	}
 
 	@Override
-	public boolean isDecimal() {
+	public boolean isFloat() {
+		return false;
+	}
+
+	@Override
+	public boolean isDouble() {
 		return false;
 	}
 

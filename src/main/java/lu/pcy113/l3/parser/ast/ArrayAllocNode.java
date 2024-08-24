@@ -26,7 +26,13 @@ public class ArrayAllocNode extends ExprNode {
 	}
 
 	@Override
-	public boolean isDecimal() throws CompilerException {
+	public boolean isDouble() throws CompilerException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public boolean isFloat() throws CompilerException {
 		// TODO Auto-generated method stub
 		return false;
 	}

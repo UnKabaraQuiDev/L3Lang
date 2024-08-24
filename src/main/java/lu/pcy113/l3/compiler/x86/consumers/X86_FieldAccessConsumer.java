@@ -11,7 +11,7 @@ import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ParamScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
-import lu.pcy113.pclib.GlobalLogger;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, FieldAccessNode> {
 
@@ -38,8 +38,7 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 
 				String reg = mem.alloc();
 
-				compiler.writeinstln(
-						"mov" + (size == 8 ? "" : "zx") + " " + mem.getAsSize(reg, size) + ", [rbp+" + (8 + (paramsSize - def.getStackOffset())) + "]  ; Load param: " + letDef.getIdent() + " > " + def.getStackOffset() + "/" + paramsSize);
+				compiler.writeinstln(getInstr(node, size) + " " + mem.getAsSize(reg, size) + ", [rbp+" + (8 + (paramsSize - def.getStackOffset())) + "]  ; Load param: " + letDef.getIdent() + " > " + def.getStackOffset() + "/" + paramsSize);
 
 			} else { // in global-scope / static, or not a parameter but local variable
 
@@ -59,14 +58,25 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 				String reg = mem.alloc();
 
 				if (letDef.isiStatic()) {
-					compiler.writeinstln("mov" + (size == 8 ? "" : "zx") + " " + mem.getAsSize(reg, size) + ", [" + def.getAsmName() + "]  ; Load static var: " + letDef.getIdent());
+					compiler.writeinstln(getInstr(node, size) + " " + mem.getAsSize(reg, size) + ", [" + def.getAsmName() + "]  ; Load static var: " + letDef.getIdent());
 				} else {
-					compiler.writeinstln("mov" + (size == 8 ? "" : "zx") + " " + mem.getAsSize(reg, size) + ", [rbp-" + (size + def.getStackOffset()) + "]  ; Load local var: " + letDef.getIdent());
+					compiler.writeinstln(getInstr(node, size) + " " + mem.getAsSize(reg, size) + ", [rbp-" + (size + def.getStackOffset()) + "]  ; Load local var: " + letDef.getIdent());
 				}
 
 			}
 
 		}
+	}
+
+	private String getInstr(FieldAccessNode node, int size) throws CompilerException {
+		if (node.isInteger()) {
+			return "mov" + (size == 8 ? "" : "zx");
+		} else if (node.isDouble()) {
+			return "movss";
+		} else if (node.isFloat()) {
+			return "movsd";
+		}
+		throw new CompilerException("No type ? " + node + " for size: " + size);
 	}
 
 }

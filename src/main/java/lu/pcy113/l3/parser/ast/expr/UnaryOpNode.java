@@ -21,13 +21,18 @@ public class UnaryOpNode extends ExprNode implements RecursiveArithmeticOp {
 	}
 
 	@Override
-	public boolean isDecimal() throws CompilerException {
-		return ((RecursiveArithmeticOp) getExpr()).isDecimal();
+	public boolean isFloat() throws CompilerException {
+		return ((RecursiveArithmeticOp) getExpr()).isFloat();
+	}
+	
+	@Override
+	public boolean isDouble() throws CompilerException {
+		return ((RecursiveArithmeticOp) getExpr()).isDouble();
 	}
 
 	@Override
 	public boolean isInteger() throws CompilerException {
-		return !isDecimal();
+		return !isDouble() && !isFloat();
 	}
 
 	public boolean isPrefix() {

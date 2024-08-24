@@ -1,5 +1,6 @@
 package lu.pcy113.l3.parser.ast.lit;
 
+import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 
@@ -13,13 +14,18 @@ public class NullLitNode extends Node implements RecursiveArithmeticOp {
 	}
 
 	@Override
-	public boolean isDecimal() {
-		return value instanceof Float || value instanceof Double;
+	public boolean isFloat() throws CompilerException {
+		return value instanceof Float;
 	}
 
 	@Override
-	public boolean isInteger() {
-		return !isDecimal();
+	public boolean isDouble() {
+		return value instanceof Double;
+	}
+
+	@Override
+	public boolean isInteger() throws CompilerException {
+		return !isDouble() && !isFloat();
 	}
 
 	public Object getValue() {

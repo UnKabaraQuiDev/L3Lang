@@ -15,9 +15,15 @@ public class PointerDerefSetNode extends ExprNode implements RecursiveArithmetic
 	}
 
 	@Override
-	public boolean isDecimal() throws CompilerException {
+	public boolean isDouble() throws CompilerException {
 		TypeNode type = getClosestContainer().getLetDefDescriptor(this.getPointer().getExpr()).getNode().getType();
-		return type instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) type).isDecimal();
+		return type instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) type).isDouble();
+	}
+
+	@Override
+	public boolean isFloat() throws CompilerException {
+		TypeNode type = getClosestContainer().getLetDefDescriptor(this.getPointer().getExpr()).getNode().getType();
+		return type instanceof PrimitiveTypeNode && ((PrimitiveTypeNode) type).isFloat();
 	}
 
 	@Override

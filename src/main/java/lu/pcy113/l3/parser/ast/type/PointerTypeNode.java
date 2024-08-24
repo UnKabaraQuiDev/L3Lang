@@ -4,13 +4,14 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 
-public class PointerTypeNode extends TypeNode {
+public class PointerTypeNode extends PrimitiveTypeNode {
 
 	public PointerTypeNode(TypeNode node) {
+		super(MemoryUtil.POINTER_TYPE);
 		add(node);
 	}
 
-	public TypeNode getNode() {
+	public TypeNode getTypeNode() {
 		return (TypeNode) children.get(0);
 	}
 

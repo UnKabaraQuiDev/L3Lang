@@ -14,10 +14,8 @@ import java.util.stream.IntStream;
 
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
-import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.Node;
-import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 
 public class X86MemoryStatus implements MemoryStatus {
 

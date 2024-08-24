@@ -4,7 +4,9 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
+import lu.pcy113.l3.parser.ast.type.PointerTypeNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class FieldAccessNode extends ExprNode implements RecursiveArithmeticOp {
 
@@ -19,12 +21,17 @@ public class FieldAccessNode extends ExprNode implements RecursiveArithmeticOp {
 	}
 
 	public boolean isNumber() throws CompilerException {
-		return isPrimitive() && getClosestContainer().getLetDefDescriptor(this).getNode().getType() instanceof PrimitiveTypeNode;
+		final TypeNode type = getClosestContainer().getLetDefDescriptor(this).getNode().getType();
+		return isPrimitive() && (type instanceof PrimitiveTypeNode || type instanceof PointerTypeNode);
 	}
 
 	@Override
-	public boolean isDecimal() throws CompilerException {
-		return isNumber() && ((PrimitiveTypeNode) getClosestContainer().getLetDefDescriptor(this).getNode().getType()).isDecimal();
+	public boolean isDouble() throws CompilerException {
+		return isNumber() && ((PrimitiveTypeNode) getClosestContainer().getLetDefDescriptor(this).getNode().getType()).isDouble();
+	}
+
+	public boolean isFloat() throws CompilerException {
+		return isNumber() && ((PrimitiveTypeNode) getClosestContainer().getLetDefDescriptor(this).getNode().getType()).isFloat();
 	}
 
 	@Override

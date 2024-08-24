@@ -56,7 +56,7 @@ import lu.pcy113.l3.parser.ast.type.UserTypeNode;
 import lu.pcy113.l3.parser.ast.type.VoidTypeNode;
 import lu.pcy113.l3.utils.FileUtils;
 import lu.pcy113.l3.utils.L3Utils;
-import lu.pcy113.pclib.GlobalLogger;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class L3Parser {
 
@@ -597,8 +597,10 @@ public class L3Parser {
 
 	private NumLitNode parseNumLit() throws ParserException {
 		NumericLiteralToken numLit = (NumericLiteralToken) consume(TokenType.NUM_LIT);
-		if (numLit.isDecimal()) {
+		if (numLit.isDouble()) {
 			return new DecimalNumLitNode((double) numLit.getValue());
+		} else if (numLit.isFloat()) {
+			return new DecimalNumLitNode((float) numLit.getValue());
 		} else if (numLit.isInteger()) {
 			return new IntegerNumLitNode((long) numLit.getValue());
 		} else {

@@ -4,8 +4,10 @@ import lu.pcy113.l3.compiler.CompilerException;
 
 public interface RecursiveArithmeticOp {
 
-	boolean isDecimal() throws CompilerException;
+	boolean isDouble() throws CompilerException;
 
 	boolean isInteger() throws CompilerException;
+
+	boolean isFloat() throws CompilerException;
 
 }

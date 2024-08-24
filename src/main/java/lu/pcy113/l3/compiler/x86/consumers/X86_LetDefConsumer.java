@@ -9,7 +9,7 @@ import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
-import lu.pcy113.pclib.GlobalLogger;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode> {
 
