@@ -20,11 +20,18 @@ public class X86_PointerDerefSetConsumer extends CompilerConsumer<X86Compiler, P
 
 		compiler.compile(pointer.getExpr());
 		String pointerLoc = mem.getLatest();
-		
+
 		compiler.compile(node.getExpr());
 		String exprLoc = mem.getLatest();
 
-		compiler.writeinstln("mov [" + pointerLoc + "], " + mem.getAsSize(exprLoc, MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE)) + "  ; Save var to pointer");
+		if (node.getExpr().isDouble()) {
+			compiler.writeinstln("movq [" + pointerLoc + "], " + mem.getAsSize(exprLoc, MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE)) + "  ; Save var to pointer (double)");
+		} else if (node.getExpr().isFloat()) {
+			compiler.writeinstln("movd [" + pointerLoc + "], " + mem.getAsSize(exprLoc, MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE)) + "  ; Save var to pointer (float)");
+		} else if (node.getExpr().isInteger()) {
+			// TODO mov with type size
+			compiler.writeinstln("mov [" + pointerLoc + "], " + mem.getAsSize(exprLoc, MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE)) + "  ; Save var to pointer (int)");
+		}
 
 		mem.free(exprLoc);
 		mem.free(pointerLoc);

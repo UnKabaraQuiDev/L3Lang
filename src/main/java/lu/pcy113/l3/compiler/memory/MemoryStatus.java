@@ -8,6 +8,8 @@ import lu.pcy113.l3.parser.ast.Node;
 public interface MemoryStatus {
 
 	String alloc();
+	
+	String allocFP();
 
 	void free(String reg);
 
@@ -15,7 +17,7 @@ public interface MemoryStatus {
 
 	boolean isFree(String reg);
 
-	boolean alloc(String reg);
+	boolean alloc(String reg) throws CompilerException;
 
 	void freeAll();
 
@@ -32,5 +34,7 @@ public interface MemoryStatus {
 	void clearStack();
 
 	void dump(PrintStream out);
+
+	boolean hasFreeFP();
 
 }

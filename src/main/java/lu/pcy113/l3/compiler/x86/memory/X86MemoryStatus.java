@@ -33,15 +33,19 @@ public class X86MemoryStatus implements MemoryStatus {
 		for (int i = 8; i < 16; i++) {
 			registerMap.put("r" + i, new String[] { "r" + i, "r" + i + "d", "r" + i + "w", "r" + i + "b" });
 		}
+		for (int i = 0; i < 16; i++) {
+			registerMap.put("xmm" + i, new String[] { "xmm" + i });
+		}
 	}
 
-	private final List<String> freeRegisters = new ArrayList<>(Arrays.asList("rax", "rbx", "rcx", "rdx"));
-	private final Set<String> usedRegisters = new HashSet<>();
+	private final List<String> freeRegisters = new ArrayList<>(Arrays.asList("rax", "rbx", "rcx", "rdx")), freeFPRegisters = new ArrayList<String>();
+	private final Set<String> usedRegisters = new HashSet<>(), usedFPRegisters = new HashSet<>();
 
 	private String latest = null;
 
 	public X86MemoryStatus() {
 		freeRegisters.addAll(IntStream.range(8, 16).mapToObj(a -> "r" + a).collect(Collectors.toList()));
+		freeFPRegisters.addAll(IntStream.range(0, 16).mapToObj(a -> "xmm" + a).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -54,11 +58,25 @@ public class X86MemoryStatus implements MemoryStatus {
 		usedRegisters.add(reg);
 		return reg;
 	}
-
+	
+	@Override
+	public String allocFP() {
+		if (freeFPRegisters.isEmpty()) {
+			throw new RuntimeException("No free registers available.");
+		}
+		String reg = freeFPRegisters.remove(0);
+		latest = reg;
+		usedFPRegisters.add(reg);
+		return reg;
+	}
+	
 	@Override
 	public void free(String reg) {
 		if (usedRegisters.remove(reg)) {
 			freeRegisters.add(0, reg);
+			latest = reg;
+		} else if(usedFPRegisters.remove(reg)) {
+			freeFPRegisters.add(0, reg);
 			latest = reg;
 		} else {
 			throw new RuntimeException("Trying to free a register that is not allocated: " + reg);
@@ -69,21 +87,31 @@ public class X86MemoryStatus implements MemoryStatus {
 	public boolean hasFree() {
 		return !freeRegisters.isEmpty();
 	}
-
+	
 	@Override
-	public boolean isFree(String reg) {
-		return freeRegisters.contains(reg);
+	public boolean hasFreeFP() {
+		return !freeRegisters.isEmpty();
 	}
 
 	@Override
-	public boolean alloc(String reg) {
+	public boolean isFree(String reg) {
+		return freeRegisters.contains(reg) || freeFPRegisters.contains(reg);
+	}
+
+	@Override
+	public boolean alloc(String reg) throws CompilerException {
 		if (!isFree(reg)) {
 			return false;
-		} else {
+		} else if (freeRegisters.contains(reg)) {
 			freeRegisters.remove(reg);
 			usedRegisters.add(reg);
 			return true;
+		}else if(freeFPRegisters.contains(reg)) {
+			freeFPRegisters.remove(reg);
+			usedFPRegisters.add(reg);
+			return true;
 		}
+		throw new CompilerException("Unknown register: " + reg);
 	}
 
 	@Override
@@ -99,7 +127,9 @@ public class X86MemoryStatus implements MemoryStatus {
 	@Override
 	public void freeAll() {
 		freeRegisters.addAll(usedRegisters);
+		freeFPRegisters.addAll(usedFPRegisters);
 		usedRegisters.clear();
+		usedFPRegisters.clear();
 	}
 
 	@Override
@@ -166,6 +196,8 @@ public class X86MemoryStatus implements MemoryStatus {
 		out.println("- - <" + this.getClass().getName() + "> - -");
 		out.println("Free: " + freeRegisters);
 		out.println("Used: " + usedRegisters);
+		out.println("Free FP: " + freeFPRegisters);
+		out.println("Used FP: " + usedFPRegisters);
 		out.println("Latest: " + latest);
 	}
 
