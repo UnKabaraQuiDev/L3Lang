@@ -20,10 +20,12 @@ public class X86_FunDefConsumer extends CompilerConsumer<X86Compiler, FunDefNode
 
 		boolean isReturnSafe = node.isReturnSafe();
 
-		if (!isReturnSafe && CompilerOptions.THROW_RETURN_SAFETY) {
-			throw new CompilerException("FunDef is not return-safe !");
-		} else {
-			compiler.warning("FunDef '" + node.getIdent() + "' is not return-safe !");
+		if (!isReturnSafe) {
+			if (CompilerOptions.THROW_RETURN_SAFETY) {
+				throw new CompilerException("FunDef is not return-safe !");
+			} else {
+				compiler.warning("FunDef '" + node.getIdent() + "' is not return-safe !");
+			}
 		}
 
 		node.getParams().normalizeSize();
