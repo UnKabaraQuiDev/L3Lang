@@ -1,11 +1,12 @@
 package lu.lang.base;
 
-fun int8 main() {
-	let int8 original = 12;
-	
-	let int8: ptr = :original;
-	
-	$ptr = 13.2f * 2.2f;
+struct Person {
+	let int32 age;
+	let int64 loc;
+}
 
-	return $ptr;
+fun int8 main() {
+ 	let Person a = new Person(age = 12, loc = 26);
+
+	return 122;
 }

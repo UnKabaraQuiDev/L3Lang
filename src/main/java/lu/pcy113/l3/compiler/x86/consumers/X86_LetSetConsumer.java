@@ -25,27 +25,27 @@ public class X86_LetSetConsumer extends CompilerConsumer<X86Compiler, LetSetNode
 		String ident = field.getIdent().getLeaf().getValue();
 
 		FunDefNode funDef;
-		
+
 		compiler.compile(node.getExpr());
-		
+
 		String reg = mem.getLatest();
-		
+
 		if (node.hasFunDefParent() && (funDef = node.getFunDefParent()).isParamDefDescriptor(ident)) { // fun param
 
 			ParamScopeDescriptor def = funDef.getParamDefDescriptor(ident);
 			FunDefParamNode funLetDef = def.getNode();
 
-			funLetDef.getType().normalizeSize();
+			funLetDef.getType().normalizeSize(container);
 			int size = funLetDef.getType().getBytesSize();
-			funDef.getFunDefParent().getParams().normalizeSize();
+			funDef.getFunDefParent().getParams().normalizeSize(container);
 			int paramsSize = funDef.getFunDefParent().getParams().getBytesSize();
 
-			compiler.writeinstln("mov [rbp+" + (8 + (paramsSize - def.getStackOffset())) + "], "+ mem.getAsSize(reg, size) +"  ; Save param: " + funLetDef.getIdent() + " > " + def.getStackOffset() + "/" + paramsSize);
+			compiler.writeinstln("mov [rbp+" + (8 + (paramsSize - def.getStackOffset())) + "], " + mem.getAsSize(reg, size) + "  ; Save param: " + funLetDef.getIdent() + " > " + def.getStackOffset() + "/" + paramsSize);
 
 		} else { // in global-scope / static, or not a parameter but local variable
-			
+
 			if (!container.containsDescriptor(ident)) {
-				throw new CompilerException("LetDef: '" + ident + "' not found in current scope.");
+				throw new CompilerException("LetDef: '" + ident + "' not found in current scope: " + container);
 			}
 
 			LetScopeDescriptor def = container.getLetDefDescriptor(ident);

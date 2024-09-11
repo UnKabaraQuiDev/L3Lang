@@ -28,7 +28,7 @@ public class X86_FunDefConsumer extends CompilerConsumer<X86Compiler, FunDefNode
 			}
 		}
 
-		node.getParams().normalizeSize();
+		node.getParams().normalizeSize(container);
 		int offset = 0; // node.getParams().getBytesSize();
 		for (int i = 0; i < node.getParams().getChildren().size(); i++) {
 			FunDefParamNode param = node.getParams().getParam(i);

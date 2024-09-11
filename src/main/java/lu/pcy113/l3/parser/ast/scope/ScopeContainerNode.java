@@ -12,6 +12,8 @@ import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
 import lu.pcy113.l3.parser.ast.Node;
+import lu.pcy113.l3.parser.ast.StructDefNode;
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 
 public class ScopeContainerNode extends Node implements ScopeContainer {
 
@@ -173,7 +175,7 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 
 		return (LetScopeDescriptor) col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Let: " + ident + ", not defined."));
 	}
-	
+
 	@Override
 	public boolean containsFunDefDescriptor(FunCallNode node) {
 		Collection<ScopeDescriptor> col = this.getDescriptors(((FunCallNode) node).getIdent().getLeaf().getValue());
@@ -234,4 +236,17 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 		return col;
 	}
 
+	@Override
+	public StructScopeDescriptor addStructDefDescriptor(StructDefNode node) {
+		StructScopeDescriptor fun = new StructScopeDescriptor(node.getIdent(), node);
+		addDescriptor(node.getIdent().getLeaf().getValue(), fun);
+		return fun;
+	}
+
+	@Override
+	public StructScopeDescriptor getStructDefDescriptor(String ident) throws CompilerException {
+		Collection<ScopeDescriptor> col = this.getDescriptors(ident);
+
+		return (StructScopeDescriptor) col.stream().filter(c -> c instanceof StructScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Struct: " + ident + ", not defined."));
+	}
 }

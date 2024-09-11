@@ -31,9 +31,9 @@ public class X86_PointerDerefConsumer extends CompilerConsumer<X86Compiler, Poin
 			ParamScopeDescriptor def = funDef.getParamDefDescriptor(ident);
 			FunDefParamNode letDef = def.getNode();
 
-			letDef.getType().normalizeSize();
+			letDef.getType().normalizeSize(container);
 			int size = letDef.getType().getBytesSize();
-			funDef.getFunDefParent().getParams().normalizeSize();
+			funDef.getFunDefParent().getParams().normalizeSize(container);
 			int paramsSize = funDef.getFunDefParent().getParams().getBytesSize();
 
 			compiler.writeinstln("mov" + (size == 8 ? "" : "zx") + " " + mem.getAsSize(reg, size) + ", [" + reg + "]  ; Load param from addr: " + letDef.getIdent() + " > " + def.getStackOffset() + "/" + paramsSize);

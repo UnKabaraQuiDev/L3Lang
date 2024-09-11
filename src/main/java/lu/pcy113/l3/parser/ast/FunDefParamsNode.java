@@ -3,6 +3,7 @@ package lu.pcy113.l3.parser.ast;
 import java.util.Arrays;
 
 import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 
 public class FunDefParamsNode extends Node {
 
@@ -30,9 +31,9 @@ public class FunDefParamsNode extends Node {
 		return (FunDefParamNode) children.get(i);
 	}
 
-	public void normalizeSize() throws CompilerException {
+	public void normalizeSize(ScopeContainer container) throws CompilerException {
 		for (int i = 0; i < children.size(); i++) {
-			getParam(i).getType().normalizeSize();
+			getParam(i).getType().normalizeSize(container);
 		}
 	}
 

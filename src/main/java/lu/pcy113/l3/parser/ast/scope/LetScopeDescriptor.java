@@ -35,4 +35,9 @@ public class LetScopeDescriptor extends ScopeDescriptor {
 		this.allocated = allocated;
 	}
 
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + "(" + ident.asString() + " -> " + getAsmName() + ", offset=" + getStackOffset() + ")";
+	}
+
 }

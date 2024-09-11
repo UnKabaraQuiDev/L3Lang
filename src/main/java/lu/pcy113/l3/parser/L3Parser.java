@@ -32,6 +32,7 @@ import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.PointerDerefSetNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
+import lu.pcy113.l3.parser.ast.StructDefNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
@@ -49,6 +50,7 @@ import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
+import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
 import lu.pcy113.l3.parser.ast.type.PointerTypeNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
@@ -92,9 +94,29 @@ public class L3Parser {
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.FUN)) {
 			parseFunDef(parent);
+		} else if (peek(TokenType.STRUCT)) {
+			parseStruct(parent);
 		} else {
 			implement(peek().getType());
 		}
+	}
+
+	private void parseStruct(ScopeContainerNode parent) throws ParserException {
+		consume(TokenType.STRUCT);
+		IdentifierLitNode ident = parseSimpleIdentLit();
+		consume(TokenType.CURLY_OPEN);
+		
+		StructDefNode structDefNode = new StructDefNode(ident);
+		
+		while(!peek(TokenType.CURLY_CLOSE)) {
+			parseLetDef(structDefNode);
+			consume(TokenType.SEMICOLON);
+		}
+		
+		consume(TokenType.CURLY_CLOSE);
+		
+		parent.add(structDefNode);
+		parent.addStructDefDescriptor(structDefNode);
 	}
 
 	private void parseFunLineExpr(FunDefNode fun, FunBodyDefNode body, ScopeContainerNode parent) throws ParserException {
@@ -400,7 +422,7 @@ public class L3Parser {
 		if (peek(TokenType.IDENT)) {
 
 			IdentifierLitNode ident = parseIdentLit();
-			node = new UserTypeNode(ident);
+			node = new UserTypeNode(ident); // TODO: add support for not only structs
 
 		} else if (peek(TokenType.PRIMITIVE_TYPE)) {
 
@@ -718,13 +740,13 @@ public class L3Parser {
 		default:
 			break;
 		}
-		
+
 		if (var instanceof FieldAccessNode) {
 			return new LetSetNode((FieldAccessNode) var, expr);
-		}else if(var instanceof PointerDerefNode) {
+		} else if (var instanceof PointerDerefNode) {
 			return new PointerDerefSetNode((PointerDerefNode) var, expr);
 		}
-		
+
 		implement(var);
 		return null;
 	}

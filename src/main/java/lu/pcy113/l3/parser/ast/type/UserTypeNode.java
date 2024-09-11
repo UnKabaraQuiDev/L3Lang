@@ -1,12 +1,15 @@
 package lu.pcy113.l3.parser.ast.type;
 
 import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 
 public class UserTypeNode extends TypeNode {
 
 	private IdentifierLitNode ident;
+	private int byteSize = -1;
 
 	public UserTypeNode(IdentifierLitNode ident) {
 		this.ident = ident;
@@ -20,17 +23,20 @@ public class UserTypeNode extends TypeNode {
 	public boolean typeMatches(ExprNode param) throws CompilerException {
 		throw new CompilerException("Not implemented.");
 	}
-	
+
 	@Override
-	public void normalizeSize() throws CompilerException {
-		throw new CompilerException("Not implemented.");
+	public void normalizeSize(ScopeContainer container) throws CompilerException {
+		byteSize = container.getStructDefDescriptor(ident.getLeaf().getValue()).getNode().getChildren().stream().skip(1).mapToInt((c) -> ((LetDefNode) c).getType().getBytesSize()).sum();
 	}
 
 	@Override
-	public int getBytesSize() throws CompilerException {
-		throw new CompilerException("Not implemented.");
+	public int getBytesSize() {
+		if (byteSize == -1)
+			throw new RuntimeException(new CompilerException("Normalize size first."));
+
+		return byteSize;
 	}
-	
+
 	@Override
 	public void setBytesSize(int bytes) {
 		sizeOverride = true;

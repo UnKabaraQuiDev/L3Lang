@@ -28,10 +28,10 @@ public class X86_FunCallConsumer extends CompilerConsumer<X86Compiler, FunCallNo
 		FunScopeDescriptor def = container.getFunDefDescriptor(node);
 		FunDefNode funDef = def.getNode();
 
-		funDef.getReturnType().normalizeSize();
+		funDef.getReturnType().normalizeSize(container);
 		int returnSize = funDef.getReturnType().getBytesSize();
 
-		funDef.getParams().normalizeSize();
+		funDef.getParams().normalizeSize(container);
 		int paramsSize = funDef.getParams().getBytesSize();
 
 		if (!funDef.getParams().paramsEquals(node.getParams())) {

@@ -31,9 +31,9 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 				ParamScopeDescriptor def = funDef.getParamDefDescriptor(ident);
 				FunDefParamNode letDef = def.getNode();
 
-				letDef.getType().normalizeSize();
+				letDef.getType().normalizeSize(container);
 				int size = letDef.getType().getBytesSize();
-				funDef.getFunDefParent().getParams().normalizeSize();
+				funDef.getFunDefParent().getParams().normalizeSize(container);
 				int paramsSize = funDef.getFunDefParent().getParams().getBytesSize();
 
 				String reg = mem.alloc();
