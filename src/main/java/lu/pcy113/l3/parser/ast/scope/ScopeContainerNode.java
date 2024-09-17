@@ -13,7 +13,6 @@ import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.StructDefNode;
-import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 
 public class ScopeContainerNode extends Node implements ScopeContainer {
 

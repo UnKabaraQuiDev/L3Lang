@@ -26,7 +26,7 @@ public class X86_StructDefConsumer extends CompilerConsumer<X86Compiler, StructD
 				node.getLetDefDescriptor((LetDefNode) n).setStackOffset(offset);
 			}
 		}
-
+		
 		System.out.println(node.toString(0));
 	}
 

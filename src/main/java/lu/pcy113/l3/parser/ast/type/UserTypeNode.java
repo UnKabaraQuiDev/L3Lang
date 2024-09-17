@@ -26,7 +26,14 @@ public class UserTypeNode extends TypeNode {
 
 	@Override
 	public void normalizeSize(ScopeContainer container) throws CompilerException {
-		byteSize = container.getStructDefDescriptor(ident.getLeaf().getValue()).getNode().getChildren().stream().skip(1).mapToInt((c) -> ((LetDefNode) c).getType().getBytesSize()).sum();
+		byteSize = container.getStructDefDescriptor(ident.getLeaf().getValue()).getNode().getChildren().stream().skip(1).mapToInt((c) -> {
+			try {
+				((LetDefNode) c).getType().normalizeSize(container);
+			} catch (CompilerException e) {
+				throw new RuntimeException(e);
+			}
+			return ((LetDefNode) c).getType().getBytesSize();
+		}).sum();
 	}
 
 	@Override
@@ -45,7 +52,7 @@ public class UserTypeNode extends TypeNode {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + ident.asString() + ")";
+		return super.toString() + "(" + ident.asString() + ", size=" + byteSize + ")";
 	}
 
 }

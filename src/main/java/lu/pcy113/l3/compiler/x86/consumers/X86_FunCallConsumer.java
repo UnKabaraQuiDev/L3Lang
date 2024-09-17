@@ -73,6 +73,8 @@ public class X86_FunCallConsumer extends CompilerConsumer<X86Compiler, FunCallNo
 	private void compilePreset(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, FunCallNode node) throws CompilerException {
 		if (node.getIdent().getFirst().getValue().equals("asm")) {
 			compiler.writeinstln(((StringLitNode) node.getParams().getParam(0)).getString().getEscapedValue());
+		} else if (node.getIdent().getFirst().getValue().equals("asmln")) {
+			compiler.writeln(((StringLitNode) node.getParams().getParam(0)).getString().getEscapedValue());
 		} else {
 			compiler.implement("Preset: " + node.getIdent());
 		}

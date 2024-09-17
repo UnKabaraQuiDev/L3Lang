@@ -1,12 +1,24 @@
 package lu.lang.base;
 
+struct SubSubPerson {
+	let int16 address;
+}
+
+struct SubPerson {
+	let int16 address;
+	let int8 bits;
+	let SubSubPerson boolean;
+}
+
 struct Person {
-	let int32 age;
+	let int8 age;
 	let int64 loc;
+	let SubPerson sub;
 }
 
 fun int8 main() {
- 	let Person a = new Person(age = 12, loc = 26);
+ 	let Person a = new Person(age = 13, loc = 26, sub = new SubPerson(address = 3, bits = 2, boolean = new SubSubPerson(address = 22)));
 
-	return 122;
+	asmln#("return:");
+	return a.sub.address;
 }

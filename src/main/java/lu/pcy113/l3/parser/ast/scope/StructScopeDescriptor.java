@@ -19,5 +19,5 @@ public class StructScopeDescriptor extends ScopeDescriptor {
 	public void setNode(StructDefNode node) {
 		this.node = node;
 	}
-
+	
 }

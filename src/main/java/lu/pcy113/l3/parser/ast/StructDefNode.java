@@ -12,5 +12,5 @@ public class StructDefNode extends ScopeContainerNode {
 	public IdentifierLitNode getIdent() {
 		return (IdentifierLitNode) children.get(0);
 	}
-
+	
 }

@@ -35,7 +35,7 @@ public class IdentifierLitNode extends Node {
 	public IdentifierToken get(int index) {
 		return tokens.get(index);
 	}
-
+	
 	public int size() {
 		return tokens.size();
 	}

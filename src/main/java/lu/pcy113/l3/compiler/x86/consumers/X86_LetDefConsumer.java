@@ -4,17 +4,12 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.consumers.CompilerConsumer;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86.X86Compiler;
-import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
-import lu.pcy113.l3.parser.ast.LetSetNode;
-import lu.pcy113.l3.parser.ast.StructDefNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
-import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
-import lu.pcy113.l3.parser.ast.type.UserTypeNode;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode> {
@@ -65,26 +60,11 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 
 				mem.pushStack(node);
 
-				compiler.writeinstln("sub rsp, " + size + "  ; Alloc-ed empty: " + size + " for " + node.getIdent().asString());
+				// compiler.writeinstln("sub rsp, " + size + " ; Alloc-ed empty: " + size + " for " + node.getIdent().asString());
 
 				UserTypeAllocNode ua = (UserTypeAllocNode) node.getExpr();
 
-				StructScopeDescriptor structDesc = container.getStructDefDescriptor(((UserTypeNode) ua.getType()).getIdentifier().getLeaf().getValue());
-				StructDefNode structDef = structDesc.getNode();
-
-				for (LetSetNode n : ua.getLets()) {
-					LetScopeDescriptor letDesc = structDef.getLetDefDescriptor(n.getLet().getIdent().getLeaf().getValue());
-					LetDefNode letDef = letDesc.getNode();
-					letDesc.setAllocated(true);
-
-					compiler.compile(n.getExpr());
-
-					String reg = mem.getLatest();
-
-					compiler.writeinstln("mov [rbp-" + (letDesc.getStackOffset()) + "], " + mem.getAsSize(reg, letDef.getType().getBytesSize()) + "  ; Save local struct var, size=" + size + ", offset=" + def.getStackOffset() + ".");
-
-					mem.free(reg);
-				}
+				compiler.compile(ua);
 
 				def.setAllocated(true);
 			} else {
