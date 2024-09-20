@@ -13,5 +13,7 @@ struct SubTest {
 fun int8 main() {
 	let Test yes = new Test(a = 15, b = 16, subTest = new SubTest(c = 17));
 
-	return yes.subTest;
+	yes.subTest.c = 18;
+
+	return yes.subTest.c;
 }
