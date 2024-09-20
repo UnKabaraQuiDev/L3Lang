@@ -132,14 +132,16 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 	}
 
 	private String getInstr(FieldAccessNode node, int size) throws CompilerException {
-		if (node.isInteger()) {
+		if (node.isPointer()) {
+			return "mov";
+		} else if (node.isInteger()) {
 			return "mov" + (size == 8 ? "" : "zx");
 		} else if (node.isDouble()) {
 			return "movss";
 		} else if (node.isFloat()) {
 			return "movsd";
 		}
-		throw new CompilerException("No type ? " + node + " for size: " + size);
+		throw new CompilerException("No type ? " + node + " for size: " + size + " primitive=" + node.isPrimitive() + ", number=" + node.isNumber());
 	}
 
 }

@@ -75,6 +75,21 @@ public class Node implements Iterable<Node> {
 		return (FunDefNode) parent;
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T extends Node> T getFirstChild(Class<T> clazz) {
+		for (Node child : children) {
+			if (clazz.isInstance(child)) {
+				return (T) child;
+			} else {
+				Node fChild = child.getFirstChild(clazz);
+				if (fChild != null) {
+					return (T) fChild;
+				}
+			}
+		}
+		return null;
+	}
+
 	public int getParentCount(Class<? extends Node> clazz) {
 		int count = 0;
 

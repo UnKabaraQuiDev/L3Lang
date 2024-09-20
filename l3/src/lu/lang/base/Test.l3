@@ -1,7 +1,9 @@
 package lu.lang.base;
 
 fun int8 main() {
-	let int8[2][4] test_array = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
-
-	return test_array[0];
+	let int8[2][4] test_array = {{1, 2}, {3, 4}, {5, 6}, {7, 8}};
+	
+	asmln#("return:");
+	
+	return test_array[1][0];
 }

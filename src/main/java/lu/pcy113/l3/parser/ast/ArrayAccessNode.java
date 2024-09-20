@@ -3,28 +3,21 @@ package lu.pcy113.l3.parser.ast;
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
-import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 
 public class ArrayAccessNode extends ExprNode implements RecursiveArithmeticOp {
 
-	private IdentifierLitNode ident;
 
-	public ArrayAccessNode(IdentifierLitNode ident, ExprNode offset) {
+	public ArrayAccessNode(ExprNode expr, ExprNode offset) {
+		add(expr);
 		add(offset);
-		this.ident = ident;
 	}
 
 	public Node getOffset() {
-		return children.get(0);
+		return children.get(1);
 	}
 
-	public IdentifierLitNode getIdent() {
-		return ident;
-	}
-
-	@Override
-	public String toString() {
-		return super.toString() + "(" + ident.toString() + ", offset=" + getOffset() + ")";
+	public ExprNode getExpr() {
+		return (ExprNode) children.get(0);
 	}
 
 	@Override

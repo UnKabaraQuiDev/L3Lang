@@ -678,10 +678,18 @@ public class L3Parser {
 		if (peek(TokenType.BRACKET_OPEN)) {
 
 			consume(TokenType.BRACKET_OPEN);
-			ExprNode expr = parseExpression();
+			ExprNode offset = parseExpression();
+			ExprNode expr = new ArrayAccessNode(new FieldAccessNode(ident), offset);
 			consume(TokenType.BRACKET_CLOSE);
+			
+			while (peek(TokenType.BRACKET_OPEN)) {
+				consume(TokenType.BRACKET_OPEN);
+				offset = parseExpression();
+				expr = new ArrayAccessNode(expr, offset);
+				consume(TokenType.BRACKET_CLOSE);
+			}
 
-			return new ArrayAccessNode(ident, expr);
+			return expr;
 
 		} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
 
@@ -787,6 +795,9 @@ public class L3Parser {
 			return new LetSetNode((FieldAccessNode) var, expr);
 		} else if (var instanceof PointerDerefNode) {
 			return new PointerDerefSetNode((PointerDerefNode) var, expr);
+		} else if (var instanceof ArrayAccessNode) {
+			implement();
+			// return new ArrayAccessSetNode((ArrayAccessNode) var, expr);
 		}
 
 		implement(var);

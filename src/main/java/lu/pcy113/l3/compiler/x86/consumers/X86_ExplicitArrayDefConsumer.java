@@ -24,10 +24,10 @@ public class X86_ExplicitArrayDefConsumer extends CompilerConsumer<X86Compiler, 
 		ArrayTypeNode arrayType = (ArrayTypeNode) letDefParent.getType();
 
 		final int arrayDepth = node.getParentCount(ExplicitArrayDefNode.class); // getting the depth of the current ExplicitArrayDefNode
-		arrayType = arrayType.getSubType(arrayDepth); // getting subelement for current depth
+		arrayType = (ArrayTypeNode) arrayType.getSubType(arrayDepth); // getting subelement for current depth
 
 		final int expectedElementCount = arrayType.getElementCount();
-		final int elementSize = arrayType.getBytesSize() / expectedElementCount;
+		final int elementSize = arrayType.getBytesSize();
 		final int givenElementCount = node.getExprs().size();
 
 		if (givenElementCount != expectedElementCount) {

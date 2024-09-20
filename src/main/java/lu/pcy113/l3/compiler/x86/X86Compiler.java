@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.L3Compiler;
+import lu.pcy113.l3.compiler.x86.consumers.X86_ArrayAccessConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_BinaryOpConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_ExplicitArrayDefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_FieldAccessConsumer;
@@ -29,6 +30,7 @@ import lu.pcy113.l3.compiler.x86.consumers.X86_UnaryOpConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_UserTypeAllocConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_WhileDefConsumer;
 import lu.pcy113.l3.compiler.x86.memory.X86MemoryStatus;
+import lu.pcy113.l3.parser.ast.ArrayAccessNode;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.ForDefNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
@@ -82,6 +84,7 @@ public class X86Compiler extends L3Compiler {
 	private X86_StructDefConsumer structDefConsumer = new X86_StructDefConsumer();
 	private X86_UserTypeAllocConsumer userTypeAllocConsumer = new X86_UserTypeAllocConsumer();
 	private X86_ExplicitArrayDefConsumer explicitArrayDefConsumer = new X86_ExplicitArrayDefConsumer();
+	private X86_ArrayAccessConsumer arrayAccessConsumer = new X86_ArrayAccessConsumer();
 
 	public X86Compiler(RuntimeNode env, File binDirPath, String fileName) {
 		super(env, new File(binDirPath, fileName));
@@ -109,6 +112,7 @@ public class X86Compiler extends L3Compiler {
 		structDefConsumer.attach(this);
 		userTypeAllocConsumer.attach(this);
 		explicitArrayDefConsumer.attach(this);
+		arrayAccessConsumer.attach(this);
 	}
 
 	@Override
@@ -192,6 +196,8 @@ public class X86Compiler extends L3Compiler {
 			userTypeAllocConsumer.accept((UserTypeAllocNode) node);
 		} else if (node instanceof ExplicitArrayDefNode) {
 			explicitArrayDefConsumer.accept((ExplicitArrayDefNode) node);
+		} else if (node instanceof ArrayAccessNode) {
+			arrayAccessConsumer.accept((ArrayAccessNode) node);
 		} else {
 			implement(node);
 		}
