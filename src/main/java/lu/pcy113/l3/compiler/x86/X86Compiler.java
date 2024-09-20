@@ -6,6 +6,7 @@ import java.io.IOException;
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.L3Compiler;
 import lu.pcy113.l3.compiler.x86.consumers.X86_BinaryOpConsumer;
+import lu.pcy113.l3.compiler.x86.consumers.X86_ExplicitArrayDefConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_FieldAccessConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_FileConsumer;
 import lu.pcy113.l3.compiler.x86.consumers.X86_ForDefConsumer;
@@ -45,6 +46,7 @@ import lu.pcy113.l3.parser.ast.StructDefNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.expr.ExplicitArrayDefNode;
 import lu.pcy113.l3.parser.ast.expr.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.expr.UnaryOpNode;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
@@ -79,6 +81,7 @@ public class X86Compiler extends L3Compiler {
 	private X86_PointerDerefSetConsumer pointerDerefSetConsumer = new X86_PointerDerefSetConsumer();
 	private X86_StructDefConsumer structDefConsumer = new X86_StructDefConsumer();
 	private X86_UserTypeAllocConsumer userTypeAllocConsumer = new X86_UserTypeAllocConsumer();
+	private X86_ExplicitArrayDefConsumer explicitArrayDefConsumer = new X86_ExplicitArrayDefConsumer();
 
 	public X86Compiler(RuntimeNode env, File binDirPath, String fileName) {
 		super(env, new File(binDirPath, fileName));
@@ -105,6 +108,7 @@ public class X86Compiler extends L3Compiler {
 		pointerDerefSetConsumer.attach(this);
 		structDefConsumer.attach(this);
 		userTypeAllocConsumer.attach(this);
+		explicitArrayDefConsumer.attach(this);
 	}
 
 	@Override
@@ -186,6 +190,8 @@ public class X86Compiler extends L3Compiler {
 			structDefConsumer.accept((StructDefNode) node);
 		} else if (node instanceof UserTypeAllocNode) {
 			userTypeAllocConsumer.accept((UserTypeAllocNode) node);
+		} else if (node instanceof ExplicitArrayDefNode) {
+			explicitArrayDefConsumer.accept((ExplicitArrayDefNode) node);
 		} else {
 			implement(node);
 		}

@@ -6,6 +6,8 @@ import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86.X86Compiler;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
+import lu.pcy113.l3.parser.ast.expr.ExplicitArrayDefNode;
+import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
 import lu.pcy113.l3.parser.ast.lit.NumLitNode;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
@@ -57,11 +59,20 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 			} else if (node.getExpr() instanceof UserTypeAllocNode) {
 				final UserTypeAllocNode ua = (UserTypeAllocNode) node.getExpr();
 				ua.getType().normalizeSize(container);
-				
+
+				letDesc.setStackOffset(mem.getCurrentStackOffset());
+				mem.pushStack(node);
+
+				compiler.compile(ua);
+
+				node.setAllocated(true);
+			} else if (node.getExpr() instanceof ExplicitArrayDefNode) {
 				letDesc.setStackOffset(mem.getCurrentStackOffset());
 				mem.pushStack(node);
 				
-				compiler.compile(node.getExpr());
+				ExplicitArrayDefNode arrayDef = (ExplicitArrayDefNode) node.getExpr();
+				
+				compiler.compile(arrayDef);
 				
 				node.setAllocated(true);
 			} else {

@@ -1,19 +1,7 @@
 package lu.lang.base;
 
-struct Test {
-	let int16 a;
-	let int16 b;
-	let SubTest subTest;
-}
-
-struct SubTest {
-	let int16 c;
-}
-
 fun int8 main() {
-	let Test yes = new Test(a = 15, b = 16, subTest = new SubTest(c = 17));
+	let int8[2][4] test_array = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
 
-	yes.subTest.c = 18;
-
-	return yes.subTest.c;
+	return test_array[0];
 }

@@ -75,14 +75,32 @@ public class Node implements Iterable<Node> {
 		return (FunDefNode) parent;
 	}
 
+	public int getParentCount(Class<? extends Node> clazz) {
+		int count = 0;
+
+		Node paren = this.getParent();
+		while (paren != null) {
+			if (clazz.isInstance(paren)) {
+				count++;
+			}
+
+			paren = paren.getParent();
+		}
+
+		return count;
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T> T getParent(Class<T> clazz) {
 		Node paren = this;
+
 		do {
 			paren = paren.getParent();
-			if (paren == null)
+			if (paren == null) {
 				return null;
+			}
 		} while (!clazz.isInstance(paren));
+
 		return (T) paren;
 	}
 

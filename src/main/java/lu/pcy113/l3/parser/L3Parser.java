@@ -36,6 +36,7 @@ import lu.pcy113.l3.parser.ast.StructDefNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.expr.ExplicitArrayDefNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
@@ -50,6 +51,7 @@ import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
+import lu.pcy113.l3.parser.ast.type.ArrayTypeNode;
 import lu.pcy113.l3.parser.ast.type.PointerTypeNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
@@ -104,16 +106,16 @@ public class L3Parser {
 		consume(TokenType.STRUCT);
 		IdentifierLitNode ident = parseSimpleIdentLit();
 		consume(TokenType.CURLY_OPEN);
-		
+
 		StructDefNode structDefNode = new StructDefNode(ident);
-		
-		while(!peek(TokenType.CURLY_CLOSE)) {
+
+		while (!peek(TokenType.CURLY_CLOSE)) {
 			parseLetDef(structDefNode);
 			consume(TokenType.SEMICOLON);
 		}
-		
+
 		consume(TokenType.CURLY_CLOSE);
-		
+
 		parent.add(structDefNode);
 		parent.addStructDefDescriptor(structDefNode);
 	}
@@ -415,6 +417,10 @@ public class L3Parser {
 
 	}
 
+	private ExplicitArrayDefNode parseExplicitArrayDef() {
+		return null;
+	}
+
 	private TypeNode parseType() throws ParserException {
 		TypeNode node = null;
 
@@ -431,12 +437,26 @@ public class L3Parser {
 		} else if (peek(TokenType.VOID)) {
 
 			consume(TokenType.VOID);
-			return new VoidTypeNode();
+			node = new VoidTypeNode();
 
 		} else {
 
 			throw new ParserException("Unsupported type: " + peek());
 
+		}
+
+		while (peek(TokenType.BRACKET_OPEN)) {
+			consume(TokenType.BRACKET_OPEN);
+
+			NumLitNode numLit = parseNumLit();
+			if (numLit instanceof IntegerNumLitNode) {
+				if (((IntegerNumLitNode) numLit).getValue() > Integer.MAX_VALUE) {
+					throw new ParserException(((IntegerNumLitNode) numLit).getValue() + " exceeds max array size (" + Integer.MAX_VALUE + ")");
+				}
+				node = new ArrayTypeNode(node, (int) (long) ((IntegerNumLitNode) numLit).getValue());
+			}
+
+			consume(TokenType.BRACKET_CLOSE);
 		}
 
 		while (peek(TokenType.COLON)) {
@@ -606,9 +626,32 @@ public class L3Parser {
 
 			return node;
 
+		} else if (peek(TokenType.CURLY_OPEN)) {
+
+			consume(TokenType.CURLY_OPEN);
+			ExplicitArrayDefNode expr = new ExplicitArrayDefNode(parseArrayArgs());
+			consume(TokenType.CURLY_CLOSE);
+
+			return expr;
+
 		} else {
 			throw new RuntimeException("Unexpected token: " + peek().getType());
 		}
+	}
+
+	private List<ExprNode> parseArrayArgs() throws ParserException {
+		List<ExprNode> nodes = new ArrayList<ExprNode>();
+
+		while (!peek(TokenType.CURLY_CLOSE)) {
+			ExprNode expr = parseExpression();
+			nodes.add(expr);
+
+			if (peek(TokenType.COMMA)) {
+				consume(TokenType.COMMA);
+			}
+		}
+
+		return nodes;
 	}
 
 	private StringLitNode parseStringLit() throws ParserException {
