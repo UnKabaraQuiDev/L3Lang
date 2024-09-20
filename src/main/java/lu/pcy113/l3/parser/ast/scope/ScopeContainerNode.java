@@ -261,4 +261,9 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 		return getStructDefDescriptor(ident.getValue());
 	}
 
+	@Override
+	public StructScopeDescriptor getStructDefDescriptor(StructDefNode node) throws CompilerException {
+		return getStructDefDescriptor(node.getIdent());
+	}
+
 }

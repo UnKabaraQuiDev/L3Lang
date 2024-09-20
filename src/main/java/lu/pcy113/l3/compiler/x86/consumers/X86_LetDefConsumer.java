@@ -55,6 +55,9 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 
 				node.setAllocated(true);
 			} else if (node.getExpr() instanceof UserTypeAllocNode) {
+				final UserTypeAllocNode ua = (UserTypeAllocNode) node.getExpr();
+				ua.getType().normalizeSize(container);
+				
 				letDesc.setStackOffset(mem.getCurrentStackOffset());
 				mem.pushStack(node);
 				

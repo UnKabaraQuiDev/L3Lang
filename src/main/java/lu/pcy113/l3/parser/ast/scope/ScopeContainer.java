@@ -69,4 +69,6 @@ public interface ScopeContainer {
 
 	StructScopeDescriptor getStructDefDescriptor(IdentifierToken ident) throws CompilerException;
 
+	StructScopeDescriptor getStructDefDescriptor(StructDefNode node) throws CompilerException;
+
 }

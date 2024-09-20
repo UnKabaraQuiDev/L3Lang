@@ -19,14 +19,14 @@ public class X86_UserTypeAllocConsumer extends CompilerConsumer<X86Compiler, Use
 
 	@Override
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, UserTypeAllocNode node) throws CompilerException {
-		StructScopeDescriptor structDesc = container.getStructDefDescriptor(((UserTypeNode) node.getType()).getIdentifier());
-		StructDefNode structDef = structDesc.getNode();
+		final StructScopeDescriptor structDesc = container.getStructDefDescriptor(((UserTypeNode) node.getType()).getIdentifier());
+		final StructDefNode structDef = structDesc.getNode();
 
 		for (LetSetNode n : node.getLets()) {
-			LetScopeDescriptor letDesc = structDef.getLetDefDescriptor(n.getLet().getIdent().getLeaf().getValue());
-			LetDefNode letDef = letDesc.getNode();
+			final LetScopeDescriptor letDesc = structDef.getLetDefDescriptor(n.getLet().getIdent().getLeaf().getValue());
+			final LetDefNode letDef = letDesc.getNode();
 
-			ExprNode subExpr = n.getExpr();
+			final ExprNode subExpr = n.getExpr();
 
 			if (subExpr instanceof RecursiveArithmeticOp) {
 				compiler.compile(subExpr);
@@ -38,8 +38,6 @@ public class X86_UserTypeAllocConsumer extends CompilerConsumer<X86Compiler, Use
 
 				compiler.writeinstln("push " + mem.getAsSize(reg, size) + "; Save local struct var, size=" + size + ", offset=" + letDesc.getStackOffset() + ".");
 				// compiler.writeinstln("mov [rbp-" + (letDesc.getStackOffset()) + "], " + mem.getAsSize(reg, letDef.getType().getBytesSize()) + " ; Save local struct var, size=" + size + ", offset=" + def.getStackOffset() + ".");
-
-				System.err.println("current stack offset after: " + letDef + " -> " + mem.getCurrentStackOffset());
 
 				mem.free(reg);
 			} else if (subExpr instanceof UserTypeAllocNode) {

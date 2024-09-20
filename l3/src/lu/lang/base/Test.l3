@@ -3,10 +3,15 @@ package lu.lang.base;
 struct Test {
 	let int16 a;
 	let int16 b;
+	let SubTest subTest;
+}
+
+struct SubTest {
+	let int16 c;
 }
 
 fun int8 main() {
-	let Test yes = new Test(a = 15, b = 16);
+	let Test yes = new Test(a = 15, b = 16, subTest = new SubTest(c = 17));
 
-	return 12;
+	return yes.subTest;
 }

@@ -37,7 +37,7 @@ public class UserTypeNode extends TypeNode {
 				def.getType().normalizeSize(container);
 				subSize += def.getType().getBytesSize();
 			}
-
+			
 			setBytesSize(bytesOverride);
 		} catch (CompilerException e) {
 			throw new RuntimeException(e);
