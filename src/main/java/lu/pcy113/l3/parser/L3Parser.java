@@ -32,6 +32,7 @@ import lu.pcy113.l3.parser.ast.PackageDefNode;
 import lu.pcy113.l3.parser.ast.PointerDerefSetNode;
 import lu.pcy113.l3.parser.ast.ReturnNode;
 import lu.pcy113.l3.parser.ast.ScopeBodyNode;
+import lu.pcy113.l3.parser.ast.StructDefNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
@@ -92,9 +93,29 @@ public class L3Parser {
 			consume(TokenType.SEMICOLON);
 		} else if (peek(TokenType.FUN)) {
 			parseFunDef(parent);
+		} else if (peek(TokenType.STRUCT)) {
+			parseStruct(parent);
 		} else {
 			implement(peek().getType());
 		}
+	}
+
+	private void parseStruct(ScopeContainerNode parent) throws ParserException {
+		consume(TokenType.STRUCT);
+		IdentifierLitNode ident = parseSimpleIdentLit();
+		consume(TokenType.CURLY_OPEN);
+		
+		StructDefNode structDefNode = new StructDefNode(ident);
+		
+		while(!peek(TokenType.CURLY_CLOSE)) {
+			parseLetDef(structDefNode);
+			consume(TokenType.SEMICOLON);
+		}
+		
+		consume(TokenType.CURLY_CLOSE);
+		
+		parent.add(structDefNode);
+		parent.addStructDefDescriptor(structDefNode);
 	}
 
 	private void parseFunLineExpr(FunDefNode fun, FunBodyDefNode body, ScopeContainerNode parent) throws ParserException {
@@ -495,8 +516,8 @@ public class L3Parser {
 		} else if (peek(TokenType.NOT)) {
 			left = new UnaryOpNode(consume(TokenType.NOT).getType(), parsePrimary(), true);
 		} /*
-			 * else if (peek(TokenType.COLON)) { consume(TokenType.COLON); left = new LetRefNode((FieldAccessNode) parseIdent()); }
-			 * else if (peek(TokenType.DOLLAR)) { consume(TokenType.DOLLAR); left = new PointerDerefNode(parseExpression()); }
+			 * else if (peek(TokenType.COLON)) { consume(TokenType.COLON); left = new LetRefNode((FieldAccessNode) parseIdent()); } else if (peek(TokenType.DOLLAR)) { consume(TokenType.DOLLAR); left = new
+			 * PointerDerefNode(parseExpression()); }
 			 */else {
 			left = parsePrimary();
 		}
@@ -718,13 +739,13 @@ public class L3Parser {
 		default:
 			break;
 		}
-		
+
 		if (var instanceof FieldAccessNode) {
 			return new LetSetNode((FieldAccessNode) var, expr);
-		}else if(var instanceof PointerDerefNode) {
+		} else if (var instanceof PointerDerefNode) {
 			return new PointerDerefSetNode((PointerDerefNode) var, expr);
 		}
-		
+
 		implement(var);
 		return null;
 	}

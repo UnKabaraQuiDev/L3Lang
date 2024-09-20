@@ -32,15 +32,15 @@ public class X86_LetSetConsumer extends CompilerConsumer<X86Compiler, LetSetNode
 		
 		if (node.hasFunDefParent() && (funDef = node.getFunDefParent()).isParamDefDescriptor(ident)) { // fun param
 
-			ParamScopeDescriptor def = funDef.getParamDefDescriptor(ident);
-			FunDefParamNode funLetDef = def.getNode();
+			ParamScopeDescriptor letDesc = funDef.getParamDefDescriptor(ident);
+			FunDefParamNode funLetDef = letDesc.getNode();
 
-			funLetDef.getType().normalizeSize();
+			funLetDef.getType().normalizeSize(container);
 			int size = funLetDef.getType().getBytesSize();
 			funDef.getFunDefParent().getParams().normalizeSize();
 			int paramsSize = funDef.getFunDefParent().getParams().getBytesSize();
 
-			compiler.writeinstln("mov [rbp+" + (8 + (paramsSize - def.getStackOffset())) + "], "+ mem.getAsSize(reg, size) +"  ; Save param: " + funLetDef.getIdent() + " > " + def.getStackOffset() + "/" + paramsSize);
+			compiler.writeinstln("mov [rbp+" + (8 + (paramsSize - letDesc.getStackOffset())) + "], "+ mem.getAsSize(reg, size) +"  ; Save param: " + funLetDef.getIdent() + " > " + letDesc.getStackOffset() + "/" + paramsSize);
 
 		} else { // in global-scope / static, or not a parameter but local variable
 			
@@ -48,19 +48,19 @@ public class X86_LetSetConsumer extends CompilerConsumer<X86Compiler, LetSetNode
 				throw new CompilerException("LetDef: '" + ident + "' not found in current scope.");
 			}
 
-			LetScopeDescriptor def = container.getLetDefDescriptor(ident);
-			LetDefNode letDef = def.getNode();
+			LetScopeDescriptor letDesc = container.getLetDefDescriptor(ident);
+			LetDefNode letDef = letDesc.getNode();
 
 			int size = letDef.getType().getBytesSize();
 
-			if (!def.isAllocated()) {
+			if (!letDef.isAllocated()) {
 				throw new CompilerException("LetDef: " + ident + ", isn't accessible in current scope.");
 			}
 
 			if (letDef.isiStatic()) {
-				compiler.writeinstln("mov [" + def.getAsmName() + "], " + mem.getAsSize(reg, size) + "  ; Save static var: " + letDef.getIdent());
+				compiler.writeinstln("mov [" + letDesc.getAsmName() + "], " + mem.getAsSize(reg, size) + "  ; Save static var: " + letDef.getIdent());
 			} else {
-				compiler.writeinstln("mov [rbp-" + (size + def.getStackOffset()) + "], " + mem.getAsSize(reg, size) + "  ; Save local var: " + letDef.getIdent());
+				compiler.writeinstln("mov [rbp-" + (size + letDesc.getStackOffset()) + "], " + mem.getAsSize(reg, size) + "  ; Save local var: " + letDef.getIdent());
 			}
 
 		}

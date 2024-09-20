@@ -4,6 +4,7 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 
 public class PrimitiveTypeNode extends TypeNode {
 
@@ -24,13 +25,13 @@ public class PrimitiveTypeNode extends TypeNode {
 	public boolean isDouble() {
 		return type.matches(TokenType.DOUBLE);
 	}
-	
+
 	public boolean isFloat() {
 		return type.matches(TokenType.FLOAT);
 	}
-	
+
 	@Override
-	public void normalizeSize() throws CompilerException {
+	public void normalizeSize(ScopeContainer container) {
 		int size = getBytesSize();
 		if (size >= 4) {
 			setBytesSize(8);
@@ -45,19 +46,13 @@ public class PrimitiveTypeNode extends TypeNode {
 	}
 
 	@Override
-	public int getBytesSize() throws CompilerException {
+	public int getBytesSize() {
 		return sizeOverride ? bytesOverride : MemoryUtil.getPrimitiveSize(type);
-	}
-	
-	@Override
-	public void setBytesSize(int bytes) {
-		sizeOverride = true;
-		bytesOverride = bytes;
 	}
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + type.toString() + ")";
+		return super.toString() + "(" + type.toShortString() + ", sizeOverride=" + sizeOverride + ", size=" + getBytesSize() + ")";
 	}
 
 }

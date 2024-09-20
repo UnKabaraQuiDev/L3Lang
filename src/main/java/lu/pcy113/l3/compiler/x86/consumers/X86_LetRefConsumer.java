@@ -31,17 +31,17 @@ public class X86_LetRefConsumer extends CompilerConsumer<X86Compiler, LetRefNode
 
 			if (node.hasFunDefParent() && (funDef = node.getFunDefParent()).isParamDefDescriptor(ident)) { // fun param
 
-				ParamScopeDescriptor def = funDef.getParamDefDescriptor(ident);
-				FunDefParamNode letDef = def.getNode();
+				ParamScopeDescriptor letDesc = funDef.getParamDefDescriptor(ident);
+				FunDefParamNode letDef = letDesc.getNode();
 
-				letDef.getType().normalizeSize();
+				letDef.getType().normalizeSize(container);
 				int size = letDef.getType().getBytesSize();
 				funDef.getFunDefParent().getParams().normalizeSize();
 				int paramsSize = funDef.getFunDefParent().getParams().getBytesSize();
 
 				String reg = mem.alloc();
 
-				compiler.writeinstln("lea " + reg + ", [rbp+" + (8 + (paramsSize - def.getStackOffset())) + "]  ; Load param addr: " + letDef.getIdent() + " > " + def.getStackOffset() + "/" + paramsSize);
+				compiler.writeinstln("lea " + reg + ", [rbp+" + (8 + (paramsSize - letDesc.getStackOffset())) + "]  ; Load param addr: " + letDef.getIdent() + " > " + letDesc.getStackOffset() + "/" + paramsSize);
 
 			} else { // in global-scope / static, or not a parameter but local variable
 
@@ -49,21 +49,21 @@ public class X86_LetRefConsumer extends CompilerConsumer<X86Compiler, LetRefNode
 					throw new CompilerException("LetDef: '" + ident + "' not found in current scope.");
 				}
 
-				LetScopeDescriptor def = container.getLetDefDescriptor(ident);
-				LetDefNode letDef = def.getNode();
+				LetScopeDescriptor letDesc = container.getLetDefDescriptor(ident);
+				LetDefNode letDef = letDesc.getNode();
 
 				int size = letDef.getType().getBytesSize();
 
-				if (!def.isAllocated()) {
+				if (!letDef.isAllocated()) {
 					throw new CompilerException("LetDef: " + ident + ", isn't accessible in current scope.");
 				}
 
 				String reg = mem.alloc();
 
 				if (letDef.isiStatic()) {
-					compiler.writeinstln("lea " + reg + ", [" + def.getAsmName() + "]  ; Load static var addr: " + letDef.getIdent());
+					compiler.writeinstln("lea " + reg + ", [" + letDesc.getAsmName() + "]  ; Load static var addr: " + letDef.getIdent());
 				} else {
-					compiler.writeinstln("lea " + reg + ", [rbp-" + (size + def.getStackOffset()) + "]  ; Load local var addr: " + letDef.getIdent());
+					compiler.writeinstln("lea " + reg + ", [rbp-" + (size + letDesc.getStackOffset()) + "]  ; Load local var addr: " + letDef.getIdent());
 				}
 
 			}

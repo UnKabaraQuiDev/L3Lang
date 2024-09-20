@@ -13,7 +13,7 @@ public final class MemoryUtil {
 	 * @return Bytes
 	 * @throws L3Exception
 	 */
-	public static int getPrimitiveSize(TokenType type) throws CompilerException {
+	public static int getPrimitiveSize(TokenType type) {
 		switch (type) {
 		case INT:
 			return getPrimitiveSize(INT_TYPE);
@@ -36,7 +36,7 @@ public final class MemoryUtil {
 		case VOID:
 			return 0;
 		default:
-			throw new CompilerException("Cannot get size of this type: " + type);
+			throw new RuntimeException(new CompilerException("Cannot get size of this type: " + type));
 		}
 	}
 

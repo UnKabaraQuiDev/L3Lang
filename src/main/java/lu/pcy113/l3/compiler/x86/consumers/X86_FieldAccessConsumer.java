@@ -28,17 +28,17 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 
 			if (node.hasFunDefParent() && (funDef = node.getFunDefParent()).isParamDefDescriptor(ident)) { // fun param
 
-				ParamScopeDescriptor def = funDef.getParamDefDescriptor(ident);
-				FunDefParamNode letDef = def.getNode();
+				ParamScopeDescriptor letDesc = funDef.getParamDefDescriptor(ident);
+				FunDefParamNode letDef = letDesc.getNode();
 
-				letDef.getType().normalizeSize();
+				letDef.getType().normalizeSize(container);
 				int size = letDef.getType().getBytesSize();
 				funDef.getFunDefParent().getParams().normalizeSize();
 				int paramsSize = funDef.getFunDefParent().getParams().getBytesSize();
 
 				String reg = mem.alloc();
 
-				compiler.writeinstln(getInstr(node, size) + " " + mem.getAsSize(reg, size) + ", [rbp+" + (8 + (paramsSize - def.getStackOffset())) + "]  ; Load param: " + letDef.getIdent() + " > " + def.getStackOffset() + "/" + paramsSize);
+				compiler.writeinstln(getInstr(node, size) + " " + mem.getAsSize(reg, size) + ", [rbp+" + (8 + (paramsSize - letDesc.getStackOffset())) + "]  ; Load param: " + letDef.getIdent() + " > " + letDesc.getStackOffset() + "/" + paramsSize);
 
 			} else { // in global-scope / static, or not a parameter but local variable
 
@@ -46,21 +46,21 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 					throw new CompilerException("LetDef: '" + ident + "' not found in current scope.");
 				}
 
-				LetScopeDescriptor def = container.getLetDefDescriptor(ident);
-				LetDefNode letDef = def.getNode();
+				LetScopeDescriptor letDesc = container.getLetDefDescriptor(ident);
+				LetDefNode letDef = letDesc.getNode();
 
 				int size = letDef.getType().getBytesSize();
 
-				if (!def.isAllocated()) {
+				if (!letDef.isAllocated()) {
 					throw new CompilerException("LetDef: " + ident + ", isn't accessible in current scope.");
 				}
 
 				String reg = mem.alloc();
 
 				if (letDef.isiStatic()) {
-					compiler.writeinstln(getInstr(node, size) + " " + mem.getAsSize(reg, size) + ", [" + def.getAsmName() + "]  ; Load static var: " + letDef.getIdent());
+					compiler.writeinstln(getInstr(node, size) + " " + mem.getAsSize(reg, size) + ", [" + letDesc.getAsmName() + "]  ; Load static var: " + letDef.getIdent());
 				} else {
-					compiler.writeinstln(getInstr(node, size) + " " + mem.getAsSize(reg, size) + ", [rbp-" + (size + def.getStackOffset()) + "]  ; Load local var: " + letDef.getIdent());
+					compiler.writeinstln(getInstr(node, size) + " " + mem.getAsSize(reg, size) + ", [rbp-" + (size + letDesc.getStackOffset()) + "]  ; Load local var: " + letDef.getIdent());
 				}
 
 			}

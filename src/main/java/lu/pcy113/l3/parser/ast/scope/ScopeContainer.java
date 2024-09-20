@@ -5,10 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
+import lu.pcy113.l3.parser.ast.StructDefNode;
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
 
 public interface ScopeContainer {
 
@@ -29,25 +32,27 @@ public interface ScopeContainer {
 	Collection<ScopeDescriptor> getDescriptors(String name);
 
 	ScopeContainer getContainer(String name);
-	
+
 	FunScopeDescriptor addFunDefDescriptor(FunDefNode node);
-	
+
 	LetScopeDescriptor addLetDefDescriptor(LetDefNode node);
-	
+
+	StructScopeDescriptor addStructDefDescriptor(StructDefNode node);
+
 	boolean addDescriptor(String name, ScopeDescriptor scopeDescriptor);
 
 	boolean containsFunDefDescriptor(FunCallNode node);
 
 	boolean containsFunDefDescriptor(FunDefNode node);
-	
+
 	boolean containsLetDefDescriptor(LetDefNode node);
 
 	boolean containsLetDefDescriptor(FieldAccessNode node);
 
 	FunScopeDescriptor getFunDefDescriptor(FunCallNode node) throws CompilerException;
-	
+
 	FunScopeDescriptor getFunDefDescriptor(FunDefNode node) throws CompilerException;
-	
+
 	Collection<ScopeDescriptor> getFunDefDescriptors(String ident) throws CompilerException;
 
 	LetScopeDescriptor getLetDefDescriptor(LetDefNode node) throws CompilerException;
@@ -57,5 +62,11 @@ public interface ScopeContainer {
 	LetScopeDescriptor getLetDefDescriptor(FieldAccessNode node) throws CompilerException;
 
 	LetScopeDescriptor getLetDefDescriptor(String ident) throws CompilerException;
+
+	StructScopeDescriptor getStructDefDescriptor(String ident) throws CompilerException;
+
+	StructScopeDescriptor getStructDefDescriptor(IdentifierLitNode ident) throws CompilerException;
+
+	StructScopeDescriptor getStructDefDescriptor(IdentifierToken ident) throws CompilerException;
 
 }

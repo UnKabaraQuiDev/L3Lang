@@ -1,8 +1,8 @@
 package lu.pcy113.l3.parser.ast.type;
 
-import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 
 public class PointerTypeNode extends PrimitiveTypeNode {
 
@@ -22,12 +22,12 @@ public class PointerTypeNode extends PrimitiveTypeNode {
 	}
 
 	@Override
-	public void normalizeSize() throws CompilerException {
+	public void normalizeSize(ScopeContainer container) {
 		// Do nothing
 	}
 
 	@Override
-	public int getBytesSize() throws CompilerException {
+	public int getBytesSize() {
 		return sizeOverride ? bytesOverride : MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE);
 	}
 

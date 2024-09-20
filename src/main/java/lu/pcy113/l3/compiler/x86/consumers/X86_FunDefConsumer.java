@@ -6,6 +6,7 @@ import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86.X86Compiler;
 import lu.pcy113.l3.parser.ast.FunDefParamNode;
 import lu.pcy113.l3.parser.ast.scope.FunDefNode;
+import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 import lu.pcy113.l3.utils.CompilerOptions;
 import lu.pcy113.pclib.logger.GlobalLogger;
@@ -36,7 +37,9 @@ public class X86_FunDefConsumer extends CompilerConsumer<X86Compiler, FunDefNode
 			offset += param.getType().getBytesSize();
 		}
 
-		compiler.writeln(node.getFunDefDescriptor(node).getAsmName() + ":  ; Fun: " + node.getIdent().asString());
+		final FunScopeDescriptor funDesc = node.getFunDefDescriptor(node);
+
+		compiler.writeln((node.isMain() ? "main" : funDesc.getAsmName()) + ":  ; Fun: " + node.getIdent().asString());
 		compiler.writeinstln("push rbp");
 		compiler.writeinstln("mov rbp, rsp");
 

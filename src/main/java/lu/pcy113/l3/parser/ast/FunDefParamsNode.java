@@ -32,7 +32,7 @@ public class FunDefParamsNode extends Node {
 
 	public void normalizeSize() throws CompilerException {
 		for (int i = 0; i < children.size(); i++) {
-			getParam(i).getType().normalizeSize();
+			getParam(i).getType().normalizeSize(getParentContainer());
 		}
 	}
 

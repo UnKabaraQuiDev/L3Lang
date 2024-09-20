@@ -2,11 +2,12 @@ package lu.pcy113.l3.parser.ast.type;
 
 import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 
 public class VoidTypeNode extends TypeNode {
 
 	@Override
-	public void normalizeSize() throws CompilerException {
+	public void normalizeSize(ScopeContainer container) {
 		// do nothing
 	}
 
@@ -16,7 +17,7 @@ public class VoidTypeNode extends TypeNode {
 	}
 
 	@Override
-	public int getBytesSize() throws CompilerException {
+	public int getBytesSize() {
 		return 0;
 	}
 

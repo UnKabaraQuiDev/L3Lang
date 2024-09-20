@@ -6,7 +6,7 @@ import lu.pcy113.l3.parser.ast.type.TypeNode;
 public class LetDefNode extends Node {
 
 	private IdentifierLitNode ident;
-	private boolean iStatic;
+	private boolean iStatic, allocated = false;
 
 	public LetDefNode(TypeNode type, IdentifierLitNode ident, boolean iStatic) {
 		add(type);
@@ -32,6 +32,14 @@ public class LetDefNode extends Node {
 
 	public boolean isiStatic() {
 		return iStatic;
+	}
+
+	public boolean isAllocated() {
+		return allocated;
+	}
+
+	public void setAllocated(boolean allocated) {
+		this.allocated = allocated;
 	}
 
 	@Override

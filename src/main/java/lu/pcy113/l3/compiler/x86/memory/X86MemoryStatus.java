@@ -158,7 +158,7 @@ public class X86MemoryStatus implements MemoryStatus {
 
 	@Override
 	public void pushStack(Node node) throws CompilerException {
-		setStackOffset(node, currentStackOffset);
+		// setStackOffset(node, currentStackOffset);
 		stack.push(node);
 		currentStackOffset += getStackSize(node);
 	}
@@ -185,6 +185,11 @@ public class X86MemoryStatus implements MemoryStatus {
 		return stack.pop();
 	}
 
+	@Override
+	public int getCurrentStackOffset() {
+		return currentStackOffset;
+	}
+	
 	@Override
 	public void clearStack() {
 		stack.clear();

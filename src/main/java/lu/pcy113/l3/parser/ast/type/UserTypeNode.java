@@ -1,8 +1,12 @@
 package lu.pcy113.l3.parser.ast.type;
 
 import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.parser.ast.LetDefNode;
+import lu.pcy113.l3.parser.ast.StructDefNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
+import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
+import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
 
 public class UserTypeNode extends TypeNode {
 
@@ -20,17 +24,33 @@ public class UserTypeNode extends TypeNode {
 	public boolean typeMatches(ExprNode param) throws CompilerException {
 		throw new CompilerException("Not implemented.");
 	}
-	
-	@Override
-	public void normalizeSize() throws CompilerException {
-		throw new CompilerException("Not implemented.");
-	}
 
 	@Override
-	public int getBytesSize() throws CompilerException {
-		throw new CompilerException("Not implemented.");
+	public void normalizeSize(ScopeContainer container) {
+		try {
+			StructScopeDescriptor structDesc = container.getStructDefDescriptor(ident);
+			StructDefNode structDef = structDesc.getNode();
+
+			int subSize = 0;
+
+			for (LetDefNode def : structDef.getFields()) {
+				def.getType().normalizeSize(container);
+				subSize += def.getType().getBytesSize();
+			}
+
+			setBytesSize(bytesOverride);
+		} catch (CompilerException e) {
+			throw new RuntimeException(e);
+		}
 	}
-	
+
+	public int getBytesSize() {
+		if (!sizeOverride) {
+			throw new RuntimeException(new CompilerException("Normalize size first."));
+		}
+		return bytesOverride;
+	}
+
 	@Override
 	public void setBytesSize(int bytes) {
 		sizeOverride = true;
@@ -39,7 +59,7 @@ public class UserTypeNode extends TypeNode {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + ident.asString() + ")";
+		return super.toString() + "(" + ident.asString() + ", sizeOverride="+sizeOverride+", size=" + bytesOverride + ")";
 	}
 
 }

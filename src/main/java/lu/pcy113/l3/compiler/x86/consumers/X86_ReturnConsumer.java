@@ -17,7 +17,7 @@ public class X86_ReturnConsumer extends CompilerConsumer<X86Compiler, ReturnNode
 
 		if (node.hasExpr()) {
 			if (node.getFunDefParent().getReturnType() instanceof PrimitiveTypeNode) {
-				node.getFunDefParent().getReturnType().normalizeSize();
+				node.getFunDefParent().getReturnType().normalizeSize(container);
 				int size = node.getFunDefParent().getReturnType().getBytesSize();
 				// +24 bc rsp (call return), rbp and return rbp are on the stack
 
