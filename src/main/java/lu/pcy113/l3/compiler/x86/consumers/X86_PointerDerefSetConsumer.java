@@ -18,7 +18,7 @@ public class X86_PointerDerefSetConsumer extends CompilerConsumer<X86Compiler, P
 
 		PointerDerefNode pointer = node.getPointer();
 
-		compiler.compile(pointer.getExpr());
+		compiler.compile(pointer.getPointerExpr());
 		String pointerLoc = mem.getLatest();
 
 		compiler.compile(node.getExpr());

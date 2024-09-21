@@ -104,16 +104,16 @@ public class L3Parser {
 		consume(TokenType.STRUCT);
 		IdentifierLitNode ident = parseSimpleIdentLit();
 		consume(TokenType.CURLY_OPEN);
-		
+
 		StructDefNode structDefNode = new StructDefNode(ident);
-		
-		while(!peek(TokenType.CURLY_CLOSE)) {
+
+		while (!peek(TokenType.CURLY_CLOSE)) {
 			parseLetDef(structDefNode);
 			consume(TokenType.SEMICOLON);
 		}
-		
+
 		consume(TokenType.CURLY_CLOSE);
-		
+
 		parent.add(structDefNode);
 		parent.addStructDefDescriptor(structDefNode);
 	}
@@ -515,11 +515,14 @@ public class L3Parser {
 			left = new UnaryOpNode(consume(TokenType.BIT_NOT).getType(), parsePrimary(), true);
 		} else if (peek(TokenType.NOT)) {
 			left = new UnaryOpNode(consume(TokenType.NOT).getType(), parsePrimary(), true);
-		} /*
-			 * else if (peek(TokenType.COLON)) { consume(TokenType.COLON); left = new LetRefNode((FieldAccessNode) parseIdent()); } else if (peek(TokenType.DOLLAR)) { consume(TokenType.DOLLAR); left = new
-			 * PointerDerefNode(parseExpression()); }
-			 */else {
+		} else {
 			left = parsePrimary();
+		}
+
+		if ((left instanceof PointerDerefNode) && peek(TokenType.DOT)) {
+			consume(TokenType.DOT);
+			ExprNode subAction = parseIdent();
+			left.add(subAction);
 		}
 
 		if (peek(TokenType.ASSIGN)) {
@@ -572,7 +575,7 @@ public class L3Parser {
 		} else if (peek(TokenType.DOLLAR)) {
 
 			consume(TokenType.DOLLAR);
-			return new PointerDerefNode((FieldAccessNode) parseIdent());
+			return new PointerDerefNode(parseExpression());
 
 		} else if (peek(TokenType.COLON)) {
 
@@ -654,7 +657,7 @@ public class L3Parser {
 	}
 
 	private IdentifierLitNode parseIdentLit() throws ParserException {
-		IdentifierLitNode ident = new IdentifierLitNode((IdentifierToken) consume());
+		IdentifierLitNode ident = new IdentifierLitNode((IdentifierToken) consume(TokenType.IDENT));
 
 		while (peek(0, TokenType.DOT) && peek(1, TokenType.IDENT)) {
 			consume(TokenType.DOT);

@@ -36,8 +36,6 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 
 			int offset = letDesc.getStackOffset(), size = 0;
 
-			System.err.println("base offset: " + offset);
-
 			StructScopeDescriptor structDesc = container.getStructDefDescriptor(type.getIdentifier().getFirst().getValue());
 			StructDefNode structDef = structDesc.getNode();
 
@@ -55,8 +53,6 @@ public class X86_FieldAccessConsumer extends CompilerConsumer<X86Compiler, Field
 
 				offset += subLetDesc.getStackOffset();
 				size = subLetDef.getType().getBytesSize();
-
-				System.err.println(ident.getValue() + " adds: " + subLetDesc.getStackOffset() + "=" + offset + ", size = " + size);
 
 			}
 

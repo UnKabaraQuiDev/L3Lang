@@ -4,13 +4,20 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.consumers.CompilerConsumer;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86.X86Compiler;
-import lu.pcy113.l3.parser.ast.FunDefParamNode;
+import lu.pcy113.l3.lexer.tokens.IdentifierToken;
+import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
+import lu.pcy113.l3.parser.ast.StructDefNode;
+import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.PointerDerefNode;
-import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
-import lu.pcy113.l3.parser.ast.scope.ParamScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
+import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
+import lu.pcy113.l3.parser.ast.type.PointerTypeNode;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
+import lu.pcy113.l3.parser.ast.type.UserTypeNode;
+import lu.pcy113.pclib.datastructure.pair.Pairs;
+import lu.pcy113.pclib.datastructure.pair.ReadOnlyPair;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class X86_PointerDerefConsumer extends CompilerConsumer<X86Compiler, PointerDerefNode> {
@@ -19,47 +26,61 @@ public class X86_PointerDerefConsumer extends CompilerConsumer<X86Compiler, Poin
 	protected void accept(X86Compiler compiler, MemoryStatus mem, ScopeContainer container, PointerDerefNode node) throws CompilerException {
 		GlobalLogger.log("PointerDeref: " + node);
 
-		String ident = node.getExpr().getIdent().getLeaf().getValue();
+		ExprNode pointer = node.getPointerExpr();
 
-		compiler.compile(node.getExpr());
-		String reg = mem.getLatest();
+		if (!(pointer instanceof FieldAccessNode)) {
+			compiler.implement(pointer); // We need to know the type of the var for the sub expr (node.getExpr())
+		}
 
-		FunDefNode funDef = null;
+		final FieldAccessNode fieldPointer = (FieldAccessNode) pointer;
+		final LetScopeDescriptor letDesc = container.getLetDefDescriptor(fieldPointer);
+		final LetDefNode letDef = letDesc.getNode();
+		final TypeNode type = ((PointerTypeNode) letDef.getType()).getTypeNode();
 
-		if (node.hasFunDefParent() && (funDef = node.getFunDefParent()).isParamDefDescriptor(ident)) { // fun param
+		compiler.compile(pointer);
+		String pointerReg = mem.getLatest();
 
-			ParamScopeDescriptor letDesc = funDef.getParamDefDescriptor(ident);
-			FunDefParamNode letDef = letDesc.getNode();
+		if (node.hasExpr()) {
+			if (node.getExpr() instanceof FieldAccessNode) {
+				ReadOnlyPair<Integer, Integer> offset_size = calcOffset(container, letDesc, letDef, (UserTypeNode) type, (FieldAccessNode) node.getExpr());
 
-			letDef.getType().normalizeSize(container);
-			int size = letDef.getType().getBytesSize();
-			funDef.getFunDefParent().getParams().normalizeSize();
-			int paramsSize = funDef.getFunDefParent().getParams().getBytesSize();
+				// compiler.writeinstln("add " + pointerReg + ", " + offset_size.getKey() + " ; Adding offset to pointer");
 
-			compiler.writeinstln("mov" + (size == 8 ? "" : "zx") + " " + mem.getAsSize(reg, size) + ", [" + reg + "]  ; Load param from addr: " + letDef.getIdent() + " > " + letDesc.getStackOffset() + "/" + paramsSize);
-
-		} else { // in global-scope / static, or not a parameter but local variable
-
-			if (!container.containsDescriptor(ident)) {
-				throw new CompilerException("LetDef: '" + ident + "' not found in current scope.");
-			}
-
-			LetScopeDescriptor letDesc = container.getLetDefDescriptor(ident);
-			LetDefNode letDef = letDesc.getNode();
-
-			int size = letDef.getType().getBytesSize();
-
-			if (!letDef.isAllocated()) {
-				throw new CompilerException("LetDef: " + ident + ", isn't accessible in current scope.");
-			}
-
-			if (letDef.isiStatic()) {
-				compiler.writeinstln("mov" + (size == 8 ? "" : "zx") + " " + mem.getAsSize(reg, size) + ", [" + reg + "]  ; Load static var from addr: " + letDef.getIdent());
+				compiler.writeinstln("mov " + pointerReg + ", [" + pointerReg + "-" + (offset_size.getValue() + offset_size.getKey()) + "]  ; Loading value from pointer with offset");
 			} else {
-				compiler.writeinstln("mov" + (size == 8 ? "" : "zx") + " " + mem.getAsSize(reg, size) + ", [" + reg + "]  ; Load local var from addr: " + letDef.getIdent());
+				compiler.implement(node.getExpr());
 			}
+		}
+	}
+
+	private ReadOnlyPair<Integer, Integer> calcOffset(ScopeContainer container, final LetScopeDescriptor letDesc, final LetDefNode letDef, final UserTypeNode type, final FieldAccessNode node) throws CompilerException {
+		int offset = 0, size = 0;
+
+		StructScopeDescriptor structDesc = container.getStructDefDescriptor(type.getIdentifier().getFirst().getValue());
+		StructDefNode structDef = structDesc.getNode();
+
+		System.err.println("ident: " + node);
+
+		for (int i = 0; i < node.getIdent().getTokens().size(); i++) {
+
+			IdentifierToken ident = node.getIdent().getTokens().get(i);
+			LetScopeDescriptor subLetDesc = structDef.getLetDefDescriptor(ident.getValue());
+			LetDefNode subLetDef = subLetDesc.getNode();
+
+			if (subLetDesc.getNode().getType() instanceof UserTypeNode) {
+				UserTypeNode subType = (UserTypeNode) subLetDef.getType();
+				structDesc = container.getStructDefDescriptor(subType.getIdentifier().getFirst().getValue());
+				structDef = structDesc.getNode();
+			}
+
+			offset += subLetDesc.getStackOffset();
+			size = subLetDef.getType().getBytesSize();
+
+			System.err.println("adds: " + subLetDesc.getStackOffset() + "=" + offset + ", size = " + size);
 
 		}
+
+		return Pairs.readOnly(offset, size);
 	}
 
 }

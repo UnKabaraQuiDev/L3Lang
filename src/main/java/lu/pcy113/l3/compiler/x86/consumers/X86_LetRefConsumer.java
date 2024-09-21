@@ -4,6 +4,7 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.consumers.CompilerConsumer;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86.X86Compiler;
+import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FunDefParamNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
@@ -31,8 +32,8 @@ public class X86_LetRefConsumer extends CompilerConsumer<X86Compiler, LetRefNode
 
 			if (node.hasFunDefParent() && (funDef = node.getFunDefParent()).isParamDefDescriptor(ident)) { // fun param
 
-				ParamScopeDescriptor letDesc = funDef.getParamDefDescriptor(ident);
-				FunDefParamNode letDef = letDesc.getNode();
+				final ParamScopeDescriptor letDesc = funDef.getParamDefDescriptor(ident);
+				final FunDefParamNode letDef = letDesc.getNode();
 
 				letDef.getType().normalizeSize(container);
 				int size = letDef.getType().getBytesSize();
@@ -49,8 +50,8 @@ public class X86_LetRefConsumer extends CompilerConsumer<X86Compiler, LetRefNode
 					throw new CompilerException("LetDef: '" + ident + "' not found in current scope.");
 				}
 
-				LetScopeDescriptor letDesc = container.getLetDefDescriptor(ident);
-				LetDefNode letDef = letDesc.getNode();
+				final LetScopeDescriptor letDesc = container.getLetDefDescriptor(ident);
+				final LetDefNode letDef = letDesc.getNode();
 
 				int size = letDef.getType().getBytesSize();
 
@@ -63,7 +64,7 @@ public class X86_LetRefConsumer extends CompilerConsumer<X86Compiler, LetRefNode
 				if (letDef.isiStatic()) {
 					compiler.writeinstln("lea " + reg + ", [" + letDesc.getAsmName() + "]  ; Load static var addr: " + letDef.getIdent());
 				} else {
-					compiler.writeinstln("lea " + reg + ", [rbp-" + (size + letDesc.getStackOffset()) + "]  ; Load local var addr: " + letDef.getIdent());
+					compiler.writeinstln("lea " + reg + ", [rbp-" + (letDesc.getStackOffset()) + "]  ; Load local var addr: " + letDef.getIdent());
 				}
 
 			}

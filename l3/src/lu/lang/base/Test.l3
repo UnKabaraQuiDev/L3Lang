@@ -1,20 +1,22 @@
 package lu.lang.base;
 
 struct SubStruct {
-	let int16 c;
+	let int64 c;
 }
 
 struct Test {
-	let int16 a;
-	let int16 b;
+	let int64 a;
+	let int64 b;
 	let SubStruct sub;
 }
 
 fun int8 main() {
 	let Test yes = new Test(a = 15, b = 16, sub = new SubStruct(c = 17));
 
-	yes = new Test(a = 18, b = 19, sub = new SubStruct(c = 20));
+asmln#("ptr:");
+	let Test: yesPointer = :yes;
 
+asmln#("return:");
 
-	return yes.sub.c;
+	return $(yesPointer).a;
 }
