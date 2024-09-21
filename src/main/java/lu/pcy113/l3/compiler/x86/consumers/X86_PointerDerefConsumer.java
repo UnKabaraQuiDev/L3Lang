@@ -44,8 +44,6 @@ public class X86_PointerDerefConsumer extends CompilerConsumer<X86Compiler, Poin
 			if (node.getExpr() instanceof FieldAccessNode) {
 				ReadOnlyPair<Integer, Integer> offset_size = calcOffset(container, letDesc, letDef, (UserTypeNode) type, (FieldAccessNode) node.getExpr());
 
-				// compiler.writeinstln("add " + pointerReg + ", " + offset_size.getKey() + " ; Adding offset to pointer");
-
 				compiler.writeinstln("mov " + pointerReg + ", [" + pointerReg + "-" + (offset_size.getValue() + offset_size.getKey()) + "]  ; Loading value from pointer with offset");
 			} else {
 				compiler.implement(node.getExpr());
@@ -53,13 +51,11 @@ public class X86_PointerDerefConsumer extends CompilerConsumer<X86Compiler, Poin
 		}
 	}
 
-	private ReadOnlyPair<Integer, Integer> calcOffset(ScopeContainer container, final LetScopeDescriptor letDesc, final LetDefNode letDef, final UserTypeNode type, final FieldAccessNode node) throws CompilerException {
+	public static ReadOnlyPair<Integer, Integer> calcOffset(ScopeContainer container, final LetScopeDescriptor letDesc, final LetDefNode letDef, final UserTypeNode type, final FieldAccessNode node) throws CompilerException {
 		int offset = 0, size = 0;
 
 		StructScopeDescriptor structDesc = container.getStructDefDescriptor(type.getIdentifier().getFirst().getValue());
 		StructDefNode structDef = structDesc.getNode();
-
-		System.err.println("ident: " + node);
 
 		for (int i = 0; i < node.getIdent().getTokens().size(); i++) {
 
@@ -75,8 +71,6 @@ public class X86_PointerDerefConsumer extends CompilerConsumer<X86Compiler, Poin
 
 			offset += subLetDesc.getStackOffset();
 			size = subLetDef.getType().getBytesSize();
-
-			System.err.println("adds: " + subLetDesc.getStackOffset() + "=" + offset + ", size = " + size);
 
 		}
 

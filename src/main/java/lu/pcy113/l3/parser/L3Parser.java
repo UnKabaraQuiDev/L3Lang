@@ -575,7 +575,7 @@ public class L3Parser {
 		} else if (peek(TokenType.DOLLAR)) {
 
 			consume(TokenType.DOLLAR);
-			return new PointerDerefNode(parseExpression());
+			return new PointerDerefNode(parsePrimary());
 
 		} else if (peek(TokenType.COLON)) {
 

@@ -16,7 +16,10 @@ fun int8 main() {
 asmln#("ptr:");
 	let Test: yesPointer = :yes;
 
+asmln#("set:");
+	$(yesPointer).a = 14;
+
 asmln#("return:");
 
-	return $(yesPointer).a;
+	return $(yesPointer).b;
 }

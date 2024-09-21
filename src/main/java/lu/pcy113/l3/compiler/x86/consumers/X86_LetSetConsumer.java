@@ -38,8 +38,6 @@ public class X86_LetSetConsumer extends CompilerConsumer<X86Compiler, LetSetNode
 
 			int offset = letDesc.getStackOffset(), size = 0;
 
-			System.err.println("base offset: " + offset);
-
 			StructScopeDescriptor structDesc = container.getStructDefDescriptor(type.getIdentifier().getFirst().getValue());
 			StructDefNode structDef = structDesc.getNode();
 
