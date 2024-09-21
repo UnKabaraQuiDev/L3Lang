@@ -26,10 +26,6 @@ public class X86_LetSetConsumer extends CompilerConsumer<X86Compiler, LetSetNode
 
 		FieldAccessNode field = node.getLet();
 
-		compiler.compile(node.getExpr());
-
-		String reg = mem.getLatest();
-
 		if (field.getIdent().size() > 1) { // struct type
 
 			final LetScopeDescriptor letDesc = container.getLetDefDescriptor(field.getIdent().getFirst().getValue());
@@ -62,8 +58,6 @@ public class X86_LetSetConsumer extends CompilerConsumer<X86Compiler, LetSetNode
 				offset += subLetDesc.getStackOffset();
 				size = subLetDef.getType().getBytesSize();
 
-				System.err.println(ident.getValue() + " adds: " + subLetDesc.getStackOffset() + "=" + offset + ", size = " + size);
-
 			}
 
 			String ident = field.getIdent().getLeaf().getValue();
@@ -76,13 +70,14 @@ public class X86_LetSetConsumer extends CompilerConsumer<X86Compiler, LetSetNode
 			} else { // in global-scope / static, or not a parameter but local variable
 
 				if (letDef.isiStatic()) {
-					compiler.writeinstln("mov [" + letDesc.getAsmName() + "-" + offset + "], " + mem.getAsSize(reg, size) + "  ; Set static var: " + field.getIdent());
+					mem.setLatest(letDesc.getAsmName() + "-" + offset);
 				} else {
-					compiler.writeinstln("mov [rbp-" + (size + offset) + "], " + mem.getAsSize(reg, size) + "  ; Set local var: " + field.getIdent());
+					mem.setLatest("rbp-" + offset);
 				}
-			}
 
-			mem.free(reg);
+				compiler.compile(node.getExpr());
+
+			}
 
 		} else { // primitive type
 
@@ -100,7 +95,9 @@ public class X86_LetSetConsumer extends CompilerConsumer<X86Compiler, LetSetNode
 				funDef.getFunDefParent().getParams().normalizeSize();
 				int paramsSize = funDef.getFunDefParent().getParams().getBytesSize();
 
-				compiler.writeinstln("mov [rbp+" + (8 + (paramsSize - letDesc.getStackOffset())) + "], " + mem.getAsSize(reg, size) + "  ; Save param: " + funLetDef.getIdent() + " > " + letDesc.getStackOffset() + "/" + paramsSize);
+				mem.setLatest("rbp+" + (8 + (paramsSize - letDesc.getStackOffset()))); // TODO check if param vars are still working
+
+				compiler.compile(node.getExpr());
 
 			} else { // in global-scope / static, or not a parameter but local variable
 
@@ -118,10 +115,12 @@ public class X86_LetSetConsumer extends CompilerConsumer<X86Compiler, LetSetNode
 				}
 
 				if (letDef.isiStatic()) {
-					compiler.writeinstln("mov [" + letDesc.getAsmName() + "], " + mem.getAsSize(reg, size) + "  ; Save static var: " + letDef.getIdent());
+					mem.setLatest(letDesc.getAsmName()); // TODO check if static vars are still working
 				} else {
-					compiler.writeinstln("mov [rbp-" + (size + letDesc.getStackOffset()) + "], " + mem.getAsSize(reg, size) + "  ; Save local var: " + letDef.getIdent());
+					mem.setLatest("rbp-" + letDesc.getStackOffset());
 				}
+
+				compiler.compile(node.getExpr());
 
 			}
 

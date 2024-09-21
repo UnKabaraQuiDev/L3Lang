@@ -174,7 +174,7 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 	public LetScopeDescriptor getLetDefDescriptor(String ident) throws CompilerException {
 		Collection<ScopeDescriptor> col = this.getDescriptors(ident);
 
-		return (LetScopeDescriptor) col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Let: " + ident + ", not defined."));
+		return (LetScopeDescriptor) col.stream().filter(c -> c instanceof LetScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Let: " + ident + ", not defined in: " + this + "."));
 	}
 
 	@Override

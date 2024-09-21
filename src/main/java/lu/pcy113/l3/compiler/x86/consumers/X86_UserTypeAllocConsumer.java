@@ -39,8 +39,7 @@ public class X86_UserTypeAllocConsumer extends CompilerConsumer<X86Compiler, Use
 
 				String reg = mem.getLatest();
 
-				compiler.writeinstln("mov [" + locRegister + "-" + (size + offset) + "], " + mem.getAsSize(reg, size) + "; Save local struct var, size=" + size + ", offset=" + letDesc.getStackOffset() + ".");
-				// compiler.writeinstln("mov [rbp-" + (letDesc.getStackOffset()) + "], " + mem.getAsSize(reg, letDef.getType().getBytesSize()) + " ; Save local struct var, size=" + size + ", offset=" + def.getStackOffset() + ".");
+				compiler.writeinstln("mov [" + locRegister + "-" + (size + offset) + "], " + mem.getAsSize(reg, size) + "  ; Save local struct var, size=" + size + ", stackOffset=" + letDesc.getStackOffset() + ", offset=" + offset + ".");
 
 				mem.free(reg);
 			} else if (subExpr instanceof UserTypeAllocNode) {
