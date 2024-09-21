@@ -57,12 +57,23 @@ public class X86_LetDefConsumer extends CompilerConsumer<X86Compiler, LetDefNode
 			} else if (node.getExpr() instanceof UserTypeAllocNode) {
 				final UserTypeAllocNode ua = (UserTypeAllocNode) node.getExpr();
 				ua.getType().normalizeSize(container);
+				size = ua.getType().getBytesSize();
 				
 				letDesc.setStackOffset(mem.getCurrentStackOffset());
 				mem.pushStack(node);
 				
+				System.err.println(ua.toString(0));
+
+				/*if(!mem.alloc("rbp")) {
+					throw new CompilerException("Couldn't get lock on register: 'rbp'.");
+				}*/
+				
+				mem.setLatest("rsp"); // Setting rbp as pointer for the location where the struct will be initialized
+
 				compiler.compile(node.getExpr());
 				
+				compiler.writeinstln("sub rsp, " + size + "  ; Alloc-ed: " + size + " for " + node.getIdent().asString() + " type: " + ua.toString());
+
 				node.setAllocated(true);
 			} else {
 				compiler.implement();

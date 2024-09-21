@@ -37,8 +37,8 @@ public class UserTypeNode extends TypeNode {
 				def.getType().normalizeSize(container);
 				subSize += def.getType().getBytesSize();
 			}
-			
-			setBytesSize(bytesOverride);
+
+			setBytesSize(subSize);
 		} catch (CompilerException e) {
 			throw new RuntimeException(e);
 		}
@@ -59,7 +59,7 @@ public class UserTypeNode extends TypeNode {
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + ident.asString() + ", sizeOverride="+sizeOverride+", size=" + bytesOverride + ")";
+		return super.toString() + "(" + ident.asString() + ", sizeOverride=" + sizeOverride + ", size=" + bytesOverride + ")";
 	}
 
 }

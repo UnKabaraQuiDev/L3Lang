@@ -1,19 +1,17 @@
 package lu.lang.base;
 
-struct Test {
-	let int16 a;
-	let int16 b;
-	let SubTest subTest;
-}
-
-struct SubTest {
+struct SubStruct {
 	let int16 c;
 }
 
+struct Test {
+	let int16 a;
+	let int16 b;
+	let SubStruct sub;
+}
+
 fun int8 main() {
-	let Test yes = new Test(a = 15, b = 16, subTest = new SubTest(c = 17));
+	let Test yes = new Test(a = 15, b = 16, sub = new SubStruct(c = 17));
 
-	yes.subTest.c = 18;
-
-	return yes.subTest.c;
+	return yes.sub.c;
 }

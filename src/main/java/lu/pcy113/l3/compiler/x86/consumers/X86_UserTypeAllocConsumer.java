@@ -22,29 +22,36 @@ public class X86_UserTypeAllocConsumer extends CompilerConsumer<X86Compiler, Use
 		final StructScopeDescriptor structDesc = container.getStructDefDescriptor(((UserTypeNode) node.getType()).getIdentifier());
 		final StructDefNode structDef = structDesc.getNode();
 
+		final String locRegister = mem.getLatest();
+
+		int offset = 0;
+
 		for (LetSetNode n : node.getLets()) {
 			final LetScopeDescriptor letDesc = structDef.getLetDefDescriptor(n.getLet().getIdent().getLeaf().getValue());
 			final LetDefNode letDef = letDesc.getNode();
 
 			final ExprNode subExpr = n.getExpr();
 
+			int size = letDef.getType().getBytesSize();
+
 			if (subExpr instanceof RecursiveArithmeticOp) {
 				compiler.compile(subExpr);
 
 				String reg = mem.getLatest();
 
-				// letDef.getType().normalizeSize(container);
-				int size = letDef.getType().getBytesSize();
-
-				compiler.writeinstln("push " + mem.getAsSize(reg, size) + "; Save local struct var, size=" + size + ", offset=" + letDesc.getStackOffset() + ".");
+				compiler.writeinstln("mov [" + locRegister + "-" + (size + offset) + "], " + mem.getAsSize(reg, size) + "; Save local struct var, size=" + size + ", offset=" + letDesc.getStackOffset() + ".");
 				// compiler.writeinstln("mov [rbp-" + (letDesc.getStackOffset()) + "], " + mem.getAsSize(reg, letDef.getType().getBytesSize()) + " ; Save local struct var, size=" + size + ", offset=" + def.getStackOffset() + ".");
 
 				mem.free(reg);
 			} else if (subExpr instanceof UserTypeAllocNode) {
+				mem.setLatest(locRegister + "-" + offset);
+
 				compiler.compile(subExpr);
 			} else {
 				compiler.implement(subExpr);
 			}
+
+			offset += size;
 
 			letDef.setAllocated(true);
 		}
