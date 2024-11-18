@@ -562,7 +562,7 @@ public class L3Lexer {
 		if (IDENT.equals(type)) {
 			tokens.add(new IdentifierToken(type, line, column - strValue.length(), strValue));
 		} else if (NUM_LIT.equals(type) || CHAR_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type)) {
-			tokens.add(new NumericLiteralToken(type, line, column - strValue.length(), strValue));
+			tokens.add(NumericLiteralToken.parseNumeric(type, line, column - strValue.length(), strValue));
 		} else if (STRING_LIT.equals(type)) {
 			tokens.add(new StringLiteralToken(type, line, column - strValue.length(), strValue));
 		} else if (COMMENT.equals(type)) {
