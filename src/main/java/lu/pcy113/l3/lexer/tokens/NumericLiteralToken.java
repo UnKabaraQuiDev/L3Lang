@@ -35,12 +35,8 @@ public class NumericLiteralToken extends LiteralToken {
 	protected Number value;
 	protected NumericValueType valueType;
 
-	public NumericLiteralToken(TokenType type, int line, int column, String literal) throws LexerException {
-		super(type, line, column);
-	}
-
 	public NumericLiteralToken(TokenType type, int line, int column, String literal, NumericValueType valueType, Object value) {
-		super(type, line, column);
+		super(TokenType.NUM_LIT, line, column);
 		this.valueType = valueType;
 		this.value = (Number) value;
 		this.literal = literal;

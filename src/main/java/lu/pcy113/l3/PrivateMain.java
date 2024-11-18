@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
+import lu.pcy113.l3.parser.L3Parser;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class PrivateMain {
@@ -29,6 +30,10 @@ public class PrivateMain {
 		System.out.println("Input:\n" + lexer.getInput());
 		lexer.lexe();
 		lexer.getTokens().forEach(System.out::println);
+
+		L3Parser parser = new L3Parser(lexer.iterator());
+		parser.parse();
+		System.out.println(parser.getFile().toJSONObject().toString(4));
 	}
 
 	private static void createParent(File file) {

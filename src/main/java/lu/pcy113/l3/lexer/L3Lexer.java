@@ -692,18 +692,19 @@ public class L3Lexer {
 
 			@Override
 			public boolean hasNext() {
-				return tokens.size() < pos;
+				return pos < tokens.size();
 			}
 
 			@Override
 			public Token consume(TokenType type) {
 				if (peek(type))
-					return tokens.get(pos++);
+					return consume();
 				throw new L3Exception("Expected: " + type + " but got: " + peek());
 			}
 
 			@Override
 			public Token consume() {
+				System.err.println("consume: "+peek());
 				return tokens.get(pos++);
 			}
 		};

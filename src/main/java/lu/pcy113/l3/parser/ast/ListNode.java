@@ -1,13 +1,14 @@
 package lu.pcy113.l3.parser.ast;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 import org.json.JSONObject;
 
-public class RuntimeNode extends Node implements Iterable<Node> {
+public class ListNode extends Node implements Iterable<Node> {
 
-	private List<Node> children;
+	protected List<Node> children = new ArrayList<Node>();
 
 	@Override
 	public Iterator<Node> iterator() {
@@ -17,7 +18,7 @@ public class RuntimeNode extends Node implements Iterable<Node> {
 	@Override
 	public JSONObject toJSONObject() {
 		JSONObject obj = super.toJSONObject();
-		forEach((c) -> obj.accumulate("children", c));
+		forEach((c) -> obj.accumulate("children", c.toJSONObject()));
 		return obj;
 	}
 
