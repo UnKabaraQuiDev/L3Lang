@@ -7,12 +7,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
 import lu.pcy113.l3.parser.ast.Node;
 import lu.pcy113.l3.parser.ast.StructDefNode;
+<<<<<<< HEAD
+=======
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 
 public class ScopeContainerNode extends Node implements ScopeContainer {
 
@@ -248,4 +253,23 @@ public class ScopeContainerNode extends Node implements ScopeContainer {
 
 		return (StructScopeDescriptor) col.stream().filter(c -> c instanceof StructScopeDescriptor).findFirst().orElseThrow(() -> new CompilerException("Struct: " + ident + ", not defined."));
 	}
+<<<<<<< HEAD
+=======
+
+	@Override
+	public StructScopeDescriptor getStructDefDescriptor(IdentifierLitNode ident) throws CompilerException {
+		return getStructDefDescriptor(ident.getFirst());
+	}
+
+	@Override
+	public StructScopeDescriptor getStructDefDescriptor(IdentifierToken ident) throws CompilerException {
+		return getStructDefDescriptor(ident.getValue());
+	}
+
+	@Override
+	public StructScopeDescriptor getStructDefDescriptor(StructDefNode node) throws CompilerException {
+		return getStructDefDescriptor(node.getIdent());
+	}
+
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 }

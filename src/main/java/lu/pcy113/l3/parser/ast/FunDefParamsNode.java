@@ -33,7 +33,11 @@ public class FunDefParamsNode extends Node {
 
 	public void normalizeSize(ScopeContainer container) throws CompilerException {
 		for (int i = 0; i < children.size(); i++) {
+<<<<<<< HEAD
 			getParam(i).getType().normalizeSize(container);
+=======
+			getParam(i).getType().normalizeSize(getParentContainer());
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 		}
 	}
 

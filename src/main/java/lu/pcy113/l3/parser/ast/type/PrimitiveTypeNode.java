@@ -31,7 +31,11 @@ public class PrimitiveTypeNode extends TypeNode {
 	}
 
 	@Override
+<<<<<<< HEAD
 	public void normalizeSize(ScopeContainer container) throws CompilerException {
+=======
+	public void normalizeSize(ScopeContainer container) {
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 		int size = getBytesSize();
 		if (size >= 4) {
 			setBytesSize(8);
@@ -47,22 +51,29 @@ public class PrimitiveTypeNode extends TypeNode {
 
 	@Override
 	public int getBytesSize() {
+<<<<<<< HEAD
 		try {
 			return sizeOverride ? bytesOverride : MemoryUtil.getPrimitiveSize(type);
 		} catch (CompilerException e) {
 			throw new RuntimeException(e);
 		}
+=======
+		return sizeOverride ? bytesOverride : MemoryUtil.getPrimitiveSize(type);
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 	}
+<<<<<<< HEAD
 
 	@Override
 	public void setBytesSize(int bytes) {
 		sizeOverride = true;
 		bytesOverride = bytes;
 	}
+=======
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 
 	@Override
 	public String toString() {
-		return super.toString() + "(" + type.toString() + ")";
+		return super.toString() + "(" + type.toShortString() + ", sizeOverride=" + sizeOverride + ", size=" + getBytesSize() + ")";
 	}
 
 }

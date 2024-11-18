@@ -36,6 +36,7 @@ import lu.pcy113.l3.parser.ast.StructDefNode;
 import lu.pcy113.l3.parser.ast.UserTypeAllocNode;
 import lu.pcy113.l3.parser.ast.WhileDefNode;
 import lu.pcy113.l3.parser.ast.expr.BinaryOpNode;
+import lu.pcy113.l3.parser.ast.expr.ExplicitArrayDefNode;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.expr.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.expr.RecursiveArithmeticOp;
@@ -50,7 +51,11 @@ import lu.pcy113.l3.parser.ast.scope.FunDefNode;
 import lu.pcy113.l3.parser.ast.scope.FunScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.LetScopeDescriptor;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainerNode;
+<<<<<<< HEAD
 import lu.pcy113.l3.parser.ast.scope.StructScopeDescriptor;
+=======
+import lu.pcy113.l3.parser.ast.type.ArrayTypeNode;
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 import lu.pcy113.l3.parser.ast.type.PointerTypeNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
@@ -105,6 +110,7 @@ public class L3Parser {
 		consume(TokenType.STRUCT);
 		IdentifierLitNode ident = parseSimpleIdentLit();
 		consume(TokenType.CURLY_OPEN);
+<<<<<<< HEAD
 		
 		StructDefNode structDefNode = new StructDefNode(ident);
 		
@@ -115,6 +121,18 @@ public class L3Parser {
 		
 		consume(TokenType.CURLY_CLOSE);
 		
+=======
+
+		StructDefNode structDefNode = new StructDefNode(ident);
+
+		while (!peek(TokenType.CURLY_CLOSE)) {
+			parseLetDef(structDefNode);
+			consume(TokenType.SEMICOLON);
+		}
+
+		consume(TokenType.CURLY_CLOSE);
+
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 		parent.add(structDefNode);
 		parent.addStructDefDescriptor(structDefNode);
 	}
@@ -416,6 +434,10 @@ public class L3Parser {
 
 	}
 
+	private ExplicitArrayDefNode parseExplicitArrayDef() {
+		return null;
+	}
+
 	private TypeNode parseType() throws ParserException {
 		TypeNode node = null;
 
@@ -432,12 +454,26 @@ public class L3Parser {
 		} else if (peek(TokenType.VOID)) {
 
 			consume(TokenType.VOID);
-			return new VoidTypeNode();
+			node = new VoidTypeNode();
 
 		} else {
 
 			throw new ParserException("Unsupported type: " + peek());
 
+		}
+
+		while (peek(TokenType.BRACKET_OPEN)) {
+			consume(TokenType.BRACKET_OPEN);
+
+			NumLitNode numLit = parseNumLit();
+			if (numLit instanceof IntegerNumLitNode) {
+				if (((IntegerNumLitNode) numLit).getValue() > Integer.MAX_VALUE) {
+					throw new ParserException(((IntegerNumLitNode) numLit).getValue() + " exceeds max array size (" + Integer.MAX_VALUE + ")");
+				}
+				node = new ArrayTypeNode(node, (int) (long) ((IntegerNumLitNode) numLit).getValue());
+			}
+
+			consume(TokenType.BRACKET_CLOSE);
 		}
 
 		while (peek(TokenType.COLON)) {
@@ -517,8 +553,8 @@ public class L3Parser {
 		} else if (peek(TokenType.NOT)) {
 			left = new UnaryOpNode(consume(TokenType.NOT).getType(), parsePrimary(), true);
 		} /*
-			 * else if (peek(TokenType.COLON)) { consume(TokenType.COLON); left = new LetRefNode((FieldAccessNode) parseIdent()); }
-			 * else if (peek(TokenType.DOLLAR)) { consume(TokenType.DOLLAR); left = new PointerDerefNode(parseExpression()); }
+			 * else if (peek(TokenType.COLON)) { consume(TokenType.COLON); left = new LetRefNode((FieldAccessNode) parseIdent()); } else if (peek(TokenType.DOLLAR)) { consume(TokenType.DOLLAR); left = new
+			 * PointerDerefNode(parseExpression()); }
 			 */else {
 			left = parsePrimary();
 		}
@@ -607,9 +643,32 @@ public class L3Parser {
 
 			return node;
 
+		} else if (peek(TokenType.CURLY_OPEN)) {
+
+			consume(TokenType.CURLY_OPEN);
+			ExplicitArrayDefNode expr = new ExplicitArrayDefNode(parseArrayArgs());
+			consume(TokenType.CURLY_CLOSE);
+
+			return expr;
+
 		} else {
 			throw new RuntimeException("Unexpected token: " + peek().getType());
 		}
+	}
+
+	private List<ExprNode> parseArrayArgs() throws ParserException {
+		List<ExprNode> nodes = new ArrayList<ExprNode>();
+
+		while (!peek(TokenType.CURLY_CLOSE)) {
+			ExprNode expr = parseExpression();
+			nodes.add(expr);
+
+			if (peek(TokenType.COMMA)) {
+				consume(TokenType.COMMA);
+			}
+		}
+
+		return nodes;
 	}
 
 	private StringLitNode parseStringLit() throws ParserException {
@@ -636,10 +695,18 @@ public class L3Parser {
 		if (peek(TokenType.BRACKET_OPEN)) {
 
 			consume(TokenType.BRACKET_OPEN);
-			ExprNode expr = parseExpression();
+			ExprNode offset = parseExpression();
+			ExprNode expr = new ArrayAccessNode(new FieldAccessNode(ident), offset);
 			consume(TokenType.BRACKET_CLOSE);
+			
+			while (peek(TokenType.BRACKET_OPEN)) {
+				consume(TokenType.BRACKET_OPEN);
+				offset = parseExpression();
+				expr = new ArrayAccessNode(expr, offset);
+				consume(TokenType.BRACKET_CLOSE);
+			}
 
-			return new ArrayAccessNode(ident, expr);
+			return expr;
 
 		} else if ((peek(TokenType.HASH) && peek(1, TokenType.PAREN_OPEN)) || peek(TokenType.PAREN_OPEN)) {
 
@@ -745,6 +812,9 @@ public class L3Parser {
 			return new LetSetNode((FieldAccessNode) var, expr);
 		} else if (var instanceof PointerDerefNode) {
 			return new PointerDerefSetNode((PointerDerefNode) var, expr);
+		} else if (var instanceof ArrayAccessNode) {
+			implement();
+			// return new ArrayAccessSetNode((ArrayAccessNode) var, expr);
 		}
 
 		implement(var);

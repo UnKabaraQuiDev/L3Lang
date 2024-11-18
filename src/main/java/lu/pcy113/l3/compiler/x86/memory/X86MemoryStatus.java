@@ -16,6 +16,7 @@ import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.Node;
+import lu.pcy113.l3.parser.ast.StructDefNode;
 
 public class X86MemoryStatus implements MemoryStatus {
 
@@ -58,7 +59,7 @@ public class X86MemoryStatus implements MemoryStatus {
 		usedRegisters.add(reg);
 		return reg;
 	}
-	
+
 	@Override
 	public String allocFP() {
 		if (freeFPRegisters.isEmpty()) {
@@ -69,13 +70,13 @@ public class X86MemoryStatus implements MemoryStatus {
 		usedFPRegisters.add(reg);
 		return reg;
 	}
-	
+
 	@Override
 	public void free(String reg) {
 		if (usedRegisters.remove(reg)) {
 			freeRegisters.add(0, reg);
 			latest = reg;
-		} else if(usedFPRegisters.remove(reg)) {
+		} else if (usedFPRegisters.remove(reg)) {
 			freeFPRegisters.add(0, reg);
 			latest = reg;
 		} else {
@@ -87,7 +88,7 @@ public class X86MemoryStatus implements MemoryStatus {
 	public boolean hasFree() {
 		return !freeRegisters.isEmpty();
 	}
-	
+
 	@Override
 	public boolean hasFreeFP() {
 		return !freeRegisters.isEmpty();
@@ -106,7 +107,7 @@ public class X86MemoryStatus implements MemoryStatus {
 			freeRegisters.remove(reg);
 			usedRegisters.add(reg);
 			return true;
-		}else if(freeFPRegisters.contains(reg)) {
+		} else if (freeFPRegisters.contains(reg)) {
 			freeFPRegisters.remove(reg);
 			usedFPRegisters.add(reg);
 			return true;
@@ -183,6 +184,11 @@ public class X86MemoryStatus implements MemoryStatus {
 	public Node popStack() throws CompilerException {
 		currentStackOffset -= getStackSize(stack.peek());
 		return stack.pop();
+	}
+
+	@Override
+	public int getCurrentStackOffset() {
+		return currentStackOffset;
 	}
 
 	@Override

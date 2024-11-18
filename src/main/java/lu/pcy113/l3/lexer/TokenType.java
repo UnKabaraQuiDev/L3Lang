@@ -22,10 +22,10 @@ public enum TokenType {
 
 	FLOAT(PRIMITIVE_TYPE, "float"),
 
-	FLOAT_32(FLOAT, "float32"), /*FLOAT_128(FLOAT, "float128"),*/
-	
+	FLOAT_32(FLOAT, "float32"), /* FLOAT_128(FLOAT, "float128"), */
+
 	DOUBLE(PRIMITIVE_TYPE, "double"),
-	
+
 	BOOLEAN(PRIMITIVE_TYPE),
 
 	TRUE("true"), FALSE("false"),
@@ -148,12 +148,16 @@ public enum TokenType {
 	@Override
 	public String toString() {
 		if (fixed && string) {
-			return TokenType.class.getName() + "[" + name() + ", fixed=" + fixed + ", string=" + string + ", stringValue=" + stringValue + "]";
+			return TokenType.class.getSimpleName() + "[" + name() + ", fixed=" + fixed + ", string=" + string + ", stringValue=" + stringValue + "]";
 		} else if (fixed && !string) {
-			return TokenType.class.getName() + "[" + name() + ", fixed=" + fixed + ", string=" + string + ", charValue=" + charValue + "]";
+			return TokenType.class.getSimpleName() + "[" + name() + ", fixed=" + fixed + ", string=" + string + ", charValue=" + charValue + "]";
 		} else {
-			return TokenType.class.getName() + "[" + name() + ", fixed=" + fixed + ", string=" + string + "]";
+			return TokenType.class.getSimpleName() + "[" + name() + ", fixed=" + fixed + ", string=" + string + "]";
 		}
+	}
+
+	public String toShortString() {
+		return TokenType.class.getSimpleName() + "[" + name() + "]";
 	}
 
 }

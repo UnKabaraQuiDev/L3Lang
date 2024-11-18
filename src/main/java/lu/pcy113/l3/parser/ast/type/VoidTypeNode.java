@@ -7,7 +7,11 @@ import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
 public class VoidTypeNode extends TypeNode {
 
 	@Override
+<<<<<<< HEAD
 	public void normalizeSize(ScopeContainer container) throws CompilerException {
+=======
+	public void normalizeSize(ScopeContainer container) {
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 		// do nothing
 	}
 

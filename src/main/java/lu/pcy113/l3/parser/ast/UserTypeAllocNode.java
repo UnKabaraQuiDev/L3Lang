@@ -18,6 +18,10 @@ public class UserTypeAllocNode extends ExprNode {
 	public Iterable<LetSetNode> getLets() {
 		return PCUtils.toIterable(children.stream().skip(1).map(c -> (LetSetNode) c).iterator());
 	}
+	
+	public Iterable<LetSetNode> getLets() {
+		return PCUtils.toIterable(children.stream().skip(1).map(c -> (LetSetNode) c).iterator());
+	}
 
 	@Override
 	public boolean isDouble() throws CompilerException {

@@ -76,13 +76,46 @@ public class Node implements Iterable<Node> {
 	}
 
 	@SuppressWarnings("unchecked")
+	public <T extends Node> T getFirstChild(Class<T> clazz) {
+		for (Node child : children) {
+			if (clazz.isInstance(child)) {
+				return (T) child;
+			} else {
+				Node fChild = child.getFirstChild(clazz);
+				if (fChild != null) {
+					return (T) fChild;
+				}
+			}
+		}
+		return null;
+	}
+
+	public int getParentCount(Class<? extends Node> clazz) {
+		int count = 0;
+
+		Node paren = this.getParent();
+		while (paren != null) {
+			if (clazz.isInstance(paren)) {
+				count++;
+			}
+
+			paren = paren.getParent();
+		}
+
+		return count;
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T> T getParent(Class<T> clazz) {
 		Node paren = this;
+
 		do {
 			paren = paren.getParent();
-			if (paren == null)
+			if (paren == null) {
 				return null;
+			}
 		} while (!clazz.isInstance(paren));
+
 		return (T) paren;
 	}
 

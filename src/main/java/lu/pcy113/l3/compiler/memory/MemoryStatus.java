@@ -37,4 +37,6 @@ public interface MemoryStatus {
 
 	boolean hasFreeFP();
 
+	int getCurrentStackOffset();
+
 }

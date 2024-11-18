@@ -20,4 +20,8 @@ public class StructScopeDescriptor extends ScopeDescriptor {
 		this.node = node;
 	}
 	
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git

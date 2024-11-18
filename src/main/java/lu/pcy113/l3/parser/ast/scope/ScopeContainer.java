@@ -5,11 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 
 import lu.pcy113.l3.compiler.CompilerException;
+import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.parser.ast.FieldAccessNode;
 import lu.pcy113.l3.parser.ast.FunCallNode;
 import lu.pcy113.l3.parser.ast.LetDefNode;
 import lu.pcy113.l3.parser.ast.LetSetNode;
 import lu.pcy113.l3.parser.ast.StructDefNode;
+<<<<<<< HEAD
+=======
+import lu.pcy113.l3.parser.ast.lit.IdentifierLitNode;
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 
 public interface ScopeContainer {
 
@@ -63,4 +68,13 @@ public interface ScopeContainer {
 
 	StructScopeDescriptor getStructDefDescriptor(String ident) throws CompilerException;
 
+<<<<<<< HEAD
+=======
+	StructScopeDescriptor getStructDefDescriptor(IdentifierLitNode ident) throws CompilerException;
+
+	StructScopeDescriptor getStructDefDescriptor(IdentifierToken ident) throws CompilerException;
+
+	StructScopeDescriptor getStructDefDescriptor(StructDefNode node) throws CompilerException;
+
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 }

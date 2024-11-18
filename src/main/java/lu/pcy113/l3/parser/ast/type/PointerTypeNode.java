@@ -1,6 +1,5 @@
 package lu.pcy113.l3.parser.ast.type;
 
-import lu.pcy113.l3.compiler.CompilerException;
 import lu.pcy113.l3.parser.MemoryUtil;
 import lu.pcy113.l3.parser.ast.expr.ExprNode;
 import lu.pcy113.l3.parser.ast.scope.ScopeContainer;
@@ -29,11 +28,15 @@ public class PointerTypeNode extends PrimitiveTypeNode {
 
 	@Override
 	public int getBytesSize() {
+<<<<<<< HEAD
 		try {
 			return sizeOverride ? bytesOverride : MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE);
 		} catch (CompilerException e) {
 			throw new RuntimeException(e);
 		}
+=======
+		return sizeOverride ? bytesOverride : MemoryUtil.getPrimitiveSize(MemoryUtil.POINTER_TYPE);
+>>>>>>> branch 'main' of git@github.com:UnKabaraQuiDev/L3Lang.git
 	}
 
 	@Override
