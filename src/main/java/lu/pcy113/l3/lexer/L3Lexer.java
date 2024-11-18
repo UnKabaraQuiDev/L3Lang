@@ -91,6 +91,8 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import lu.pcy113.l3.L3Exception;
+import lu.pcy113.l3.lexer.impl.LexerIterator;
 import lu.pcy113.l3.lexer.tokens.CommentToken;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
@@ -666,6 +668,45 @@ public class L3Lexer {
 			return numericValue >= 0 && numericValue <= 7;
 		}
 		return false;
+	}
+
+	public LexerIterator iterator() {
+		return new LexerIterator() {
+
+			int pos = 0;
+
+			@Override
+			public TokenType peek(int i) {
+				return tokens.get(pos + i).getType();
+			}
+
+			@Override
+			public TokenType peek() {
+				return peek(0);
+			}
+
+			@Override
+			public boolean peek(TokenType type) {
+				return peek().equals(type);
+			}
+
+			@Override
+			public boolean hasNext() {
+				return tokens.size() < pos;
+			}
+
+			@Override
+			public Token consume(TokenType type) {
+				if (peek(type))
+					return tokens.get(pos++);
+				throw new L3Exception("Expected: " + type + " but got: " + peek());
+			}
+
+			@Override
+			public Token consume() {
+				return tokens.get(pos++);
+			}
+		};
 	}
 
 }

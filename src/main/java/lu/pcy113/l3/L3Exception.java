@@ -1,6 +1,6 @@
 package lu.pcy113.l3;
 
-public class L3Exception extends Exception {
+public class L3Exception extends RuntimeException {
 
 	public L3Exception(String string) {
 		super(string);
