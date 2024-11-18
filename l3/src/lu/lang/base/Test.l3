@@ -1,8 +1,2 @@
-"string";
-42;
-42.0;
-42f;
-42d;
-42b;
-42s;
-42l;
+let int x = 12;
+let bool b;

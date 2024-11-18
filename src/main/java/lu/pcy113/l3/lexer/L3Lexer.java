@@ -12,6 +12,7 @@ import static lu.pcy113.l3.lexer.TokenType.BIT_OR;
 import static lu.pcy113.l3.lexer.TokenType.BIT_OR_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIT_XOR;
 import static lu.pcy113.l3.lexer.TokenType.BIT_XOR_ASSIGN;
+import static lu.pcy113.l3.lexer.TokenType.BOOLEAN;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_CLOSE;
 import static lu.pcy113.l3.lexer.TokenType.BRACKET_OPEN;
 import static lu.pcy113.l3.lexer.TokenType.BYTE;
@@ -89,6 +90,7 @@ import static lu.pcy113.l3.lexer.TokenType.XOR;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import lu.pcy113.l3.L3Exception;
@@ -541,6 +543,9 @@ public class L3Lexer {
 			case "double":
 				type = DOUBLE;
 				break;
+			case "bool":
+				type= BOOLEAN;
+				break;
 			}
 
 			flushToken();
@@ -687,7 +692,7 @@ public class L3Lexer {
 
 			@Override
 			public boolean peek(TokenType type) {
-				return peek().equals(type);
+				return peek().matches(type);
 			}
 
 			@Override
@@ -704,8 +709,19 @@ public class L3Lexer {
 
 			@Override
 			public Token consume() {
-				System.err.println("consume: "+peek());
 				return tokens.get(pos++);
+			}
+
+			@Override
+			public boolean peek(TokenType... types) {
+				return Arrays.stream(types).anyMatch(this::peek);
+			}
+
+			@Override
+			public Token consume(TokenType... types) {
+				if (peek(types))
+					return consume();
+				throw new L3Exception("Expected: " + types + " but got: " + peek());
 			}
 		};
 	}

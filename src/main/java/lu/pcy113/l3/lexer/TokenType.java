@@ -26,7 +26,7 @@ public enum TokenType {
 
 	DOUBLE(PRIMITIVE_TYPE, "double"),
 
-	BOOLEAN(PRIMITIVE_TYPE),
+	BOOLEAN(PRIMITIVE_TYPE, "bool"),
 
 	TRUE("true"), FALSE("false"),
 

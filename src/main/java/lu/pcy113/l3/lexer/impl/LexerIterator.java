@@ -8,6 +8,8 @@ public interface LexerIterator {
 	boolean hasNext();
 
 	boolean peek(TokenType type);
+	
+	boolean peek(TokenType... type);
 
 	TokenType peek();
 
@@ -16,5 +18,7 @@ public interface LexerIterator {
 	Token consume();
 
 	Token consume(TokenType type);
+	
+	Token consume(TokenType... type);
 
 }

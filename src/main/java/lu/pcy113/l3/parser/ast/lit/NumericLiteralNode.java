@@ -3,7 +3,7 @@ package lu.pcy113.l3.parser.ast.lit;
 import org.json.JSONObject;
 
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
-import lu.pcy113.l3.parser.ast.Node;
+import lu.pcy113.l3.parser.ast.abstr.Node;
 
 public class NumericLiteralNode extends Node {
 
