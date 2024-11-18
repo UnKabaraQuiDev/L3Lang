@@ -5,7 +5,6 @@ import java.util.regex.Pattern;
 
 import org.json.JSONObject;
 
-import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.lexer.TokenType;
 
 public class NumericLiteralToken extends LiteralToken {
@@ -32,13 +31,13 @@ public class NumericLiteralToken extends LiteralToken {
 	}
 
 	protected String literal;
-	protected Number value;
+	protected Object value;
 	protected NumericValueType valueType;
 
 	public NumericLiteralToken(TokenType type, int line, int column, String literal, NumericValueType valueType, Object value) {
 		super(TokenType.NUM_LIT, line, column);
 		this.valueType = valueType;
-		this.value = (Number) value;
+		this.value = value;
 		this.literal = literal;
 	}
 
@@ -65,7 +64,6 @@ public class NumericLiteralToken extends LiteralToken {
 
 		case DEC_NUM_LIT:
 			matcher = Pattern.compile(floatPattern).matcher(literal);
-			System.err.println("lit:" + literal + " matches: " + matcher.matches());
 			if (matcher.matches()) {
 				String number = matcher.group(1);
 				String suffix = matcher.group(2).toLowerCase();
@@ -186,6 +184,14 @@ public class NumericLiteralToken extends LiteralToken {
 		return (double) value;
 	}
 
+	public boolean booleanValue() {
+		return (boolean) value;
+	}
+	
+	public boolean isBoolean() {
+		return valueType.equals(NumericValueType.BOOL_1);
+	}
+	
 	public Object getValue() {
 		return value;
 	}

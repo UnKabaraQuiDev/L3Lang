@@ -106,17 +106,20 @@ public class L3Lexer {
 
 	private int index = 0, line = 0, column = 0;
 	private final String input;
-	private final List<Token> tokens;
+	private final List<Token> tokens = new ArrayList<Token>();
+
+	public L3Lexer(String str) {
+		this.input = str;
+	}
 
 	public L3Lexer(Reader reader) throws IOException {
 		this.input = StringUtils.readAll(reader);
-		this.tokens = new ArrayList<Token>();
 	}
 
 	private TokenType type = null;
 	private String strValue = "";
 
-	public void lexe() throws LexerException {
+	public void lexe() {
 		while (hasNext()) {
 			next: {
 				char current = consume();
@@ -425,6 +428,7 @@ public class L3Lexer {
 				case '0':
 					if (peek() == 'x') {
 						consume();
+						strValue = "0x";
 						type = HEX_NUM_LIT;
 						do {
 							strValue += consume();
@@ -433,6 +437,7 @@ public class L3Lexer {
 						break next;
 					} else if (peek() == 'b') {
 						consume();
+						strValue = "0b";
 						type = BIN_NUM_LIT;
 						do {
 							strValue += consume();
@@ -441,6 +446,7 @@ public class L3Lexer {
 						break next;
 					} else if (peek() == 'o') {
 						consume();
+						strValue = "0o";
 						type = BIN_NUM_LIT;
 						do {
 							strValue += consume();
@@ -456,7 +462,7 @@ public class L3Lexer {
 		// flushToken();
 	}
 
-	private void checkOthers(char current) throws LexerException {
+	private void checkOthers(char current) {
 		if (type == null && Character.isLetter(current)) {
 			type = IDENT;
 			strValue = "" + current;
@@ -544,7 +550,7 @@ public class L3Lexer {
 				type = DOUBLE;
 				break;
 			case "bool":
-				type= BOOLEAN;
+				type = BOOLEAN;
 				break;
 			}
 
@@ -562,13 +568,13 @@ public class L3Lexer {
 		}
 	}
 
-	public void flushToken() throws LexerException {
+	public void flushToken() {
 		if (type == null)
 			return;
 
 		if (IDENT.equals(type)) {
 			tokens.add(new IdentifierToken(type, line, column - strValue.length(), strValue));
-		} else if (NUM_LIT.equals(type) || CHAR_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type)) {
+		} else if (NUM_LIT.equals(type) || CHAR_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type) || TRUE.equals(type) || FALSE.equals(type)) {
 			tokens.add(NumericLiteralToken.parseNumeric(type, line, column - strValue.length(), strValue));
 		} else if (STRING_LIT.equals(type)) {
 			tokens.add(new StringLiteralToken(type, line, column - strValue.length(), strValue));
