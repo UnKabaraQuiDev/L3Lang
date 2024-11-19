@@ -27,7 +27,7 @@ public class LongIdentifierNode extends IdentifierNode {
 	
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("children", new JSONArray(members.stream().map(IdentifierNode::toJSONObject).collect(Collectors.toList())));
+		return super.toJSONObject().put("value", getValue()).put("children", new JSONArray(members.stream().map(IdentifierNode::toJSONObject).collect(Collectors.toList())));
 	}
 
 }
