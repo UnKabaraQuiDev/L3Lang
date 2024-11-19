@@ -2,9 +2,9 @@ package lu.pcy113.l3.parser.ast.let;
 
 import org.json.JSONObject;
 
-import lu.pcy113.l3.parser.ast.IdentifierNode;
-import lu.pcy113.l3.parser.ast.TypeNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
+import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
+import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class LetDefNode extends Node {
 

@@ -31,7 +31,7 @@ public class PrivateMain {
 		lexer.lexe();
 		lexer.getTokens().forEach(System.out::println);
 
-		L3Parser parser = new L3Parser(lexer.iterator());
+		L3Parser parser = new L3Parser(lexer.iterator(), mainFile);
 		parser.parse();
 		System.out.println(parser.getFile().toJSONObject().toString(4));
 	}

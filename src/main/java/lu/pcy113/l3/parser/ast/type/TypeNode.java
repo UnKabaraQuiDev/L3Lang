@@ -1,4 +1,4 @@
-package lu.pcy113.l3.parser.ast;
+package lu.pcy113.l3.parser.ast.type;
 
 import lu.pcy113.l3.parser.ast.abstr.Node;
 

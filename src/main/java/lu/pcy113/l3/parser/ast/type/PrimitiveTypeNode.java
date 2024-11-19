@@ -4,7 +4,6 @@ import org.json.JSONObject;
 
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.Token;
-import lu.pcy113.l3.parser.ast.TypeNode;
 
 public class PrimitiveTypeNode extends TypeNode {
 

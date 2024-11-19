@@ -101,6 +101,7 @@ import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.utils.StringUtils;
+import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class L3Lexer {
 
@@ -708,13 +709,20 @@ public class L3Lexer {
 
 			@Override
 			public Token consume(TokenType type) {
+				GlobalLogger.log();
+				
 				if (peek(type))
 					return consume();
+				
 				throw new L3Exception("Expected: " + type + " but got: " + peek());
 			}
 
 			@Override
 			public Token consume() {
+				GlobalLogger.log();
+				
+				System.err.println("consumed: " + peek().name());
+				
 				return tokens.get(pos++);
 			}
 
