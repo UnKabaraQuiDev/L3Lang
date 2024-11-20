@@ -8,7 +8,7 @@ public class Node implements JSONConvertible {
 
 	@Override
 	public JSONObject toJSONObject() {
-		return new JSONObject();
+		return new JSONObject().put("type", this.getClass().getSimpleName());
 	}
 	
 	@Override

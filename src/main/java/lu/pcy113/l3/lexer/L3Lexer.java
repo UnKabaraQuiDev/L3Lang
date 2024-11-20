@@ -699,7 +699,7 @@ public class L3Lexer {
 
 			@Override
 			public boolean peek(TokenType type) {
-				return peek().matches(type);
+				return pos < tokens.size() && peek().matches(type);
 			}
 
 			@Override
@@ -710,19 +710,19 @@ public class L3Lexer {
 			@Override
 			public Token consume(TokenType type) {
 				GlobalLogger.log();
-				
+
 				if (peek(type))
 					return consume();
-				
+
 				throw new L3Exception("Expected: " + type + " but got: " + peek());
 			}
 
 			@Override
 			public Token consume() {
 				GlobalLogger.log();
-				
+
 				System.err.println("consumed: " + peek().name());
-				
+
 				return tokens.get(pos++);
 			}
 

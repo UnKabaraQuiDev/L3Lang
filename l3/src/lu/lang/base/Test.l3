@@ -1,4 +1,1 @@
-let int x = (1 + 1) * 2;
-let bool b = 1 * x.x;
-
-let long def = def.def(def.def());
+a.b.call().c.d();

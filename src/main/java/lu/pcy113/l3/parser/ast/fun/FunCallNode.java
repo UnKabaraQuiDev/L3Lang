@@ -7,20 +7,19 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import lu.pcy113.l3.parser.ast.abstr.Node;
-import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 
 public class FunCallNode extends Node {
 
-	private IdentifierNode identifier;
+	private Node parent;
 	private List<Node> args;
 
-	public FunCallNode(IdentifierNode identifier, List<Node> args) {
-		this.identifier = identifier;
+	public FunCallNode(Node parent, List<Node> args) {
+		this.parent = parent;
 		this.args = args;
 	}
 
-	public IdentifierNode getIdentifier() {
-		return identifier;
+	public Node getParent() {
+		return parent;
 	}
 
 	public List<Node> getArgs() {
@@ -29,7 +28,7 @@ public class FunCallNode extends Node {
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("identifier", identifier.toJSONObject()).put("args", new JSONArray(args.stream().map(Node::toJSONObject).collect(Collectors.toList())));
+		return super.toJSONObject().put("parent", parent.toJSONObject()).put("args", new JSONArray(args.stream().map(Node::toJSONObject).collect(Collectors.toList())));
 	}
 
 }

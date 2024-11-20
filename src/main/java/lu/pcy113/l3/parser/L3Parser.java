@@ -10,11 +10,11 @@ import lu.pcy113.l3.lexer.impl.LexerIterator;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
+import lu.pcy113.l3.parser.ast.MembersAccess;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
-import lu.pcy113.l3.parser.ast.ident.LongIdentifierNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
@@ -96,7 +96,7 @@ public class L3Parser {
 	}
 
 	private Node parseMultiplicativeExpression() {
-		return parseBinaryExpression(this::parsePrimary, TokenType.MUL, TokenType.DIV);
+		return parseBinaryExpression(this::parsePrimary, TokenType.MUL, TokenType.DIV, TokenType.MODULO);
 	}
 
 	private IdentifierNode parseSimpleIdentifier() {
@@ -104,30 +104,24 @@ public class L3Parser {
 	}
 
 	private Node parseIdentifier() {
-		IdentifierNode first = parseSimpleIdentifier();
+		Node expr = parseSimpleIdentifier();
 
-		// chained long identifier
-		if (iterator.peek(TokenType.DOT)) {
-			List<IdentifierNode> nodes = new ArrayList<>();
-			nodes.add((IdentifierNode) first);
-
-			while (iterator.peek(TokenType.DOT)) {
+		while(iterator.peek(TokenType.DOT) || iterator.peek(TokenType.PAREN_OPEN)) {
+			// chained long identifier
+			if (iterator.peek(TokenType.DOT)) {
 				iterator.consume(TokenType.DOT);
-				nodes.add(new IdentifierNode(((IdentifierToken) iterator.consume(TokenType.IDENT)).getValue()));
+
+				IdentifierNode prop = parseSimpleIdentifier();
+				expr = new MembersAccess(expr, prop);
+			}else if (iterator.peek(TokenType.PAREN_OPEN)) {
+				iterator.consume(TokenType.PAREN_OPEN);
+				expr = new FunCallNode(expr, parseFunArgs());
+				iterator.consume(TokenType.PAREN_CLOSE);
 			}
-
-			first = new LongIdentifierNode(nodes);
+			
 		}
-
-		if (iterator.peek(TokenType.PAREN_OPEN)) {
-			iterator.consume(TokenType.PAREN_OPEN);
-			final FunCallNode funCall = new FunCallNode((IdentifierNode) first, parseFunArgs());
-			iterator.consume(TokenType.PAREN_CLOSE);
-
-			return funCall;
-		}
-
-		return first;
+		
+		return expr;
 	}
 
 	private List<Node> parseFunArgs() {
