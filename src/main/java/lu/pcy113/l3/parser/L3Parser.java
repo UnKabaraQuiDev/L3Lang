@@ -11,6 +11,7 @@ import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.parser.ast.MembersAccess;
+import lu.pcy113.l3.parser.ast.PointerMemberAccess;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
@@ -19,6 +20,7 @@ import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpression;
+import lu.pcy113.l3.parser.ast.pointer.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.pclib.PCUtils;
@@ -106,21 +108,24 @@ public class L3Parser {
 	private Node parseIdentifier() {
 		Node expr = parseSimpleIdentifier();
 
-		while(iterator.peek(TokenType.DOT) || iterator.peek(TokenType.PAREN_OPEN)) {
+		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW, TokenType.DOLLAR)) {
+			iterator.consume();
 			// chained long identifier
-			if (iterator.peek(TokenType.DOT)) {
-				iterator.consume(TokenType.DOT);
-
-				IdentifierNode prop = parseSimpleIdentifier();
-				expr = new MembersAccess(expr, prop);
-			}else if (iterator.peek(TokenType.PAREN_OPEN)) {
-				iterator.consume(TokenType.PAREN_OPEN);
+			switch (iterator.peek(-1)) {
+			case DOT:
+				expr = new MembersAccess(expr, parseSimpleIdentifier());
+				break;
+			case ARROW:
+				expr = new PointerMemberAccess(expr, parseSimpleIdentifier());
+				break;
+			case PAREN_OPEN:
 				expr = new FunCallNode(expr, parseFunArgs());
 				iterator.consume(TokenType.PAREN_CLOSE);
+				break;
 			}
-			
+
 		}
-		
+
 		return expr;
 	}
 
@@ -149,12 +154,19 @@ public class L3Parser {
 		return expression;
 	}
 
+	private Node parsePointerDeref() {
+		iterator.consume(TokenType.DOLLAR);
+		return new PointerDerefNode(parseExpression());
+	}
+
 	private Node parsePrimary() {
 		switch (iterator.peek()) {
 		case PAREN_OPEN:
 			return parseParenthesizedExpression();
 		case IDENT:
 			return parseIdentifier();
+		case DOLLAR:
+			return parsePointerDeref();
 		case STRING_LIT:
 			return new StringLiteralNode((StringLiteralToken) iterator.consume());
 		case NUM_LIT:

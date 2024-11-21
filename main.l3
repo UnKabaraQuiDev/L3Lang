@@ -1,12 +1,23 @@
 - - - -
 
-import none;
+@CompilerGenerated
+struct ptr<T> {
+	uint_ptr addr;
+}
 
+ptr<Person> per = :new Person();
+per->name = "bitch";
+$(per).name = "bitch2";
+
+ - - -
+ 
 // :IDENT -> value to pointer (loc)
 // $IDENT -> pointer to value (deloc)
 // var: IDENT -> pointer variable
 // var IDENT -> value variable
 
+ - - -
+ 
 #def MAX_STRING_SIZE 0xFFFF
 
 struct String {

@@ -689,7 +689,7 @@ public class L3Lexer {
 
 			@Override
 			public TokenType peek(int i) {
-				return tokens.get(pos + i).getType();
+				return pos < tokens.size() ? tokens.get(pos + i).getType() : null;
 			}
 
 			@Override
