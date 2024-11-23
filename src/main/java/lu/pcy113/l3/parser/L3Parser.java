@@ -15,7 +15,10 @@ import lu.pcy113.l3.parser.ast.PointerMemberAccess;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
+import lu.pcy113.l3.parser.ast.fun.FunDefNode;
+import lu.pcy113.l3.parser.ast.fun.ctrl.ReturnNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
+import lu.pcy113.l3.parser.ast.let.ArgDefNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
@@ -38,27 +41,118 @@ public class L3Parser {
 	}
 
 	public void parse() {
-		file = parseFileNode();
+		parseFileNode();
 	}
 
-	private FileNode parseFileNode() {
-		final FileNode file = new FileNode(this.path, PCUtils.getFileExtension(path));
+	private void parseFileNode() {
+		file = new FileNode(this.path, PCUtils.getFileExtension(path));
 		while (iterator.hasNext()) {
-			file.addChild(parseExpression());
-			iterator.consume(TokenType.SEMICOLON);
+			file.addChild(parseLineExpression());
 		}
-		return file;
+	}
+
+	private Node parseLineExpression() {
+		if (iterator.peek(TokenType.LET)) {
+			final LetDefNode letDef = parseLetDef();
+			iterator.consume(TokenType.SEMICOLON);
+			return letDef;
+		} else if (iterator.peek(TokenType.FUN)) {
+			return parseFunDef();
+		} else if(iterator.peek(TokenType.RETURN)) {
+			final ReturnNode returnNode = parseReturn();
+			iterator.consume(TokenType.SEMICOLON);
+			return returnNode;
+		} else {
+			final Node chained = parseChainedExpression();
+			iterator.consume(TokenType.SEMICOLON);
+			return chained;
+		}
+	}
+
+	private ReturnNode parseReturn() {
+		iterator.consume(TokenType.RETURN);
+
+		if (iterator.peek(TokenType.SEMICOLON)) {
+			return new ReturnNode();
+		}
+		
+		return new ReturnNode(parseExpression());
 	}
 
 	private Node parseExpression() {
-		if (iterator.peek(TokenType.LET)) {
-			return parseLetDef();
-		}
-
-		return parseAdditiveExpression();
+		return parseChainedExpression();
 	}
 
-	private Node parseLetDef() {
+	private Node parseFunDef() {
+		iterator.consume(TokenType.FUN);
+		final TypeNode type = parseType();
+		final IdentifierNode identifier = parseSimpleIdentifier();
+
+		iterator.consume(TokenType.PAREN_OPEN);
+		final List<ArgDefNode> args = parseFunArgsDef();
+		iterator.consume(TokenType.PAREN_CLOSE);
+		
+		iterator.consume(TokenType.CURLY_OPEN);
+		final List<Node> body = parseBlock();
+		iterator.consume(TokenType.CURLY_CLOSE);
+		
+		return new FunDefNode(type, identifier, args, body);
+	}
+
+	private List<Node> parseBlock() {
+		List<Node> list = new ArrayList<>();
+		while (!iterator.peek(TokenType.CURLY_CLOSE)) {
+			list.add(parseLineExpression());
+		}
+		return list;
+	}
+
+	private List<ArgDefNode> parseFunArgsDef() {
+		List<ArgDefNode> list = new ArrayList<>();
+
+		if (iterator.peek(TokenType.PAREN_CLOSE)) {
+			return list;
+		}
+
+		list.add(parseArgDef());
+
+		while (iterator.peek(TokenType.COMMA)) {
+			iterator.consume(TokenType.COMMA);
+			list.add(parseArgDef());
+		}
+
+		return list;
+	}
+
+	private ArgDefNode parseArgDef() {
+		iterator.consume(TokenType.LET);
+		return new ArgDefNode(parseType(), parseSimpleIdentifier());
+	}
+
+	private Node parseChainedExpression() {
+		Node expr = parseAdditiveExpression();
+
+		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW, TokenType.DOLLAR)) {
+			iterator.consume();
+			// chained long identifier
+			switch (iterator.peek(-1)) {
+			case DOT:
+				expr = new MembersAccess(expr, parseSimpleIdentifier());
+				break;
+			case ARROW:
+				expr = new PointerMemberAccess(expr, parseSimpleIdentifier());
+				break;
+			case PAREN_OPEN:
+				expr = new FunCallNode(expr, parseFunArgs());
+				iterator.consume(TokenType.PAREN_CLOSE);
+				break;
+			}
+		}
+
+		return expr;
+	}
+
+	private LetDefNode parseLetDef() {
 		iterator.consume(TokenType.LET);
 		final TypeNode type = parseType();
 		final IdentifierNode identifier = parseSimpleIdentifier();
@@ -156,17 +250,21 @@ public class L3Parser {
 
 	private Node parsePointerDeref() {
 		iterator.consume(TokenType.DOLLAR);
-		return new PointerDerefNode(parseExpression());
+		if (iterator.peek(TokenType.PAREN_OPEN)) {
+			return new PointerDerefNode(parsePrimary());
+		} else {
+			return new PointerDerefNode(parseSimpleIdentifier());
+		}
 	}
 
 	private Node parsePrimary() {
 		switch (iterator.peek()) {
 		case PAREN_OPEN:
 			return parseParenthesizedExpression();
-		case IDENT:
-			return parseIdentifier();
 		case DOLLAR:
 			return parsePointerDeref();
+		case IDENT:
+			return parseIdentifier();
 		case STRING_LIT:
 			return new StringLiteralNode((StringLiteralToken) iterator.consume());
 		case NUM_LIT:

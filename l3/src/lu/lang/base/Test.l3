@@ -1,1 +1,6 @@
-$(per).name;
+
+fun bool test() {
+	let bool returnValue = false;
+	
+	return returnValue;
+}

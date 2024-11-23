@@ -42,6 +42,11 @@
 			<scope>test</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>lu.kbra</groupId>
+			<artifactId>gamebox.client.es</artifactId>
+			<version>0.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
