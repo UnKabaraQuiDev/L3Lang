@@ -1,5 +1,1 @@
-fun bool test() {
-	let bool returnValue = false;
-	
-	return returnValue;
-}
+func.aa.a->b()++;

@@ -2,6 +2,7 @@ package lu.pcy113.l3.parser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import lu.pcy113.l3.L3Exception;
@@ -24,6 +25,7 @@ import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpression;
+import lu.pcy113.l3.parser.ast.math.UnaryNode;
 import lu.pcy113.l3.parser.ast.pointer.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
@@ -232,9 +234,16 @@ public class L3Parser {
 	}
 
 	private Node parseIdentifier() {
+		Function<Node, Node> unaryHandler = (e) -> e;
+		
+		if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+			final TokenType type = iterator.consume(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS).getType();
+			unaryHandler = (e) -> new UnaryNode(e, type, true);
+		}
+		
 		Node expr = parseSimpleIdentifier();
 
-		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW, TokenType.DOLLAR)) {
+		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW)) {
 			iterator.consume();
 			// chained long identifier
 			switch (iterator.peek(-1)) {
@@ -249,9 +258,14 @@ public class L3Parser {
 				iterator.consume(TokenType.PAREN_CLOSE);
 				break;
 			}
-
 		}
-
+		
+		if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+			expr = new UnaryNode(expr, iterator.consume(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS).getType(), false);
+		}
+		
+		expr = unaryHandler.apply(expr);
+		
 		return expr;
 	}
 
@@ -295,6 +309,9 @@ public class L3Parser {
 			return parseParenthesizedExpression();
 		case DOLLAR:
 			return parsePointerDeref();
+		case PLUS_PLUS:
+		case MINUS_MINUS:
+		case NOT:
 		case IDENT:
 			return parseIdentifier();
 		case STRING_LIT:
