@@ -11,6 +11,7 @@ public class LetDefNode extends Node {
 	private TypeNode type;
 	private IdentifierNode identifier;
 	private Node value;
+	private boolean _static;
 
 	public LetDefNode(TypeNode type, IdentifierNode identifier, Node value) {
 		this.type = type;
@@ -21,6 +22,19 @@ public class LetDefNode extends Node {
 	public LetDefNode(TypeNode type, IdentifierNode identifier) {
 		this.type = type;
 		this.identifier = identifier;
+	}
+
+	public LetDefNode(TypeNode type, IdentifierNode identifier, Node value, boolean _static) {
+		this.type = type;
+		this.identifier = identifier;
+		this.value = value;
+		this._static = _static;
+	}
+
+	public LetDefNode(TypeNode type, IdentifierNode identifier, boolean _static) {
+		this.type = type;
+		this.identifier = identifier;
+		this._static = _static;
 	}
 
 	public TypeNode getType() {
@@ -39,10 +53,15 @@ public class LetDefNode extends Node {
 		return value != null;
 	}
 
+	public boolean isStatic() {
+		return _static;
+	}
+
 	@Override
 	public JSONObject toJSONObject() {
 		JSONObject obj = super.toJSONObject().put("type", type.toJSONObject()).put("identifier", identifier.toJSONObject());
 		obj.put("initialized", hasValue());
+		obj.put("static", _static);
 		if (hasValue()) {
 			obj.put("value", value.toJSONObject());
 		}

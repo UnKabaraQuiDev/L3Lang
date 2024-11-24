@@ -2,4 +2,8 @@ package lu.lang.base;
 
 fun int8 main() {
 	
+	let int8 returnValue = 0;
+	
+	return returnValue;
+	
 }

@@ -5,12 +5,12 @@ import org.json.JSONObject;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 
-public class BinaryExpression extends Node {
+public class BinaryExpressionNode extends Node {
 
 	private TokenType operator;
 	private Node left, right;
 
-	public BinaryExpression(Node left, TokenType operator, Node right) {
+	public BinaryExpressionNode(Node left, TokenType operator, Node right) {
 		this.left = left;
 		this.operator = operator;
 		this.right = right;

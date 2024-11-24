@@ -26,8 +26,8 @@ import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.let.LetSetNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
-import lu.pcy113.l3.parser.ast.math.BinaryExpression;
-import lu.pcy113.l3.parser.ast.math.UnaryNode;
+import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
+import lu.pcy113.l3.parser.ast.math.UnaryExpressionNode;
 import lu.pcy113.l3.parser.ast.pointer.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.pointer.PointerRefNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
@@ -73,6 +73,9 @@ public class L3Parser {
 		if (iterator.peek(TokenType.LET)) {
 			final LetDefNode letDef = parseStaticLetDef();
 			iterator.consume(TokenType.SEMICOLON);
+			
+			file.getSymbols().registerLet(letDef);
+			
 			return letDef;
 
 		} else if (iterator.peek(TokenType.FUN)) {
@@ -92,11 +95,18 @@ public class L3Parser {
 		if (iterator.peek(TokenType.LET)) {
 			final LetDefNode letDef = parseLetDef();
 			iterator.consume(TokenType.SEMICOLON);
+			
+			file.getSymbols().checkDependencies(letDef.getValue());
+			file.getSymbols().registerLet(letDef);
+			
 			return letDef;
 			
 		} else if (iterator.peek(TokenType.RETURN)) {
 			final ReturnNode returnNode = parseReturn();
 			iterator.consume(TokenType.SEMICOLON);
+			
+			file.getSymbols().checkDependencies(returnNode.getExpression());
+			
 			return returnNode;
 			
 		} else {
@@ -262,7 +272,7 @@ public class L3Parser {
 			final TokenType op = iterator.consume(opTypes).getType();
 			Node right = parseMultiplicativeExpression();
 
-			left = new BinaryExpression(left, op, right);
+			left = new BinaryExpressionNode(left, op, right);
 		}
 
 		return left;
@@ -321,7 +331,7 @@ public class L3Parser {
 		
 		if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS, TokenType.BIT_NOT)) {
 			final TokenType type = iterator.consume().getType();
-			unaryHandler = (e) -> new UnaryNode(e, type, true);
+			unaryHandler = (e) -> new UnaryExpressionNode(e, type, true);
 		}
 		
 		Node expr = parseSimpleIdentifier();
@@ -348,7 +358,7 @@ public class L3Parser {
 			expr = new LetSetNode(expr, parseExpression(), assignType);
 			return expr;
 		}else if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
-			expr = new UnaryNode(expr, iterator.consume(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS).getType(), false);
+			expr = new UnaryExpressionNode(expr, iterator.consume(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS).getType(), false);
 		}
 		
 		expr = unaryHandler.apply(expr);

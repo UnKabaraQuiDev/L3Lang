@@ -24,10 +24,27 @@ public class FunDefNode extends Node {
 		this.args = args;
 		this.body = body;
 	}
-	
+
+	public TypeNode getReturnType() {
+		return returnType;
+	}
+
+	public IdentifierNode getIdentifier() {
+		return identifier;
+	}
+
+	public List<ArgDefNode> getArgs() {
+		return args;
+	}
+
+	public List<Node> getBody() {
+		return body;
+	}
+
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("body", new JSONArray(body.stream().map(Node::toJSONObject).collect(Collectors.toList()))).put("returnType", returnType.toJSONObject()).put("identifier", identifier.toJSONObject()).put("args", new JSONArray(args.stream().map(Node::toJSONObject).collect(Collectors.toList())));
+		return super.toJSONObject().put("body", new JSONArray(body.stream().map(Node::toJSONObject).collect(Collectors.toList()))).put("returnType", returnType.toJSONObject()).put("identifier", identifier.toJSONObject()).put("args",
+				new JSONArray(args.stream().map(Node::toJSONObject).collect(Collectors.toList())));
 	}
 
 }

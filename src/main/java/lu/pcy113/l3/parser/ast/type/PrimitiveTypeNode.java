@@ -10,6 +10,7 @@ public class PrimitiveTypeNode extends TypeNode {
 	private TokenType type;
 	
 	public PrimitiveTypeNode(Token token) {
+		super(token.getType().name());
 		this.type = token.getType();
 	}
 	
