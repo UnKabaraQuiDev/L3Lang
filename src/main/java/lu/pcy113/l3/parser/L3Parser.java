@@ -27,6 +27,7 @@ import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpression;
 import lu.pcy113.l3.parser.ast.math.UnaryNode;
 import lu.pcy113.l3.parser.ast.pointer.PointerDerefNode;
+import lu.pcy113.l3.parser.ast.pointer.PointerRefNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.pclib.PCUtils;
@@ -164,7 +165,7 @@ public class L3Parser {
 	}
 
 	private Node parseChainedExpression() {
-		Node expr = parseAdditiveExpression();
+		Node expr = parseFirstBinaryExpression();
 
 		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW, TokenType.DOLLAR)) {
 			iterator.consume();
@@ -221,6 +222,42 @@ public class L3Parser {
 		return left;
 	}
 
+	private Node parseFirstBinaryExpression() {
+		return parseLogicalXORExpression();
+	}
+	
+	private Node parseLogicalXORExpression() {
+		return parseBinaryExpression(this::parseLogicalORExpression, TokenType.BIT_XOR);
+	}
+	
+	private Node parseLogicalORExpression() {
+		return parseBinaryExpression(this::parseLogicalANDExpression, TokenType.OR);
+	}
+	
+	private Node parseLogicalANDExpression() {
+		return parseBinaryExpression(this::parseBitORExpression, TokenType.AND);
+	}
+	
+	private Node parseBitORExpression() {
+		return parseBinaryExpression(this::parseBitXORExpression, TokenType.BIT_OR);
+	}
+	
+	private Node parseBitXORExpression() {
+		return parseBinaryExpression(this::parseBitANDExpression, TokenType.BIT_XOR);
+	}
+	
+	private Node parseBitANDExpression() {
+		return parseBinaryExpression(this::parseComparisonExpression, TokenType.BIT_AND);
+	}
+	
+	private Node parseComparisonExpression() {
+		return parseBinaryExpression(this::parseShiftExpression, TokenType.GREATER, TokenType.GREATER_EQUALS, TokenType.EQUALS, TokenType.NOT_EQUALS, TokenType.LESS, TokenType.LESS_EQUALS);
+	}
+	
+	private Node parseShiftExpression() {
+		return parseBinaryExpression(this::parseAdditiveExpression, TokenType.BIT_SHIFT_LEFT, TokenType.BIT_SHIFT_SIGNED_RIGHT, TokenType.BIT_SHIFT_UNSIGNED_RIGHT);
+	}
+	
 	private Node parseAdditiveExpression() {
 		return parseBinaryExpression(this::parseMultiplicativeExpression, TokenType.PLUS, TokenType.MINUS);
 	}
@@ -236,8 +273,8 @@ public class L3Parser {
 	private Node parseIdentifier() {
 		Function<Node, Node> unaryHandler = (e) -> e;
 		
-		if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
-			final TokenType type = iterator.consume(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS).getType();
+		if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS, TokenType.BIT_NOT)) {
+			final TokenType type = iterator.consume().getType();
 			unaryHandler = (e) -> new UnaryNode(e, type, true);
 		}
 		
@@ -309,6 +346,8 @@ public class L3Parser {
 			return parseParenthesizedExpression();
 		case DOLLAR:
 			return parsePointerDeref();
+		case COLON:
+			return parsePointerRef();
 		case PLUS_PLUS:
 		case MINUS_MINUS:
 		case NOT:
@@ -321,6 +360,11 @@ public class L3Parser {
 		}
 
 		throw new L3Exception("Unexpected token: " + iterator.peek());
+	}
+
+	private Node parsePointerRef() {
+		iterator.consume(TokenType.COLON);
+		return new PointerRefNode(parseSimpleIdentifier());
 	}
 
 	private void notImplemented() {

@@ -10,6 +10,9 @@ import static lu.pcy113.l3.lexer.TokenType.BIT_NOT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_NOT_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BIT_OR;
 import static lu.pcy113.l3.lexer.TokenType.BIT_OR_ASSIGN;
+import static lu.pcy113.l3.lexer.TokenType.BIT_SHIFT_LEFT;
+import static lu.pcy113.l3.lexer.TokenType.BIT_SHIFT_SIGNED_RIGHT;
+import static lu.pcy113.l3.lexer.TokenType.BIT_SHIFT_UNSIGNED_RIGHT;
 import static lu.pcy113.l3.lexer.TokenType.BIT_XOR;
 import static lu.pcy113.l3.lexer.TokenType.BIT_XOR_ASSIGN;
 import static lu.pcy113.l3.lexer.TokenType.BOOLEAN;
@@ -401,6 +404,9 @@ public class L3Lexer {
 					if (peek() == '=') {
 						consume();
 						type = LESS_EQUALS;
+					} else if( peek() == '<') {
+						type = BIT_SHIFT_LEFT;
+						consume();
 					} else {
 						type = LESS;
 					}
@@ -410,7 +416,14 @@ public class L3Lexer {
 					if (peek() == '=') {
 						consume();
 						type = GREATER_EQUALS;
-					} else {
+					} else if( peek() == '>') {
+						type = BIT_SHIFT_SIGNED_RIGHT;
+						consume();
+						if( peek() == '>') {
+							type = BIT_SHIFT_UNSIGNED_RIGHT;
+							consume();
+						}
+					} else{
 						type = GREATER;
 					}
 					flushToken();

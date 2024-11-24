@@ -65,6 +65,8 @@ public enum TokenType {
 	BIT_OR_ASSIGN(ASSIGN, "|="), BIT_AND_ASSIGN(ASSIGN, "&="), BIT_XOR_ASSIGN(ASSIGN, "^="), BIT_NOT_ASSIGN(ASSIGN, "~="),
 
 	OR("||"), AND("&&"), NOT('!'), XOR("^^"),
+	
+	BIT_SHIFT_LEFT("<<"), BIT_SHIFT_SIGNED_RIGHT(">>"), BIT_SHIFT_UNSIGNED_RIGHT(">>>"),
 
 	HASH('#'),
 
