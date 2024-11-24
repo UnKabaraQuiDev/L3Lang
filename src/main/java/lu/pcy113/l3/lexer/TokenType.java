@@ -66,7 +66,9 @@ public enum TokenType {
 
 	OR("||"), AND("&&"), NOT('!'), XOR("^^"),
 	
-	BIT_SHIFT_LEFT("<<"), BIT_SHIFT_SIGNED_RIGHT(">>"), BIT_SHIFT_UNSIGNED_RIGHT(">>>"),
+	BIT_SHIFT(),
+	
+	BIT_SHIFT_LEFT(BIT_SHIFT, "<<"), BIT_SHIFT_SIGNED_RIGHT(BIT_SHIFT, ">>"), BIT_SHIFT_UNSIGNED_RIGHT(BIT_SHIFT, ">>>"),
 
 	HASH('#'),
 
@@ -76,11 +78,13 @@ public enum TokenType {
 
 	PLUS_ASSIGN(ASSIGN, "+="), MINUS_ASSIGN(ASSIGN, "-="), MUL_ASSIGN(ASSIGN, "*="), DIV_ASSIGN(ASSIGN, "/="), MODULO_ASSIGN(ASSIGN, "%="),
 
-	EQUALS("=="), NOT_EQUALS("!="),
+	COMPARAISON(),
+	
+	EQUALS(COMPARAISON, "=="), NOT_EQUALS(COMPARAISON, "!="),
 
-	LESS('<'), LESS_EQUALS("<="),
+	LESS(COMPARAISON, '<'), LESS_EQUALS(COMPARAISON, "<="),
 
-	GREATER('>'), GREATER_EQUALS(">=");
+	GREATER(COMPARAISON, '>'), GREATER_EQUALS(COMPARAISON, ">=");
 
 	private TokenType parent;
 	private boolean fixed = false;

@@ -22,6 +22,7 @@ import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.ident.ImportNode;
 import lu.pcy113.l3.parser.ast.let.ArgDefNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
+import lu.pcy113.l3.parser.ast.let.LetSetNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpression;
@@ -251,11 +252,11 @@ public class L3Parser {
 	}
 	
 	private Node parseComparisonExpression() {
-		return parseBinaryExpression(this::parseShiftExpression, TokenType.GREATER, TokenType.GREATER_EQUALS, TokenType.EQUALS, TokenType.NOT_EQUALS, TokenType.LESS, TokenType.LESS_EQUALS);
+		return parseBinaryExpression(this::parseShiftExpression, TokenType.COMPARAISON);
 	}
 	
 	private Node parseShiftExpression() {
-		return parseBinaryExpression(this::parseAdditiveExpression, TokenType.BIT_SHIFT_LEFT, TokenType.BIT_SHIFT_SIGNED_RIGHT, TokenType.BIT_SHIFT_UNSIGNED_RIGHT);
+		return parseBinaryExpression(this::parseAdditiveExpression, TokenType.BIT_SHIFT);
 	}
 	
 	private Node parseAdditiveExpression() {
@@ -297,7 +298,11 @@ public class L3Parser {
 			}
 		}
 		
-		if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+		if(iterator.peek(TokenType.ASSIGN)) {
+			final TokenType assignType = iterator.consume(TokenType.ASSIGN).getType();
+			expr = new LetSetNode(expr, parseExpression(), assignType);
+			return expr;
+		}else if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
 			expr = new UnaryNode(expr, iterator.consume(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS).getType(), false);
 		}
 		
