@@ -1,1 +1,5 @@
-x > 2;
+package lu.lang.base;
+
+fun int8 main() {
+	
+}

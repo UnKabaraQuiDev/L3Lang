@@ -20,6 +20,7 @@ import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.fun.ctrl.ReturnNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.ident.ImportNode;
+import lu.pcy113.l3.parser.ast.ident.PackageNode;
 import lu.pcy113.l3.parser.ast.let.ArgDefNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.let.LetSetNode;
@@ -51,26 +52,53 @@ public class L3Parser {
 
 	private void parseFileNode() {
 		file = new FileNode(this.path, PCUtils.getFileName(path));
+
+		if (iterator.peek(TokenType.PACKAGE)) {
+			final PackageNode packageNode = parsePackage();
+			iterator.consume(TokenType.SEMICOLON);
+			file.setPackageNode(packageNode);
+		}
+
 		while (iterator.hasNext()) {
-			file.addChild(parseLineExpression());
+			file.addChild(parseFileLineExpression());
 		}
 	}
 
-	private Node parseLineExpression() {
+	private PackageNode parsePackage() {
+		iterator.consume(TokenType.PACKAGE);
+		return new PackageNode(parseLongIdentifier(TokenType.DOT));
+	}
+
+	private Node parseFileLineExpression() {
+		if (iterator.peek(TokenType.LET)) {
+			final LetDefNode letDef = parseStaticLetDef();
+			iterator.consume(TokenType.SEMICOLON);
+			return letDef;
+
+		} else if (iterator.peek(TokenType.FUN)) {
+			return parseFunDef();
+
+		} else if (iterator.peek(TokenType.IMPORT)) {
+			final Node importNode = parseImport();
+			iterator.consume(TokenType.SEMICOLON);
+			return importNode;
+
+		} else {
+			throw new L3Exception("Unexpected token: " + iterator.peek());
+		}
+	}
+
+	private Node parseFunLineExpression() {
 		if (iterator.peek(TokenType.LET)) {
 			final LetDefNode letDef = parseLetDef();
 			iterator.consume(TokenType.SEMICOLON);
 			return letDef;
-		} else if (iterator.peek(TokenType.FUN)) {
-			return parseFunDef();
-		} else if(iterator.peek(TokenType.RETURN)) {
+			
+		} else if (iterator.peek(TokenType.RETURN)) {
 			final ReturnNode returnNode = parseReturn();
 			iterator.consume(TokenType.SEMICOLON);
 			return returnNode;
-		}else if(iterator.peek(TokenType.IMPORT)) {
-			final Node importNode = parseImport();
-			iterator.consume(TokenType.SEMICOLON);
-			return importNode;
+			
 		} else {
 			final Node chained = parseChainedExpression();
 			iterator.consume(TokenType.SEMICOLON);
@@ -82,13 +110,13 @@ public class L3Parser {
 		iterator.consume(TokenType.IMPORT);
 
 		final List<IdentifierNode> idents = parseLongIdentifier(TokenType.DOT);
-		
-		if(iterator.peek(TokenType.SEMICOLON)) {
+
+		if (iterator.peek(TokenType.SEMICOLON)) {
 			return new ImportNode(idents);
 		}
-		
+
 		iterator.consume(TokenType.AS);
-		
+
 		return new ImportNode(idents, parseSimpleIdentifier());
 	}
 
@@ -96,7 +124,7 @@ public class L3Parser {
 		final List<IdentifierNode> list = new ArrayList<>();
 
 		list.add(parseSimpleIdentifier());
-		
+
 		while (iterator.peek(separator)) {
 			iterator.consume(separator);
 			list.add(parseSimpleIdentifier());
@@ -111,7 +139,7 @@ public class L3Parser {
 		if (iterator.peek(TokenType.SEMICOLON)) {
 			return new ReturnNode();
 		}
-		
+
 		return new ReturnNode(parseExpression());
 	}
 
@@ -127,18 +155,18 @@ public class L3Parser {
 		iterator.consume(TokenType.PAREN_OPEN);
 		final List<ArgDefNode> args = parseFunArgsDef();
 		iterator.consume(TokenType.PAREN_CLOSE);
-		
+
 		iterator.consume(TokenType.CURLY_OPEN);
 		final List<Node> body = parseBlock();
 		iterator.consume(TokenType.CURLY_CLOSE);
-		
+
 		return new FunDefNode(type, identifier, args, body);
 	}
 
 	private List<Node> parseBlock() {
 		List<Node> list = new ArrayList<>();
 		while (!iterator.peek(TokenType.CURLY_CLOSE)) {
-			list.add(parseLineExpression());
+			list.add(parseFunLineExpression());
 		}
 		return list;
 	}
@@ -201,6 +229,23 @@ public class L3Parser {
 
 		return new LetDefNode(type, identifier);
 	}
+	
+	private LetDefNode parseStaticLetDef() {
+		iterator.consume(TokenType.LET);
+		iterator.consume(TokenType.STATIC);
+		
+		final TypeNode type = parseType();
+		final IdentifierNode identifier = parseSimpleIdentifier();
+		
+		if (iterator.peek(TokenType.STRICT_ASSIGN)) {
+			iterator.consume(TokenType.STRICT_ASSIGN);
+			final Node value = parseExpression();
+
+			return new LetDefNode(type, identifier, value);
+		}
+
+		return new LetDefNode(type, identifier);
+	}
 
 	private TypeNode parseType() {
 		if (iterator.peek(TokenType.PRIMITIVE_TYPE)) {
@@ -226,39 +271,39 @@ public class L3Parser {
 	private Node parseFirstBinaryExpression() {
 		return parseLogicalXORExpression();
 	}
-	
+
 	private Node parseLogicalXORExpression() {
 		return parseBinaryExpression(this::parseLogicalORExpression, TokenType.BIT_XOR);
 	}
-	
+
 	private Node parseLogicalORExpression() {
 		return parseBinaryExpression(this::parseLogicalANDExpression, TokenType.OR);
 	}
-	
+
 	private Node parseLogicalANDExpression() {
 		return parseBinaryExpression(this::parseBitORExpression, TokenType.AND);
 	}
-	
+
 	private Node parseBitORExpression() {
 		return parseBinaryExpression(this::parseBitXORExpression, TokenType.BIT_OR);
 	}
-	
+
 	private Node parseBitXORExpression() {
 		return parseBinaryExpression(this::parseBitANDExpression, TokenType.BIT_XOR);
 	}
-	
+
 	private Node parseBitANDExpression() {
 		return parseBinaryExpression(this::parseComparisonExpression, TokenType.BIT_AND);
 	}
-	
+
 	private Node parseComparisonExpression() {
 		return parseBinaryExpression(this::parseShiftExpression, TokenType.COMPARAISON);
 	}
-	
+
 	private Node parseShiftExpression() {
 		return parseBinaryExpression(this::parseAdditiveExpression, TokenType.BIT_SHIFT);
 	}
-	
+
 	private Node parseAdditiveExpression() {
 		return parseBinaryExpression(this::parseMultiplicativeExpression, TokenType.PLUS, TokenType.MINUS);
 	}
