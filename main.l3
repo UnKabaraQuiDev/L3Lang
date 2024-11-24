@@ -18,6 +18,10 @@ $(per).name = "bitch2";
 
  - - -
  
+ import lu.test.Main [as Main];
+ 
+ - - -
+ 
 #def MAX_STRING_SIZE 0xFFFF
 
 struct String {

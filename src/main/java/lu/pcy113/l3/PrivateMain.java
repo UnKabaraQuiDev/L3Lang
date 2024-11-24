@@ -41,8 +41,4 @@ public class PrivateMain {
 		System.out.println(parser.getFile().toJSONObject().toString(4));
 	}
 
-	private static void createParent(File file) {
-		file.getParentFile().mkdirs();
-	}
-
 }

@@ -18,6 +18,7 @@ import lu.pcy113.l3.parser.ast.fun.FunCallNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.fun.ctrl.ReturnNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
+import lu.pcy113.l3.parser.ast.ident.ImportNode;
 import lu.pcy113.l3.parser.ast.let.ArgDefNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
@@ -45,7 +46,7 @@ public class L3Parser {
 	}
 
 	private void parseFileNode() {
-		file = new FileNode(this.path, PCUtils.getFileExtension(path));
+		file = new FileNode(this.path, PCUtils.getFileName(path));
 		while (iterator.hasNext()) {
 			file.addChild(parseLineExpression());
 		}
@@ -62,11 +63,42 @@ public class L3Parser {
 			final ReturnNode returnNode = parseReturn();
 			iterator.consume(TokenType.SEMICOLON);
 			return returnNode;
+		}else if(iterator.peek(TokenType.IMPORT)) {
+			final Node importNode = parseImport();
+			iterator.consume(TokenType.SEMICOLON);
+			return importNode;
 		} else {
 			final Node chained = parseChainedExpression();
 			iterator.consume(TokenType.SEMICOLON);
 			return chained;
 		}
+	}
+
+	private Node parseImport() {
+		iterator.consume(TokenType.IMPORT);
+
+		final List<IdentifierNode> idents = parseLongIdentifier(TokenType.DOT);
+		
+		if(iterator.peek(TokenType.SEMICOLON)) {
+			return new ImportNode(idents);
+		}
+		
+		iterator.consume(TokenType.AS);
+		
+		return new ImportNode(idents, parseSimpleIdentifier());
+	}
+
+	private List<IdentifierNode> parseLongIdentifier(TokenType separator) {
+		final List<IdentifierNode> list = new ArrayList<>();
+
+		list.add(parseSimpleIdentifier());
+		
+		while (iterator.peek(separator)) {
+			iterator.consume(separator);
+			list.add(parseSimpleIdentifier());
+		}
+
+		return list;
 	}
 
 	private ReturnNode parseReturn() {
