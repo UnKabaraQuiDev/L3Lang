@@ -20,5 +20,5 @@ public class TypeNode extends Node {
 	public JSONObject toJSONObject() {
 		return super.toJSONObject().put("ident", ident);
 	}
-
+	
 }

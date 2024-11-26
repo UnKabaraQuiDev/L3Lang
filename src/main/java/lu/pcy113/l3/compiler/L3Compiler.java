@@ -186,6 +186,15 @@ public abstract class L3Compiler {
 		public File getOutDir() {
 			return outDir;
 		}
+
+		public void implement() {
+			throw new L3Exception("Not implemented.");
+		}
+
+		public void implement(Object obj) {
+			throw new L3Exception("Not implemented (" + obj.getClass() + "): " + obj + ".");
+		}
+
 	}
 
 }

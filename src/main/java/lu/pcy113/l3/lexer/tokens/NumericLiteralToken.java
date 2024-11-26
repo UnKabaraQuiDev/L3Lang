@@ -10,14 +10,25 @@ import lu.pcy113.l3.lexer.TokenType;
 public class NumericLiteralToken extends LiteralToken {
 
 	public static enum NumericValueType {
-		FLOAT_64("double", 8), FLOAT_32("float", 4), INT_128("int128", 16), INT_64("int64", 8), INT_32("int32", 4), INT_16("int16", 2), INT_8("int8", 1), BOOL_1("bool", 1);
-
+		//@formatter:off
+		FLOAT_64("double", 8, TokenType.DOUBLE),
+		FLOAT_32("float", 4, TokenType.FLOAT),
+		INT_128("int128", 16, TokenType.INT_128),
+		INT_64("int64", 8, TokenType.INT_64),
+		INT_32("int32", 4, TokenType.INT_32),
+		INT_16("int16", 2, TokenType.INT_16),
+		INT_8("int8", 1, TokenType.INT_8),
+		BOOL_1("bool", 1, TokenType.BOOLEAN);
+		//@formatter:on
+		
 		private final String name;
 		private final int bytes;
+		private final TokenType tt;
 
-		private NumericValueType(String name, int bytes) {
+		private NumericValueType(String name, int bytes, TokenType tt) {
 			this.name = name;
 			this.bytes = bytes;
+			this.tt = tt;
 		}
 
 		public String getName() {
@@ -26,6 +37,10 @@ public class NumericLiteralToken extends LiteralToken {
 
 		public int getBytes() {
 			return bytes;
+		}
+		
+		public TokenType getTokenType() {
+			return tt;
 		}
 
 	}
@@ -194,6 +209,10 @@ public class NumericLiteralToken extends LiteralToken {
 	
 	public Object getValue() {
 		return value;
+	}
+	
+	public NumericValueType getValueType() {
+		return valueType;
 	}
 
 	@Override

@@ -8,6 +8,7 @@ import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.fun.ctrl.ReturnNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
+import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
 
 public class FunDefVisitor {
 
@@ -29,13 +30,7 @@ public class FunDefVisitor {
 		for (Node n : fun.getChildren()) {
 			if (n instanceof ReturnNode ret) {
 				Node expr = ret.getExpression();
-				if (expr instanceof NumericLiteralNode num) {
-					NumericLiteralVisitor.visit(num, "rax", fu);
-				} else if (expr instanceof IdentifierNode ident) { // if var/arg
-					IdentifierNodeVisitor.visit(ident, "rax", fun, fu);;
-				} else if (expr instanceof FunCallNode funCall) {
-					FunCallVisitor.visit(funCall, fun, fu);
-				}
+				VisitorHelper.compute(fun, expr, "rax", fu);
 				FunDefVisitor.return_(fun, file, fu);
 			} else {
 				throw new RuntimeException();

@@ -6,6 +6,6 @@ fun int8 other(let int8 arg) {
 
 fun int8 main() {
 	
-	return other(4);
+	return 1+9;
 	
 }

@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 import lu.pcy113.l3.impl.JSONConvertible;
 
-public class Node implements JSONConvertible {
+public abstract class Node implements JSONConvertible {
 
 	@Override
 	public JSONObject toJSONObject() {
