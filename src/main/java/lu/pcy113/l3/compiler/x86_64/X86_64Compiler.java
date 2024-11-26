@@ -7,6 +7,7 @@ import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.compiler.L3Compiler;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86_64.memory.X86_64MemoryStatus;
+import lu.pcy113.l3.compiler.x86_64.visitors.FunDefVisitor;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.container.RuntimeNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
@@ -74,10 +75,17 @@ public class X86_64Compiler extends L3Compiler {
 		if (file.hasMain()) {
 			final FunDefNode funDef = file.getMain();
 
-			fu.writeln("normal_exit:");
-			fu.writeinstln("mov rdi, 12");
+			fu.writeinstln("call "+funDef.name());
+			
+			fu.writeln("exit:");
+			fu.writeinstln("mov rdi, rax");
+			// fu.writeinstln("mov rdi, 12");
 			fu.writeinstln("mov rax, 60");
 			fu.writeinstln("syscall");
+			
+			FunDefVisitor.visit(funDef, file, fu);
+			
+			file.stream().filter(PCUtils::<FunDefNode>isInstance).map(PCUtils::<FunDefNode>cast).filter(u -> !u.isMain()).forEach(fun -> FunDefVisitor.visit(fun, file, fu));
 		}
 
 	}

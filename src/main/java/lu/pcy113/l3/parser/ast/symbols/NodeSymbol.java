@@ -21,5 +21,10 @@ public class NodeSymbol<T extends Node> implements JSONConvertible {
 	public JSONObject toJSONObject() {
 		return new JSONObject().put("type", getClass().getSimpleName());
 	}
+	
+	@Override
+	public String toString() {
+		return toJSONObject().toString(4);
+	}
 
 }

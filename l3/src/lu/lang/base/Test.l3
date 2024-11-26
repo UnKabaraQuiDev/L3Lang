@@ -1,9 +1,11 @@
 package lu.lang.base;
 
+fun int8 other(let int8 arg) {
+	return arg;
+}
+
 fun int8 main() {
 	
-	let int8 returnValue = 0;
-	
-	return returnValue;
+	return other(4);
 	
 }

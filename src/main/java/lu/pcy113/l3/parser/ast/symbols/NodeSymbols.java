@@ -11,12 +11,12 @@ import org.json.JSONObject;
 
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.impl.JSONConvertible;
-import lu.pcy113.l3.parser.ast.MembersAccess;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
+import lu.pcy113.l3.parser.ast.let.MembersAccess;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
 import lu.pcy113.l3.parser.ast.math.UnaryExpressionNode;
@@ -68,7 +68,7 @@ public class NodeSymbols implements JSONConvertible {
 
 		} else if (expr instanceof NumericLiteralNode) {
 			// everything ok
-			
+
 		} else {
 			throw new L3Exception("Unsupported expression: " + expr);
 		}
@@ -89,6 +89,18 @@ public class NodeSymbols implements JSONConvertible {
 		if (b) {
 			throw new L3Exception("Symbol not found: " + expr);
 		}
+	}
+
+	public LetDefSymbol get(LetDefNode letDef) {
+		return this.<LetDefSymbol>getSymbol(letDef.getIdentifier().getValue());
+	}
+
+	public FunDefSymbol get(FunDefNode funDef) {
+		return this.<FunDefSymbol>getSymbol(funDef.getIdentifier().getValue());
+	}
+
+	public FunDefSymbol get(FunCallNode funCall) {
+		return this.<FunDefSymbol>getSymbol(((IdentifierNode) funCall.getParent()).getValue()); // doesn't support nested fun. call
 	}
 
 	@SuppressWarnings("unchecked")
@@ -135,6 +147,11 @@ public class NodeSymbols implements JSONConvertible {
 		});
 
 		return obj;
+	}
+
+	@Override
+	public String toString() {
+		return toJSONObject().toString(4);
 	}
 
 }

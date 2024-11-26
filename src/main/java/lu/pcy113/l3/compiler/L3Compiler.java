@@ -75,6 +75,10 @@ public abstract class L3Compiler {
 			writeln("\t" + string);
 		}
 
+		public void writeinstln(String string, String comment) {
+			writeinstln(string + "\t; " + comment);
+		}
+
 		public void writedataln(String string) {
 			dataBuilder.append("\t" + string + "\n");
 		}
@@ -134,7 +138,7 @@ public abstract class L3Compiler {
 
 		public FileWriter createWriter() {
 			final File realFile = new File(outDir, outFileAsm.getPath());
-			
+
 			try {
 				dataBuilder = new StringBuilder();
 				textBuilder = new StringBuilder();
@@ -147,7 +151,7 @@ public abstract class L3Compiler {
 
 		public void createFile() {
 			final File realFile = new File(outDir, outFileAsm.getPath());
-			
+
 			try {
 				if (!outDir.exists()) {
 					outDir.mkdirs();

@@ -8,4 +8,8 @@ public class FunDefSymbol extends NodeSymbol<FunDefNode> {
 		super(node);
 	}
 
+	public String name() {
+		return node.getIdentifier().getValue();
+	}
+
 }

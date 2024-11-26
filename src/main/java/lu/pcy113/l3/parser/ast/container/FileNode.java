@@ -50,7 +50,7 @@ public class FileNode extends ListNode {
 	public void setPackageNode(PackageNode packageNode) {
 		this.packageNode = packageNode;
 	}
-
+	
 	@Override
 	public JSONObject toJSONObject() {
 		return super.toJSONObject().put("package", packageNode.toJSONObject()).put("path", path).put("name", name);

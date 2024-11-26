@@ -11,8 +11,7 @@ import lu.pcy113.l3.lexer.impl.LexerIterator;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
-import lu.pcy113.l3.parser.ast.MembersAccess;
-import lu.pcy113.l3.parser.ast.PointerMemberAccess;
+import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
@@ -24,11 +23,13 @@ import lu.pcy113.l3.parser.ast.ident.PackageNode;
 import lu.pcy113.l3.parser.ast.let.ArgDefNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.let.LetSetNode;
+import lu.pcy113.l3.parser.ast.let.MembersAccess;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
 import lu.pcy113.l3.parser.ast.math.UnaryExpressionNode;
 import lu.pcy113.l3.parser.ast.pointer.PointerDerefNode;
+import lu.pcy113.l3.parser.ast.pointer.PointerMemberAccess;
 import lu.pcy113.l3.parser.ast.pointer.PointerRefNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
@@ -73,16 +74,16 @@ public class L3Parser {
 		if (iterator.peek(TokenType.LET)) {
 			final LetDefNode letDef = parseStaticLetDef();
 			iterator.consume(TokenType.SEMICOLON);
-			
+
 			file.getSymbols().registerLet(letDef);
-			
+
 			return letDef;
 
 		} else if (iterator.peek(TokenType.FUN)) {
-			final FunDefNode funDef = parseFunDef();
+			final FunDefNode funDef = parseFunDef(file);
 			file.getSymbols().registerFun(funDef);
 			return funDef;
-			
+
 		} else if (iterator.peek(TokenType.IMPORT)) {
 			final Node importNode = parseImport();
 			iterator.consume(TokenType.SEMICOLON);
@@ -93,24 +94,24 @@ public class L3Parser {
 		}
 	}
 
-	private Node parseFunLineExpression() {
+	private Node parseFunLineExpression(FunDefNode funDef) {
 		if (iterator.peek(TokenType.LET)) {
 			final LetDefNode letDef = parseLetDef();
 			iterator.consume(TokenType.SEMICOLON);
-			
-			file.getSymbols().checkDependencies(letDef.getValue());
-			file.getSymbols().registerLet(letDef);
-			
+
+			funDef.getSymbols().checkDependencies(letDef.getValue());
+			funDef.getSymbols().registerLet(letDef);
+
 			return letDef;
-			
+
 		} else if (iterator.peek(TokenType.RETURN)) {
 			final ReturnNode returnNode = parseReturn();
 			iterator.consume(TokenType.SEMICOLON);
-			
-			file.getSymbols().checkDependencies(returnNode.getExpression());
-			
+
+			funDef.getSymbols().checkDependencies(returnNode.getExpression());
+
 			return returnNode;
-			
+
 		} else {
 			final Node chained = parseChainedExpression();
 			iterator.consume(TokenType.SEMICOLON);
@@ -159,7 +160,7 @@ public class L3Parser {
 		return parseChainedExpression();
 	}
 
-	private FunDefNode parseFunDef() {
+	private FunDefNode parseFunDef(ListNode list) {
 		iterator.consume(TokenType.FUN);
 		final TypeNode type = parseType();
 		final IdentifierNode identifier = parseSimpleIdentifier();
@@ -167,18 +168,21 @@ public class L3Parser {
 		iterator.consume(TokenType.PAREN_OPEN);
 		final List<ArgDefNode> args = parseFunArgsDef();
 		iterator.consume(TokenType.PAREN_CLOSE);
+		
+		final FunDefNode funDef = new FunDefNode(list, type, identifier, args);
+		funDef.getArgs().forEach(v -> funDef.getSymbols().registerLet(v));
 
 		iterator.consume(TokenType.CURLY_OPEN);
-		final List<Node> body = parseBlock();
+		funDef.setChildren(parseBlock(funDef));
 		iterator.consume(TokenType.CURLY_CLOSE);
 
-		return new FunDefNode(type, identifier, args, body);
+		return funDef;
 	}
 
-	private List<Node> parseBlock() {
+	private List<Node> parseBlock(FunDefNode funDef) {
 		List<Node> list = new ArrayList<>();
 		while (!iterator.peek(TokenType.CURLY_CLOSE)) {
-			list.add(parseFunLineExpression());
+			list.add(parseFunLineExpression(funDef));
 		}
 		return list;
 	}
@@ -241,14 +245,14 @@ public class L3Parser {
 
 		return new LetDefNode(type, identifier);
 	}
-	
+
 	private LetDefNode parseStaticLetDef() {
 		iterator.consume(TokenType.LET);
 		iterator.consume(TokenType.STATIC);
-		
+
 		final TypeNode type = parseType();
 		final IdentifierNode identifier = parseSimpleIdentifier();
-		
+
 		if (iterator.peek(TokenType.STRICT_ASSIGN)) {
 			iterator.consume(TokenType.STRICT_ASSIGN);
 			final Node value = parseExpression();
@@ -330,12 +334,12 @@ public class L3Parser {
 
 	private Node parseIdentifier() {
 		Function<Node, Node> unaryHandler = (e) -> e;
-		
-		if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS, TokenType.BIT_NOT)) {
+
+		if (iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS, TokenType.BIT_NOT)) {
 			final TokenType type = iterator.consume().getType();
 			unaryHandler = (e) -> new UnaryExpressionNode(e, type, true);
 		}
-		
+
 		Node expr = parseSimpleIdentifier();
 
 		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW)) {
@@ -354,17 +358,17 @@ public class L3Parser {
 				break;
 			}
 		}
-		
-		if(iterator.peek(TokenType.ASSIGN)) {
+
+		if (iterator.peek(TokenType.ASSIGN)) {
 			final TokenType assignType = iterator.consume(TokenType.ASSIGN).getType();
 			expr = new LetSetNode(expr, parseExpression(), assignType);
 			return expr;
-		}else if(iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
+		} else if (iterator.peek(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS)) {
 			expr = new UnaryExpressionNode(expr, iterator.consume(TokenType.PLUS_PLUS, TokenType.MINUS_MINUS).getType(), false);
 		}
-		
+
 		expr = unaryHandler.apply(expr);
-		
+
 		return expr;
 	}
 
