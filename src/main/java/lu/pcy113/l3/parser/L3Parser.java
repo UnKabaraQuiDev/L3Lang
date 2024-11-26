@@ -79,8 +79,10 @@ public class L3Parser {
 			return letDef;
 
 		} else if (iterator.peek(TokenType.FUN)) {
-			return parseFunDef();
-
+			final FunDefNode funDef = parseFunDef();
+			file.getSymbols().registerFun(funDef);
+			return funDef;
+			
 		} else if (iterator.peek(TokenType.IMPORT)) {
 			final Node importNode = parseImport();
 			iterator.consume(TokenType.SEMICOLON);
@@ -157,7 +159,7 @@ public class L3Parser {
 		return parseChainedExpression();
 	}
 
-	private Node parseFunDef() {
+	private FunDefNode parseFunDef() {
 		iterator.consume(TokenType.FUN);
 		final TypeNode type = parseType();
 		final IdentifierNode identifier = parseSimpleIdentifier();

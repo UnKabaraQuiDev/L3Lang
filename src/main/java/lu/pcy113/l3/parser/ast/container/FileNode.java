@@ -4,10 +4,13 @@ import java.util.Arrays;
 
 import org.json.JSONObject;
 
+import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
+import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.ident.PackageNode;
+import lu.pcy113.pclib.PCUtils;
 
 public class FileNode extends ListNode {
 
@@ -23,8 +26,16 @@ public class FileNode extends ListNode {
 	public void addChild(Node child) {
 		children.add(child);
 	}
-
-	public String getPath() {
+	
+	public boolean hasMain() {
+		return children.stream().filter(PCUtils::<FunDefNode>isInstance).map(PCUtils::<FunDefNode>cast).anyMatch(FunDefNode::isMain);
+	}
+	
+	public FunDefNode getMain() {
+		return children.stream().filter(PCUtils::<FunDefNode>isInstance).map(PCUtils::<FunDefNode>cast).filter(FunDefNode::isMain).findFirst().orElseThrow(() -> new L3Exception("No main in " + path));
+	}
+	
+	public String getPath() {	
 		return path;
 	}
 

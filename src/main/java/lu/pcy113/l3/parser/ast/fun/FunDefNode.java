@@ -6,9 +6,11 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.let.ArgDefNode;
+import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class FunDefNode extends Node {
@@ -25,6 +27,10 @@ public class FunDefNode extends Node {
 		this.body = body;
 	}
 
+	public boolean isMain() {
+		return returnType instanceof PrimitiveTypeNode pt && pt.getType().matches(TokenType.INT_8) && identifier.getValue().equals("main") && args.isEmpty();
+	}
+	
 	public TypeNode getReturnType() {
 		return returnType;
 	}

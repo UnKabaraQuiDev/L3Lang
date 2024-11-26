@@ -6,9 +6,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 
+import lu.pcy113.l3.compiler.L3Compiler;
+import lu.pcy113.l3.compiler.x86_64.X86_64Compiler;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.parser.L3Parser;
+import lu.pcy113.l3.parser.ast.container.RuntimeNode;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class PrivateMain {
@@ -39,6 +42,9 @@ public class PrivateMain {
 			e.printStackTrace();
 		}
 		System.out.println(parser.getFile().toJSONObject().toString(4));
+		
+		L3Compiler compiler = new X86_64Compiler(new RuntimeNode(parser.getFile()), binDir);
+		compiler.compile();
 	}
 
 }
