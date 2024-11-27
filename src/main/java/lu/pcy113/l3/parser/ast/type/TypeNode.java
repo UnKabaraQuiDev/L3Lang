@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 import lu.pcy113.l3.parser.ast.abstr.Node;
 
-public class TypeNode extends Node {
+public abstract class TypeNode extends Node {
 
 	private String ident;
 
@@ -12,6 +12,8 @@ public class TypeNode extends Node {
 		this.ident = ident;
 	}
 
+	public abstract int computeSize();
+	
 	public String getIdent() {
 		return ident;
 	}
@@ -20,5 +22,5 @@ public class TypeNode extends Node {
 	public JSONObject toJSONObject() {
 		return super.toJSONObject().put("ident", ident);
 	}
-	
+
 }

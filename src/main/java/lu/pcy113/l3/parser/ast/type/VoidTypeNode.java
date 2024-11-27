@@ -5,5 +5,10 @@ public class VoidTypeNode extends TypeNode {
 	public VoidTypeNode() {
 		super("void");
 	}
+	
+	@Override
+	public int computeSize() {
+		return 0;
+	}
 
 }

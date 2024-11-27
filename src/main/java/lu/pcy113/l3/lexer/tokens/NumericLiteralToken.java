@@ -42,6 +42,15 @@ public class NumericLiteralToken extends LiteralToken {
 		public TokenType getTokenType() {
 			return tt;
 		}
+		
+		public static NumericValueType byTokenType(TokenType tt) {
+			for (NumericValueType v : NumericValueType.values()) {
+				if (v.tt == tt) {
+					return v;
+				}
+			}
+			return null;
+		}
 
 	}
 

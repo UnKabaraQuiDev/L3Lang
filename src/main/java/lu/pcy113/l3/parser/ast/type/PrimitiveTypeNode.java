@@ -3,6 +3,7 @@ package lu.pcy113.l3.parser.ast.type;
 import org.json.JSONObject;
 
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 
 public class PrimitiveTypeNode extends TypeNode {
@@ -19,6 +20,11 @@ public class PrimitiveTypeNode extends TypeNode {
 		this.type = type;
 	}
 
+	@Override
+	public int computeSize() {
+		return NumericLiteralToken.NumericValueType.byTokenType(type).getBytes();
+	}
+	
 	public TokenType getType() {
 		return type;
 	}
