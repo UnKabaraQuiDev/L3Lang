@@ -75,8 +75,11 @@ public abstract class L3Compiler {
 			writeln("\t" + string);
 		}
 
+		public static final int TAB_WIDTH = 4;
+		private int commentIndent = 5 * TAB_WIDTH;
+
 		public void writeinstln(String string, String comment) {
-			writeinstln(string + "\t; " + comment);
+			writeinstln(string + "\t".repeat((PCUtils.snap(commentIndent - string.length(), TAB_WIDTH)) / TAB_WIDTH) + "; " + comment);
 		}
 
 		public void writedataln(String string) {

@@ -27,8 +27,6 @@ public class BinaryExpressionVisitor {
 
 		final ImplicitType implicitType = ImplicitType.computeType(bin, parent);
 
-		System.out.println(implicitType);
-		
 		String retReg = null;
 		if (implicitType.isInt()) {
 			retReg = integer(bin, parent, regLeft, regRight, fu);
