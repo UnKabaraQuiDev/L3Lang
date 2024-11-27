@@ -2,6 +2,7 @@ package lu.pcy113.l3.parser.ast.abstr;
 
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.lexer.TokenType;
+import lu.pcy113.l3.lexer.tokens.NumericLiteralToken.NumericValueType;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
@@ -39,8 +40,8 @@ public class ImplicitType {
 			} else if (this.isFloat() || other.isFloat()) {
 				return new ImplicitType(new PrimitiveTypeNode(TokenType.FLOAT));
 			} else if (this.isInt() || other.isInt()) {
-				return ((PrimitiveTypeNode) this.getType()).getType().ordinal() > ((PrimitiveTypeNode) other.getType()).getType().ordinal() ? this.clone() : other.clone();
-			} else if (this.isBool() || other.isBool()) {
+				return NumericValueType.byTokenType(((PrimitiveTypeNode) this.getType()).getType()).ordinal() > NumericValueType.byTokenType(((PrimitiveTypeNode) other.getType()).getType()).ordinal() ? this.clone() : other.clone();
+			} else if (this.isBool() && other.isBool()) {
 				return new ImplicitType(new PrimitiveTypeNode(TokenType.BOOLEAN));
 			}
 		}

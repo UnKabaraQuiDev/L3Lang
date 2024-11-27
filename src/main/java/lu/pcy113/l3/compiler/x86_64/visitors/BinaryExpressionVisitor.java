@@ -27,6 +27,8 @@ public class BinaryExpressionVisitor {
 
 		final ImplicitType implicitType = ImplicitType.computeType(bin, parent);
 
+		System.out.println(implicitType);
+		
 		String retReg = null;
 		if (implicitType.isInt()) {
 			retReg = integer(bin, parent, regLeft, regRight, fu);
@@ -62,6 +64,8 @@ public class BinaryExpressionVisitor {
 
 		final TokenType operator = node.getOperator();
 
+		fu.writeinstln("; float_double");
+		
 		if (nodeFloat) {
 			if (leftFloat) {
 				fu.writeinstln("movd " + regLeftFP + ", " + regLeft);
@@ -163,6 +167,8 @@ public class BinaryExpressionVisitor {
 
 		final TokenType operator = node.getOperator();
 
+		fu.writeinstln("; integer");
+		
 		switch (operator) {
 		case OR:
 		case PLUS:

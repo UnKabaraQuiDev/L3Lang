@@ -7,8 +7,8 @@ fun int8 other(let int8 arg) {
 fun int8 main() {
 	
 	let int8 val = 9;
-	let int8 val2 = 1;
+	let bool val2 = false;
 	
-	return val + val2;
+	return val * false;
 	
 }

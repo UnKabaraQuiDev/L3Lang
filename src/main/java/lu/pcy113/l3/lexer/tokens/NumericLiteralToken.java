@@ -11,14 +11,14 @@ public class NumericLiteralToken extends LiteralToken {
 
 	public static enum NumericValueType {
 		//@formatter:off
+		BOOL_1("bool", 1, TokenType.BOOLEAN),
 		FLOAT_64("double", 8, TokenType.DOUBLE),
 		FLOAT_32("float", 4, TokenType.FLOAT),
 		INT_128("int128", 16, TokenType.INT_128),
 		INT_64("int64", 8, TokenType.INT_64),
 		INT_32("int32", 4, TokenType.INT_32),
 		INT_16("int16", 2, TokenType.INT_16),
-		INT_8("int8", 1, TokenType.INT_8),
-		BOOL_1("bool", 1, TokenType.BOOLEAN);
+		INT_8("int8", 1, TokenType.INT_8);
 		//@formatter:on
 		
 		private final String name;
