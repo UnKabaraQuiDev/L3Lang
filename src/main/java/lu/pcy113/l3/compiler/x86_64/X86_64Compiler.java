@@ -45,7 +45,7 @@ public class X86_64Compiler extends L3Compiler {
 	}
 
 	private FileCompilerUnit compileFile(FileNode file, boolean main) {
-		System.out.println("--- Compiling file: " + file.getName()+" to: " + file.getPath());
+		System.out.println("--- Compiling file: " + file.getName() + " to: " + file.getPath());
 		FileCompilerUnit fu = new FileCompilerUnit(super.outDir, file.getPath());
 
 		fu.createFile();
@@ -78,9 +78,11 @@ public class X86_64Compiler extends L3Compiler {
 
 	private void compile(final FileNode file, final FileCompilerUnit fu, final boolean main) {
 		if (file.hasMain()) {
-			final FunDefNode funDef = file.getMain();
+			final FunDefNode fun = file.getMain();
 
-			fu.writeinstln("call " + funDef.name());
+			System.out.println(file.getSymbols());
+
+			fu.writeinstln("call " + file.getSymbols().get(fun).name());
 
 			fu.writeln("exit:");
 			fu.writeinstln("mov rdi, rax");
@@ -90,7 +92,11 @@ public class X86_64Compiler extends L3Compiler {
 		}
 
 		file.stream().forEach(System.err::println);
-		file.stream().filter((c) -> c instanceof FunDefNode).peek(n -> System.out.println("compiling: " + n + " to: " + fu.getOutFileAsm())).map(PCUtils::<FunDefNode>cast).forEach(fun -> FunDefVisitor.visit(fun, file, fu));
+		file.stream().filter((c) -> c instanceof FunDefNode).map(PCUtils::<FunDefNode>cast).forEach(fun -> {
+			FunDefVisitor.visit(fun, file, fu);
+
+			fu.writetextln("global " + file.getSymbols().get(fun).name());
+		});
 
 	}
 

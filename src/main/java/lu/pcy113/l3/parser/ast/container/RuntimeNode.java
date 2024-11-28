@@ -7,10 +7,11 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.symbols.NodeSymbols;
 
-public class RuntimeNode extends Node {
+public class RuntimeNode extends ListNode {
 
 	private FileNode mainNode;
 	private List<FileNode> files;
@@ -19,6 +20,12 @@ public class RuntimeNode extends Node {
 	public RuntimeNode(FileNode mainNode, List<FileNode> files) {
 		this.mainNode = mainNode;
 		this.files = files;
+		
+		this.mainNode.getSymbols().setParent(this.getSymbols());
+		this.files.forEach(f -> f.getSymbols().setParent(this.getSymbols()));
+		
+		this.getSymbols().registerFile(mainNode);
+		this.files.forEach(f -> this.getSymbols().registerFile(f));
 	}
 
 	public RuntimeNode(FileNode mainNode) {

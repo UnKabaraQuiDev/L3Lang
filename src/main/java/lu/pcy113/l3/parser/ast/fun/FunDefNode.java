@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import lu.pcy113.l3.impl.ASMNamed;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
@@ -15,7 +14,7 @@ import lu.pcy113.l3.parser.ast.let.ArgDefNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
-public class FunDefNode extends ListNode implements ASMNamed {
+public class FunDefNode extends ListNode {
 
 	private TypeNode returnType;
 	private IdentifierNode identifier;
@@ -42,11 +41,6 @@ public class FunDefNode extends ListNode implements ASMNamed {
 
 	public List<ArgDefNode> getArgs() {
 		return args;
-	}
-
-	@Override
-	public String name() {
-		return identifier.getValue();
 	}
 
 	@Override

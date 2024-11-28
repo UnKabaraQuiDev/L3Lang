@@ -2,10 +2,15 @@ package lu.pcy113.l3.compiler.x86_64.visitors;
 
 import lu.pcy113.l3.compiler.L3Compiler.FileCompilerUnit;
 import lu.pcy113.l3.parser.ast.abstr.Node;
+import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
+import lu.pcy113.l3.parser.ast.ident.ImportNode;
+import lu.pcy113.l3.parser.ast.let.MembersAccess;
+import lu.pcy113.l3.parser.ast.symbols.FileSymbol;
 import lu.pcy113.l3.parser.ast.symbols.FunDefSymbol;
+import lu.pcy113.l3.parser.ast.symbols.ImportSymbol;
 
 public class FunCallVisitor {
 
@@ -15,16 +20,28 @@ public class FunCallVisitor {
 
 			VisitorHelper.compute(parent, arg, FunDefVisitor.REGISTER_ORDER[i], fu);
 		}
-		
-		fu.writeinstln("call " + resolveASMName(funCall, parent));
+
+		final String asmName = resolveASMName(funCall, parent);
+
+		fu.writetextln("extern " + asmName);
+
+		fu.writeinstln("call " + asmName);
 	}
 
 	private static String resolveASMName(FunCallNode funCall, FunDefNode parent) {
 		Node caller = funCall.getParent();
-		if(caller instanceof IdentifierNode ident) {
+		if (caller instanceof IdentifierNode ident) {
 			return parent.getSymbols().<FunDefSymbol>getSymbol(ident.getValue()).name();
+		} else if (caller instanceof MembersAccess access) {
+			if (parent.getSymbols().contains(((IdentifierNode) access.getParent()).getValue())) { // file access (needs rework)
+				ImportNode in = parent.getSymbols().<ImportSymbol>getSymbol(((IdentifierNode) access.getParent()).getValue()).getNode();
+				FileNode fn = parent.getSymbols().<FileSymbol>getSymbol(in.getValue()).getNode();
+
+				return fn.getSymbols().<FunDefSymbol>getSymbol(access.getProp().getValue()).name();
+			}
 		}
-		return null;
+
+		throw new RuntimeException();
 	}
 
 }

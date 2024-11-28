@@ -41,7 +41,7 @@ public class PrivateMain {
 			parser = new L3Parser(lexer.iterator(), mainFile);
 			parser.parse();
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 		
 		final FileNode file1 = parser.getFile();
@@ -56,14 +56,14 @@ public class PrivateMain {
 			parser = new L3Parser(lexer.iterator(), otherFile);
 			parser.parse();
 		} catch (Exception e) {
-			e.printStackTrace();
+			throw e;
 		}
 		
 		final FileNode file2 = parser.getFile();
 		System.out.println(file2.toJSONObject().toString(4));
 
 		final RuntimeNode runtime = new RuntimeNode(file1, Arrays.asList(file2));
-
+		
 		X86_64Compiler compiler = new X86_64Compiler(runtime, binDir);
 		compiler.compile();
 	}

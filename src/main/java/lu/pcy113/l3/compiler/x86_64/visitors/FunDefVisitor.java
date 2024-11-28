@@ -6,6 +6,7 @@ import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.fun.ctrl.ReturnNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
+import lu.pcy113.l3.parser.ast.symbols.FunDefSymbol;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.pclib.PCUtils;
 import lu.pcy113.pclib.logger.GlobalLogger;
@@ -15,9 +16,11 @@ public class FunDefVisitor {
 	public static final String[] REGISTER_ORDER = { "rdi", "rsi", "rdx", "rcx", "r8", "r9" };
 
 	public static void visit(FunDefNode fun, FileNode file, FileCompilerUnit fu) {
-		GlobalLogger.log("Compiling: " + fun.name());
+		final FunDefSymbol funSymbol = file.getSymbols().get(fun);
+		
+		GlobalLogger.log("Compiling: " + funSymbol.name());
 
-		fu.writeln(fun.name() + ":");
+		fu.writeln(funSymbol.name() + ":");
 		fu.writeinstln("push rbp", "Save caller stackframe");
 		fu.writeinstln("mov rbp, rsp", "Set new stackframe");
 

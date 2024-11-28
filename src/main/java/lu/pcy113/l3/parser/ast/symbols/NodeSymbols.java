@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.impl.JSONConvertible;
 import lu.pcy113.l3.parser.ast.abstr.Node;
+import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
@@ -31,6 +32,10 @@ public class NodeSymbols implements JSONConvertible {
 	private Map<String, List<NodeSymbol<?>>> symbols = new HashMap<String, List<NodeSymbol<?>>>();
 	private NodeSymbols parent;
 
+	public void registerFile(FileNode fileNode) {
+		addSymbol(fileNode.getPackageNode().getValue()+"."+fileNode.getName(), new FileSymbol(fileNode));
+	}
+	
 	public void registerImport(ImportNode importNode) {
 		addSymbol(importNode.getIdentifier().getValue(), new ImportSymbol(importNode));
 	}
@@ -147,7 +152,7 @@ public class NodeSymbols implements JSONConvertible {
 
 	@Override
 	public JSONObject toJSONObject() {
-		final JSONObject obj = new JSONObject();
+		final JSONObject obj = parent == null ? new JSONObject() : parent.toJSONObject();
 
 		symbols.forEach((k, v) -> {
 			obj.accumulate("symbols", new JSONObject().put("key", k).put("values", new JSONArray(v.stream().map(NodeSymbol::toJSONObject).collect(Collectors.toList()))));
