@@ -1,5 +1,5 @@
 package lu.lang.base;
 
-fun int8 other(let int8 arg) {
-	return arg;
+fun int8 other(let int8 arg, let bool boolean) {
+	return (arg+1) * boolean;
 }

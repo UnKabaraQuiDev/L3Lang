@@ -4,5 +4,5 @@ import lu.lang.base.Test2;
 
 fun int8 main() {
 	
-	return Test2.other(2);
+	return Test2.other(2, true);
 }
