@@ -1,0 +1,5 @@
+package lu.lang.base;
+
+fun int8 other(let int8 arg) {
+	return arg;
+}

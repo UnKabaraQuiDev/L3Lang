@@ -23,7 +23,11 @@ public class X86_64Compiler extends L3Compiler {
 
 	@Override
 	public void compile() {
-		final FileCompilerUnit mainFu = compileFile(super.root.getMainNode());
+		final FileCompilerUnit mainFu = compileFile(super.root.getMainNode(), true);
+
+		for (FileNode otherFiles : super.root.getFiles()) {
+			compileFile(otherFiles, false);
+		}
 
 		String inFiles = "./" + PCUtils.replaceFileExtension(super.root.getMainNode().getPath(), "o");
 		for (FileNode p : super.root.getFiles()) {
@@ -40,20 +44,22 @@ public class X86_64Compiler extends L3Compiler {
 		}
 	}
 
-	private FileCompilerUnit compileFile(FileNode file) {
-		System.out.println("--- Compiling file: " + file.getName());
+	private FileCompilerUnit compileFile(FileNode file, boolean main) {
+		System.out.println("--- Compiling file: " + file.getName()+" to: " + file.getPath());
 		FileCompilerUnit fu = new FileCompilerUnit(super.outDir, file.getPath());
 
 		fu.createFile();
 
 		fw = fu.createWriter();
 
-		fu.writetextln("global _start");
-
 		fu.writeln("BITS 64");
-		fu.writeln("_start:");
 
-		compile(file, fu);
+		if (main) {
+			fu.writetextln("global _start");
+			fu.writeln("_start:");
+		}
+
+		compile(file, fu, main);
 
 		fu.appendBSS();
 		fu.appendText();
@@ -70,23 +76,21 @@ public class X86_64Compiler extends L3Compiler {
 		return fu;
 	}
 
-	private void compile(final FileNode file, final FileCompilerUnit fu) {
-
+	private void compile(final FileNode file, final FileCompilerUnit fu, final boolean main) {
 		if (file.hasMain()) {
 			final FunDefNode funDef = file.getMain();
 
-			fu.writeinstln("call "+funDef.name());
-			
+			fu.writeinstln("call " + funDef.name());
+
 			fu.writeln("exit:");
 			fu.writeinstln("mov rdi, rax");
 			// fu.writeinstln("mov rdi, 12");
 			fu.writeinstln("mov rax, 60");
 			fu.writeinstln("syscall");
-			
-			FunDefVisitor.visit(funDef, file, fu);
-			
-			file.stream().filter(PCUtils::<FunDefNode>isInstance).map(PCUtils::<FunDefNode>cast).filter(u -> !u.isMain()).forEach(fun -> FunDefVisitor.visit(fun, file, fu));
 		}
+
+		file.stream().forEach(System.err::println);
+		file.stream().filter((c) -> c instanceof FunDefNode).peek(n -> System.out.println("compiling: " + n + " to: " + fu.getOutFileAsm())).map(PCUtils::<FunDefNode>cast).forEach(fun -> FunDefVisitor.visit(fun, file, fu));
 
 	}
 

@@ -11,6 +11,7 @@ import lu.pcy113.l3.compiler.x86_64.X86_64Compiler;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.parser.L3Parser;
+import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.container.RuntimeNode;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
@@ -27,23 +28,43 @@ public class PrivateMain {
 		File srcDir = new File(l3Dir, "src/");
 		File binDir = new File(l3Dir, "bin/");
 
-		String mainFile = "lu/lang/base/Test.l3";
-
-		L3Lexer lexer = new L3Lexer(new FileReader(new File(srcDir, mainFile)));
-		System.out.println("Input:\n" + lexer.getInput());
-		lexer.lexe();
-		lexer.getTokens().forEach(System.out::println);
+		final String mainFile = "lu/lang/base/Test.l3";
+		final String otherFile = "lu/lang/base/Test2.l3";
 
 		L3Parser parser = null;
 		try {
+			L3Lexer lexer = new L3Lexer(new FileReader(new File(srcDir, mainFile)));
+			System.out.println("Input:\n" + lexer.getInput());
+			lexer.lexe();
+			lexer.getTokens().forEach(System.out::println);
+			
 			parser = new L3Parser(lexer.iterator(), mainFile);
 			parser.parse();
-		}catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println(parser.getFile().toJSONObject().toString(4));
 		
-		L3Compiler compiler = new X86_64Compiler(new RuntimeNode(parser.getFile()), binDir);
+		final FileNode file1 = parser.getFile();
+		System.out.println(file1.toJSONObject().toString(4));
+		
+		try {
+			L3Lexer lexer = new L3Lexer(new FileReader(new File(srcDir, otherFile)));
+			System.out.println("Input:\n" + lexer.getInput());
+			lexer.lexe();
+			lexer.getTokens().forEach(System.out::println);
+			
+			parser = new L3Parser(lexer.iterator(), otherFile);
+			parser.parse();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		final FileNode file2 = parser.getFile();
+		System.out.println(file2.toJSONObject().toString(4));
+
+		final RuntimeNode runtime = new RuntimeNode(file1, Arrays.asList(file2));
+
+		X86_64Compiler compiler = new X86_64Compiler(runtime, binDir);
 		compiler.compile();
 	}
 

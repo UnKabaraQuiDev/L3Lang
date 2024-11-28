@@ -28,11 +28,11 @@ public class FileNode extends ListNode {
 	}
 	
 	public boolean hasMain() {
-		return children.stream().filter(PCUtils::<FunDefNode>isInstance).map(PCUtils::<FunDefNode>cast).anyMatch(FunDefNode::isMain);
+		return children.stream().filter((c) -> c instanceof FunDefNode).map(PCUtils::<FunDefNode>cast).anyMatch(FunDefNode::isMain);
 	}
 	
 	public FunDefNode getMain() {
-		return children.stream().filter(PCUtils::<FunDefNode>isInstance).map(PCUtils::<FunDefNode>cast).filter(FunDefNode::isMain).findFirst().orElseThrow(() -> new L3Exception("No main in " + path));
+		return children.stream().filter((c) -> c instanceof FunDefNode).map(PCUtils::<FunDefNode>cast).filter(FunDefNode::isMain).findFirst().orElseThrow(() -> new L3Exception("No main in " + path));
 	}
 	
 	public String getPath() {	

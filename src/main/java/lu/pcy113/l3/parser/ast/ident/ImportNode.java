@@ -23,6 +23,14 @@ public class ImportNode extends Node {
 		this.identifier = identifier;
 	}
 	
+	public IdentifierNode getIdentifier() {
+		return identifier;
+	}
+	
+	public List<IdentifierNode> getIdents() {
+		return idents;
+	}
+	
 	@Override
 	public JSONObject toJSONObject() {
 		return super.toJSONObject().put("idents", new JSONArray(idents.stream().map(Node::toJSONObject).collect(Collectors.toList()))).put("identifier", identifier.toJSONObject());

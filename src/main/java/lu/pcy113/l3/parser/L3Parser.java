@@ -81,12 +81,17 @@ public class L3Parser {
 
 		} else if (iterator.peek(TokenType.FUN)) {
 			final FunDefNode funDef = parseFunDef(file);
+			
 			file.getSymbols().registerFun(funDef);
+			
 			return funDef;
 
 		} else if (iterator.peek(TokenType.IMPORT)) {
-			final Node importNode = parseImport();
+			final ImportNode importNode = parseImport();
 			iterator.consume(TokenType.SEMICOLON);
+			
+			file.getSymbols().registerImport(importNode);
+			
 			return importNode;
 
 		} else {
@@ -119,7 +124,7 @@ public class L3Parser {
 		}
 	}
 
-	private Node parseImport() {
+	private ImportNode parseImport() {
 		iterator.consume(TokenType.IMPORT);
 
 		final List<IdentifierNode> idents = parseLongIdentifier(TokenType.DOT);
@@ -129,7 +134,7 @@ public class L3Parser {
 		}
 
 		iterator.consume(TokenType.AS);
-
+		
 		return new ImportNode(idents, parseSimpleIdentifier());
 	}
 

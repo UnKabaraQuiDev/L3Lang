@@ -2,6 +2,7 @@ package lu.pcy113.l3.compiler.x86_64.visitors;
 
 import lu.pcy113.l3.compiler.L3Compiler.FileCompilerUnit;
 import lu.pcy113.l3.parser.ast.abstr.Node;
+import lu.pcy113.l3.parser.ast.fun.FunCallNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
@@ -16,6 +17,8 @@ public class VisitorHelper {
 			IdentifierNodeVisitor.visit(ident, reg, parent, fu);
 		} else if (node instanceof BinaryExpressionNode bin) {
 			BinaryExpressionVisitor.visit(bin, reg, parent, fu);
+		} else if (node instanceof FunCallNode funCall) {
+			FunCallVisitor.visit(funCall, parent, fu);
 		} else {
 			fu.implement(node);
 		}

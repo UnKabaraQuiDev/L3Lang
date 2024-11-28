@@ -15,6 +15,7 @@ import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
+import lu.pcy113.l3.parser.ast.ident.ImportNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.let.MembersAccess;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
@@ -30,6 +31,10 @@ public class NodeSymbols implements JSONConvertible {
 	private Map<String, List<NodeSymbol<?>>> symbols = new HashMap<String, List<NodeSymbol<?>>>();
 	private NodeSymbols parent;
 
+	public void registerImport(ImportNode importNode) {
+		addSymbol(importNode.getIdentifier().getValue(), new ImportSymbol(importNode));
+	}
+	
 	public void registerLet(LetDefNode letDef) {
 		addSymbol(letDef.getIdentifier().getValue(), new LetDefSymbol(letDef));
 	}
@@ -58,8 +63,10 @@ public class NodeSymbols implements JSONConvertible {
 			checkDependencies(unary.getChild());
 
 		} else if (expr instanceof MembersAccess access) {
-			final TypeNode type = evalType(access.getParent());
-			throwError(type == null, access.getParent());
+			checkDependencies(access.getParent());
+			
+			/*final TypeNode type = evalType(access.getParent());
+			throwError(type == null, access.getParent());*/
 			// if user type -> match access.getProp() with a property of the type
 
 		} else if (expr instanceof IdentifierNode ident) {

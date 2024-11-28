@@ -1,14 +1,8 @@
 package lu.lang.base;
 
-fun int8 other(let int8 arg) {
-	return arg;
-}
+import lu.lang.base.Test2;
 
 fun int8 main() {
 	
-	let int8 val = 9;
-	let bool val2 = false;
-	
-	return val * false;
-	
+	return Test2.other(2);
 }
