@@ -31,6 +31,7 @@ import lu.pcy113.l3.parser.ast.math.UnaryExpressionNode;
 import lu.pcy113.l3.parser.ast.pointer.PointerDerefNode;
 import lu.pcy113.l3.parser.ast.pointer.PointerMemberAccess;
 import lu.pcy113.l3.parser.ast.pointer.PointerRefNode;
+import lu.pcy113.l3.parser.ast.type.PointerTypeNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 import lu.pcy113.pclib.PCUtils;
@@ -81,17 +82,17 @@ public class L3Parser {
 
 		} else if (iterator.peek(TokenType.FUN)) {
 			final FunDefNode funDef = parseFunDef(file);
-			
+
 			file.getSymbols().registerFun(funDef);
-			
+
 			return funDef;
 
 		} else if (iterator.peek(TokenType.IMPORT)) {
 			final ImportNode importNode = parseImport();
 			iterator.consume(TokenType.SEMICOLON);
-			
+
 			file.getSymbols().registerImport(importNode);
-			
+
 			return importNode;
 
 		} else {
@@ -113,7 +114,9 @@ public class L3Parser {
 			final ReturnNode returnNode = parseReturn();
 			iterator.consume(TokenType.SEMICOLON);
 
-			funDef.getSymbols().checkDependencies(returnNode.getExpression());
+			if (returnNode.hasExpression()) {
+				funDef.getSymbols().checkDependencies(returnNode.getExpression());
+			}
 
 			return returnNode;
 
@@ -134,7 +137,7 @@ public class L3Parser {
 		}
 
 		iterator.consume(TokenType.AS);
-		
+
 		return new ImportNode(idents, parseSimpleIdentifier());
 	}
 
@@ -173,7 +176,7 @@ public class L3Parser {
 		iterator.consume(TokenType.PAREN_OPEN);
 		final List<ArgDefNode> args = parseFunArgsDef();
 		iterator.consume(TokenType.PAREN_CLOSE);
-		
+
 		final FunDefNode funDef = new FunDefNode(list, type, identifier, args);
 		funDef.getArgs().forEach(v -> funDef.getSymbols().registerLet(v));
 
@@ -217,7 +220,7 @@ public class L3Parser {
 	private Node parseChainedExpression() {
 		Node expr = parseFirstBinaryExpression();
 
-		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW, TokenType.DOLLAR)) {
+		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW, TokenType.DOLLAR, TokenType.HASH)) {
 			iterator.consume();
 			// chained long identifier
 			switch (iterator.peek(-1)) {
@@ -227,8 +230,13 @@ public class L3Parser {
 			case ARROW:
 				expr = new PointerMemberAccess(expr, parseSimpleIdentifier());
 				break;
+			case HASH:
+				iterator.consume(TokenType.PAREN_OPEN);
+				expr = new FunCallNode(expr, parseFunArgs(), true);
+				iterator.consume(TokenType.PAREN_CLOSE);
+				break;
 			case PAREN_OPEN:
-				expr = new FunCallNode(expr, parseFunArgs());
+				expr = new FunCallNode(expr, parseFunArgs(), false);
 				iterator.consume(TokenType.PAREN_CLOSE);
 				break;
 			}
@@ -269,11 +277,18 @@ public class L3Parser {
 	}
 
 	private TypeNode parseType() {
+		TypeNode type = null;
+
 		if (iterator.peek(TokenType.PRIMITIVE_TYPE)) {
-			return new PrimitiveTypeNode(iterator.consume(TokenType.PRIMITIVE_TYPE));
+			type = new PrimitiveTypeNode(iterator.consume(TokenType.PRIMITIVE_TYPE));
 		}
-		notImplemented();
-		return null;
+
+		while (iterator.peek(TokenType.COLON)) {
+			iterator.consume(TokenType.COLON);
+			type = new PointerTypeNode(type);
+		}
+
+		return type;
 	}
 
 	private Node parseBinaryExpression(Supplier<Node> leftProvider, TokenType... opTypes) {
@@ -347,7 +362,7 @@ public class L3Parser {
 
 		Node expr = parseSimpleIdentifier();
 
-		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW)) {
+		while (iterator.peek(TokenType.DOT, TokenType.PAREN_OPEN, TokenType.ARROW, TokenType.HASH)) {
 			iterator.consume();
 			// chained long identifier
 			switch (iterator.peek(-1)) {
@@ -357,8 +372,13 @@ public class L3Parser {
 			case ARROW:
 				expr = new PointerMemberAccess(expr, parseSimpleIdentifier());
 				break;
+			case HASH:
+				iterator.consume(TokenType.PAREN_OPEN);
+				expr = new FunCallNode(expr, parseFunArgs(), true);
+				iterator.consume(TokenType.PAREN_CLOSE);
+				break;
 			case PAREN_OPEN:
-				expr = new FunCallNode(expr, parseFunArgs());
+				expr = new FunCallNode(expr, parseFunArgs(), false);
 				iterator.consume(TokenType.PAREN_CLOSE);
 				break;
 			}

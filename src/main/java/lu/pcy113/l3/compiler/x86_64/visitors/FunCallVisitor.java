@@ -8,36 +8,59 @@ import lu.pcy113.l3.parser.ast.fun.FunCallNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.ident.ImportNode;
 import lu.pcy113.l3.parser.ast.let.MembersAccess;
+import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
 import lu.pcy113.l3.parser.ast.symbols.FileSymbol;
 import lu.pcy113.l3.parser.ast.symbols.FunDefSymbol;
 import lu.pcy113.l3.parser.ast.symbols.ImportSymbol;
+import lu.pcy113.pclib.datastructure.pair.Pairs;
+import lu.pcy113.pclib.datastructure.pair.ReadOnlyPair;
 
 public class FunCallVisitor {
 
 	public static void visit(FunCallNode funCall, ListNode parent, FileCompilerUnit fu) {
+
+		if (funCall.isPreset()) {
+			handlePreset(funCall, parent, fu);
+			return;
+		}
+
 		for (int i = 0; i < funCall.getArgs().size(); i++) {
 			final Node arg = funCall.getArgs().get(i);
 
 			VisitorHelper.compute(parent, arg, FunDefVisitor.REGISTER_ORDER[i], fu);
 		}
 
-		final String asmName = resolveASMName(funCall, parent);
+		final ReadOnlyPair<Boolean, FunDefSymbol> funDefRet = resolveASMName(funCall, parent);
+		final FunDefSymbol funDefSymbol = funDefRet.getValue();
+		final boolean internal = funDefRet.getKey();
 
-		fu.writetextln("extern " + asmName);
+		if (!internal) {
+			fu.writetextln("extern " + funDefSymbol.name());
+		}
 
-		fu.writeinstln("call " + asmName);
+		fu.writeinstln("call " + funDefSymbol.name());
 	}
 
-	private static String resolveASMName(FunCallNode funCall, ListNode parent) {
+	private static void handlePreset(FunCallNode funCall, ListNode parent, FileCompilerUnit fu) {
+		final String name = ((IdentifierNode) funCall.getParent()).getValue();
+
+		if (name.equals("asm")) {
+			fu.writeinstln(((StringLiteralNode) funCall.getArgs().get(0)).getValue().getValue());
+		} else if (name.equals("asmln")) {
+			fu.writeln(((StringLiteralNode) funCall.getArgs().get(0)).getValue().getValue());
+		}
+	}
+
+	private static ReadOnlyPair<Boolean, FunDefSymbol> resolveASMName(FunCallNode funCall, ListNode parent) {
 		Node caller = funCall.getParent();
 		if (caller instanceof IdentifierNode ident) {
-			return parent.getSymbols().<FunDefSymbol>getSymbol(ident.getValue()).name();
+			return Pairs.readOnly(true, parent.getSymbols().<FunDefSymbol>getSymbol(ident.getValue()));
 		} else if (caller instanceof MembersAccess access) {
 			if (parent.getSymbols().contains(((IdentifierNode) access.getParent()).getValue())) { // file access (needs rework)
 				ImportNode in = parent.getSymbols().<ImportSymbol>getSymbol(((IdentifierNode) access.getParent()).getValue()).getNode();
 				FileNode fn = parent.getSymbols().<FileSymbol>getSymbol(in.getValue()).getNode();
 
-				return fn.getSymbols().<FunDefSymbol>getSymbol(access.getProp().getValue()).name();
+				return Pairs.readOnly(false, fn.getSymbols().<FunDefSymbol>getSymbol(access.getProp().getValue()));
 			}
 		}
 

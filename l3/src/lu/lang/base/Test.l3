@@ -6,5 +6,36 @@ let static int8 globalVar = 2;
 
 fun int8 main() {
 	
-	return Test2.other(globalVar, true);
+	let char: str = "test";
+	
+	println(str);
+	
+	return strlen(str);
 }
+
+fun int8 strlen(let char: str) {
+	asmln#(".find_length:");
+	asm#("mov al, byte [rdi]     ; Load a byte from the string");
+	asm#("test al, al            ; Check if the byte is null (0x00)");
+	asm#("jz .length_found       ; If zero, we found the end");
+	asm#("inc rcx                ; Increment the length counter");
+	asm#("inc rdi                ; Move to the next character");
+	asm#("jmp .find_length       ; Repeat");
+
+	asmln#(".length_found:");
+	asm#("mov rax, rcx");
+	
+	return;
+}
+
+fun int8 println(let char: str) {
+	asm#("mov rsi, rdi");
+	strlen(str);
+	asm#("mov rdi, 1             ; File descriptor: 1 (stdout)");
+	asm#("mov rdx, rax           ; Length of the string");
+	asm#("mov rax, 1             ; System call number: 1 (write)");
+	asm#("syscall ");
+	
+	return;
+}
+

@@ -19,6 +19,10 @@ public class ReturnNode extends Node {
 		return expression;
 	}
 	
+	public boolean hasExpression() {
+		return expression != null;
+	}
+	
 	@Override
 	public JSONObject toJSONObject() {
 		return super.toJSONObject().put("expression", expression == null ? null : expression.toJSONObject());

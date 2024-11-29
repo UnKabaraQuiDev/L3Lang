@@ -20,6 +20,7 @@ import lu.pcy113.l3.parser.ast.ident.ImportNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.let.MembersAccess;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
+import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
 import lu.pcy113.l3.parser.ast.math.UnaryExpressionNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
@@ -61,7 +62,8 @@ public class NodeSymbols implements JSONConvertible {
 			throwError(this.<TypeSymbol>getSymbol(type.getIdent()) == null, expr);
 
 		} else if (expr instanceof FunCallNode funCall) {
-			checkDependencies(funCall.getParent());
+			// checkDependencies(funCall.getParent());
+			// functions are checked at compile time
 			funCall.getArgs().forEach(this::checkDependencies);
 
 		} else if (expr instanceof UnaryExpressionNode unary) {
@@ -78,7 +80,7 @@ public class NodeSymbols implements JSONConvertible {
 			throwError(getSymbol(ident.getValue()) == null, ident);
 			// if user type -> match access.getProp() with a property of the type
 
-		} else if (expr instanceof NumericLiteralNode) {
+		} else if (expr instanceof NumericLiteralNode || expr instanceof StringLiteralNode) {
 			// everything ok
 
 		} else {

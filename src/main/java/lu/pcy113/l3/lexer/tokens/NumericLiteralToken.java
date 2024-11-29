@@ -18,6 +18,7 @@ public class NumericLiteralToken extends LiteralToken {
 		INT_64("int64", 8, TokenType.INT_64),
 		INT_32("int32", 4, TokenType.INT_32),
 		INT_16("int16", 2, TokenType.INT_16),
+		CHAR("char", 1, TokenType.CHAR),
 		INT_8("int8", 1, TokenType.INT_8);
 		//@formatter:on
 		
