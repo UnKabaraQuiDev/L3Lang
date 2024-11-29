@@ -31,7 +31,6 @@ public class LetDefVisitor {
 				VisitorHelper.compute(fun, letDef.getValue(), "rax", fu);
 				fu.writeinstln("mov " + name + ", rax");
 			}
-
 		} else {
 			currentStackOffset += byteCount;
 

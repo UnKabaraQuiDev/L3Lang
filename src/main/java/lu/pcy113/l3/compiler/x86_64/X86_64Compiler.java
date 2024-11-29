@@ -2,6 +2,8 @@ package lu.pcy113.l3.compiler.x86_64;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.compiler.L3Compiler;
@@ -25,10 +27,10 @@ public class X86_64Compiler extends L3Compiler {
 
 	@Override
 	public void compile() {
-		final FileCompilerUnit mainFu = compileFile(super.root.getMainNode(), true);
+		final FileCompilerUnit mainFu = compileFile(super.root.getMainNode(), super.root.getFiles(), true);
 
 		for (FileNode otherFiles : super.root.getFiles()) {
-			compileFile(otherFiles, false);
+			compileFile(otherFiles, Arrays.asList(), false);
 		}
 
 		String inFiles = "./" + PCUtils.replaceFileExtension(super.root.getMainNode().getPath(), "o");
@@ -46,7 +48,7 @@ public class X86_64Compiler extends L3Compiler {
 		}
 	}
 
-	private FileCompilerUnit compileFile(FileNode file, boolean main) {
+	private FileCompilerUnit compileFile(FileNode file, List<FileNode> others, boolean main) {
 		System.out.println("--- Compiling file: " + file.getName() + " to: " + file.getPath());
 		FileCompilerUnit fu = new FileCompilerUnit(super.outDir, file.getPath());
 
@@ -62,6 +64,14 @@ public class X86_64Compiler extends L3Compiler {
 		}
 
 		compile(file, fu, main);
+
+		fu.writeln("_static_ext__:");
+		for (FileNode other : others) {
+			final String staticName = "_static_" + other.getName();
+			fu.writeinstln("call " + staticName);
+			fu.writetextln("extern " + staticName);
+		}
+		fu.writeinstln("ret");
 
 		fu.appendBSS();
 		fu.appendText();
@@ -79,10 +89,11 @@ public class X86_64Compiler extends L3Compiler {
 	}
 
 	private void compile(final FileNode file, final FileCompilerUnit fu, final boolean main) {
-		file.stream().filter((c) -> c instanceof LetDefNode).map(PCUtils::<LetDefNode>cast).forEach(letDef -> {
-			LetDefVisitor.visit(letDef, file, fu);
-		});
-		
+
+		final String staticName = "_static_" + file.getName();
+
+		fu.writeinstln("call " + staticName);
+
 		if (file.hasMain()) {
 			final FunDefNode fun = file.getMain();
 
@@ -94,13 +105,24 @@ public class X86_64Compiler extends L3Compiler {
 			fu.writeinstln("mov rax, 60");
 			fu.writeinstln("syscall");
 		}
+		
+		fu.writeln(staticName + ":");
+		fu.writetextln("global " + staticName);
+
+		file.stream().filter((c) -> c instanceof LetDefNode).map(PCUtils::<LetDefNode>cast).forEach(letDef -> {
+			LetDefVisitor.visit(letDef, file, fu);
+		});
+
+		if (main) {
+			fu.writeinstln("call _static_ext__");
+		}
+		fu.writeinstln("ret");
 
 		file.stream().filter((c) -> c instanceof FunDefNode).map(PCUtils::<FunDefNode>cast).forEach(fun -> {
 			FunDefVisitor.visit(fun, file, fu);
 
 			fu.writetextln("global " + file.getSymbols().get(fun).name());
 		});
-
 	}
 
 	@Override
