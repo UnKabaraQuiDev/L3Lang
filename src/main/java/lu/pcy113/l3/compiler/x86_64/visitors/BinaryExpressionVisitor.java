@@ -6,12 +6,12 @@ import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.parser.ast.abstr.ImplicitType;
 import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
-import lu.pcy113.l3.parser.ast.fun.FunDefNode;
+import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
 
 public class BinaryExpressionVisitor {
 
-	public static void visit(BinaryExpressionNode bin, String reg, FunDefNode parent, FileCompilerUnit fu) {
+	public static void visit(BinaryExpressionNode bin, String reg, ListNode parent, FileCompilerUnit fu) {
 
 		final Node left = bin.getLeft();
 		final Node right = bin.getRight();

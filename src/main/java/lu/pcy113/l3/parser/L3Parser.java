@@ -262,10 +262,10 @@ public class L3Parser {
 			iterator.consume(TokenType.STRICT_ASSIGN);
 			final Node value = parseExpression();
 
-			return new LetDefNode(type, identifier, value);
+			return new LetDefNode(type, identifier, value, true);
 		}
 
-		return new LetDefNode(type, identifier);
+		return new LetDefNode(type, identifier, true);
 	}
 
 	private TypeNode parseType() {

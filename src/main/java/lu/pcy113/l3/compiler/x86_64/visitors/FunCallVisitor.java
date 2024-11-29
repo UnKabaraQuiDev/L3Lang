@@ -1,10 +1,10 @@
 package lu.pcy113.l3.compiler.x86_64.visitors;
 
 import lu.pcy113.l3.compiler.L3Compiler.FileCompilerUnit;
+import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
-import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.ident.ImportNode;
 import lu.pcy113.l3.parser.ast.let.MembersAccess;
@@ -14,7 +14,7 @@ import lu.pcy113.l3.parser.ast.symbols.ImportSymbol;
 
 public class FunCallVisitor {
 
-	public static void visit(FunCallNode funCall, FunDefNode parent, FileCompilerUnit fu) {
+	public static void visit(FunCallNode funCall, ListNode parent, FileCompilerUnit fu) {
 		for (int i = 0; i < funCall.getArgs().size(); i++) {
 			final Node arg = funCall.getArgs().get(i);
 
@@ -28,7 +28,7 @@ public class FunCallVisitor {
 		fu.writeinstln("call " + asmName);
 	}
 
-	private static String resolveASMName(FunCallNode funCall, FunDefNode parent) {
+	private static String resolveASMName(FunCallNode funCall, ListNode parent) {
 		Node caller = funCall.getParent();
 		if (caller instanceof IdentifierNode ident) {
 			return parent.getSymbols().<FunDefSymbol>getSymbol(ident.getValue()).name();

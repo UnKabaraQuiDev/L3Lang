@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 
-import lu.pcy113.l3.compiler.L3Compiler;
 import lu.pcy113.l3.compiler.x86_64.X86_64Compiler;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;

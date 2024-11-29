@@ -8,9 +8,11 @@ import lu.pcy113.l3.compiler.L3Compiler;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86_64.memory.X86_64MemoryStatus;
 import lu.pcy113.l3.compiler.x86_64.visitors.FunDefVisitor;
+import lu.pcy113.l3.compiler.x86_64.visitors.LetDefVisitor;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.container.RuntimeNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
+import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.pclib.PCUtils;
 
 public class X86_64Compiler extends L3Compiler {
@@ -77,10 +79,12 @@ public class X86_64Compiler extends L3Compiler {
 	}
 
 	private void compile(final FileNode file, final FileCompilerUnit fu, final boolean main) {
+		file.stream().filter((c) -> c instanceof LetDefNode).map(PCUtils::<LetDefNode>cast).forEach(letDef -> {
+			LetDefVisitor.visit(letDef, file, fu);
+		});
+		
 		if (file.hasMain()) {
 			final FunDefNode fun = file.getMain();
-
-			System.out.println(file.getSymbols());
 
 			fu.writeinstln("call " + file.getSymbols().get(fun).name());
 
@@ -91,7 +95,6 @@ public class X86_64Compiler extends L3Compiler {
 			fu.writeinstln("syscall");
 		}
 
-		file.stream().forEach(System.err::println);
 		file.stream().filter((c) -> c instanceof FunDefNode).map(PCUtils::<FunDefNode>cast).forEach(fun -> {
 			FunDefVisitor.visit(fun, file, fu);
 

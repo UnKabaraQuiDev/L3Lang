@@ -2,7 +2,9 @@ package lu.lang.base;
 
 import lu.lang.base.Test2;
 
+let static int8 globalVar = 2;
+
 fun int8 main() {
 	
-	return Test2.other(2, true);
+	return Test2.other(globalVar, true);
 }

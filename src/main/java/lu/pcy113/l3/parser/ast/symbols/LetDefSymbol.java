@@ -29,6 +29,10 @@ public class LetDefSymbol extends NodeSymbol<LetDefNode> implements ASMNamed {
 		asmName = reg;
 	}
 
+	public void setName(String asmName) {
+		this.asmName = asmName;
+	}
+	
 	@Override
 	public String name() {
 		return asmName;
