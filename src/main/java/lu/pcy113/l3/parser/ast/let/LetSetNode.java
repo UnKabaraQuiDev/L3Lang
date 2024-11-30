@@ -17,6 +17,18 @@ public class LetSetNode extends Node {
 		this.assignType = assignType;
 	}
 
+	public Node getParent() {
+		return parent;
+	}
+
+	public Node getExpr() {
+		return expr;
+	}
+
+	public TokenType getAssignType() {
+		return assignType;
+	}
+
 	@Override
 	public JSONObject toJSONObject() {
 		return super.toJSONObject().put("expr", expr.toJSONObject()).put("assignType", assignType.name()).put("parent", parent.toJSONObject());

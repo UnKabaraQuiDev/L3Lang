@@ -6,14 +6,15 @@ let static int8 globalVar = 2;
 
 fun int8 main() {
 	
-	let char: str = "test";
+	let int8 a = 254;
+	a = a+1;
+	a = a+1;
+	a = a+1;
 	
-	println(str);
-	
-	return strlen(str);
+	return a;
 }
 
-fun int8 strlen(let char: str) {
+fun int16 strlen(let char: str) {
 	asmln#(".find_length:");
 	asm#("mov al, byte [rdi]     ; Load a byte from the string");
 	asm#("test al, al            ; Check if the byte is null (0x00)");

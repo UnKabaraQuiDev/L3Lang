@@ -38,9 +38,9 @@ public class LetDefVisitor {
 
 			if (letDef.hasValue()) {
 				VisitorHelper.compute(fun, letDef.getValue(), "rax", fu);
-				fu.writeinstln("push rax");
+				fu.writeinstln("push " + fu.getMemory().getAsSize("rax", byteCount), "Save (" + byteCount + "): " + letDef.getIdentifier().getValue());
 			} else {
-				fu.writeinstln("sub rsp, " + byteCount);
+				fu.writeinstln("sub rsp, " + byteCount, "Save space (" + byteCount + ") for: " + letDef.getIdentifier().getValue());
 			}
 		}
 	}

@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
+import lu.pcy113.l3.compiler.x86_64.memory.X86_64MemoryStatus;
 import lu.pcy113.l3.parser.ast.container.RuntimeNode;
 import lu.pcy113.pclib.PCUtils;
 
@@ -16,6 +17,7 @@ public abstract class L3Compiler {
 	protected RuntimeNode root;
 	protected File outDir, outFileExec;
 	protected FileWriter fw;
+	protected X86_64MemoryStatus memory = new X86_64MemoryStatus();
 
 	public L3Compiler(RuntimeNode env, File outDir) {
 		this.root = env;
@@ -188,6 +190,10 @@ public abstract class L3Compiler {
 
 		public File getOutDir() {
 			return outDir;
+		}
+		
+		public X86_64MemoryStatus getMemory() {
+			return memory;
 		}
 
 		public void implement() {

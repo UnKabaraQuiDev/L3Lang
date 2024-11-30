@@ -7,6 +7,7 @@ import lu.pcy113.l3.parser.ast.fun.FunCallNode;
 import lu.pcy113.l3.parser.ast.fun.FunDefNode;
 import lu.pcy113.l3.parser.ast.fun.ctrl.ReturnNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
+import lu.pcy113.l3.parser.ast.let.LetSetNode;
 import lu.pcy113.l3.parser.ast.symbols.FunDefSymbol;
 import lu.pcy113.pclib.logger.GlobalLogger;
 
@@ -34,7 +35,7 @@ public class FunDefVisitor {
 
 		for (Node n : fun.getChildren()) {
 			if (n instanceof ReturnNode ret) {
-				if(ret.hasExpression()) {
+				if (ret.hasExpression()) {
 					Node expr = ret.getExpression();
 					VisitorHelper.compute(fun, expr, "rax", fu);
 				}
@@ -43,6 +44,8 @@ public class FunDefVisitor {
 				LetDefVisitor.visit(letDef, fun, fu);
 			} else if (n instanceof FunCallNode funCall) {
 				FunCallVisitor.visit(funCall, fun, fu);
+			} else if (n instanceof LetSetNode letSet) {
+				LetSetVisitor.visit(letSet, fun, fu);
 			} else {
 				fu.implement(n);
 			}
