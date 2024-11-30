@@ -1,9 +1,8 @@
-package lu.pcy113.l3.parser.ast;
+package lu.pcy113.l3.parser.ast.type;
 
 import org.json.JSONObject;
 
 import lu.pcy113.l3.parser.ast.abstr.Node;
-import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class CastNode extends Node {
 

@@ -11,7 +11,6 @@ import org.json.JSONObject;
 
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.impl.JSONConvertible;
-import lu.pcy113.l3.parser.ast.CastNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
@@ -24,6 +23,7 @@ import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
 import lu.pcy113.l3.parser.ast.math.UnaryExpressionNode;
+import lu.pcy113.l3.parser.ast.type.CastNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 /**

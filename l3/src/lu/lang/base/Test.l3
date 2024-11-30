@@ -9,10 +9,28 @@ fun int8 main() {
 	let int64 a = 1010101;
 	let int8 b = (int8s) a;
 	
-	return b;
+	let char: str = "test";
+	
+	println(str);
+	
+	return strlen(str);
 }
 
 fun int16 strlen(let char: str) {
+	asm#("xor rax, rax");
+	
+	asm#("mov rsi, rdi");
+	asm#("mov al, 0x00");
+	asm#("mov rcx, 0xFFFFFFFF");
+	asm#("repne scasb");
+	asm#("add rcx, 1");
+	
+	asm#("mov rax, 0xFFFFFFFF");
+	
+	asm#("sub rax, rcx");
+	
+	return;
+	
 	asmln#(".find_length:");
 	asm#("mov al, byte [rdi]     ; Load a byte from the string");
 	asm#("test al, al            ; Check if the byte is null (0x00)");

@@ -3,9 +3,9 @@ package lu.pcy113.l3.compiler.x86_64.visitors;
 import lu.pcy113.l3.compiler.L3Compiler.FileCompilerUnit;
 import lu.pcy113.l3.lexer.TokenType;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken.NumericValueType;
-import lu.pcy113.l3.parser.ast.CastNode;
 import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
+import lu.pcy113.l3.parser.ast.type.CastNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 

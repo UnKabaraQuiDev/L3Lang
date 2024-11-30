@@ -7,6 +7,7 @@ import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
 import lu.pcy113.l3.parser.ast.symbols.LetDefSymbol;
+import lu.pcy113.l3.parser.ast.type.CastNode;
 import lu.pcy113.l3.parser.ast.type.PrimitiveTypeNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
@@ -25,6 +26,8 @@ public class ImplicitType {
 			return new ImplicitType(parent.getSymbols().<LetDefSymbol>getSymbol(ident.getValue()).getNode().getType());
 		} else if (node instanceof BinaryExpressionNode bin) {
 			return computeType(bin.getLeft(), parent).merge(computeType(bin.getRight(), parent));
+		}else if (node instanceof CastNode cast) {
+			return new ImplicitType(cast.getCastType());
 		}
 		throw new L3Exception("Cannot compute type for " + node.getClass().getSimpleName());
 	}
