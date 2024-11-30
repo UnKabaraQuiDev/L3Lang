@@ -11,6 +11,7 @@ import org.json.JSONObject;
 
 import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.impl.JSONConvertible;
+import lu.pcy113.l3.parser.ast.CastNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
@@ -34,13 +35,13 @@ public class NodeSymbols implements JSONConvertible {
 	private NodeSymbols parent;
 
 	public void registerFile(FileNode fileNode) {
-		addSymbol(fileNode.getPackageNode().getValue()+"."+fileNode.getName(), new FileSymbol(fileNode));
+		addSymbol(fileNode.getPackageNode().getValue() + "." + fileNode.getName(), new FileSymbol(fileNode));
 	}
-	
+
 	public void registerImport(ImportNode importNode) {
 		addSymbol(importNode.getIdentifier().getValue(), new ImportSymbol(importNode));
 	}
-	
+
 	public void registerLet(LetDefNode letDef) {
 		addSymbol(letDef.getIdentifier().getValue(), new LetDefSymbol(letDef));
 	}
@@ -71,9 +72,11 @@ public class NodeSymbols implements JSONConvertible {
 
 		} else if (expr instanceof MembersAccess access) {
 			checkDependencies(access.getParent());
-			
-			/*final TypeNode type = evalType(access.getParent());
-			throwError(type == null, access.getParent());*/
+
+			/*
+			 * final TypeNode type = evalType(access.getParent()); throwError(type == null,
+			 * access.getParent());
+			 */
 			// if user type -> match access.getProp() with a property of the type
 
 		} else if (expr instanceof IdentifierNode ident) {
@@ -83,6 +86,8 @@ public class NodeSymbols implements JSONConvertible {
 		} else if (expr instanceof NumericLiteralNode || expr instanceof StringLiteralNode) {
 			// everything ok
 
+		} else if (expr instanceof CastNode cast) {
+			checkDependencies(cast.getValue());
 		} else {
 			throw new L3Exception("Unsupported expression: " + expr);
 		}

@@ -712,9 +712,15 @@ public class L3Lexer {
 
 			@Override
 			public boolean peek(TokenType type) {
-				return pos < tokens.size() && peek().matches(type);
+				return peek().matches(type);
 			}
 
+			
+			@Override
+			public boolean peek(int i, TokenType type) {
+				return peek(i).matches(type);
+			}
+			
 			@Override
 			public boolean hasNext() {
 				return pos < tokens.size();
@@ -734,14 +740,17 @@ public class L3Lexer {
 			public Token consume() {
 				GlobalLogger.log();
 
-				System.err.println("consumed: " + peek().name());
-
 				return tokens.get(pos++);
 			}
 
 			@Override
 			public boolean peek(TokenType... types) {
 				return Arrays.stream(types).anyMatch(this::peek);
+			}
+			
+			@Override
+			public boolean peek(int i, TokenType... types) {
+				return Arrays.stream(types).anyMatch(t -> peek(i, t));
 			}
 
 			@Override

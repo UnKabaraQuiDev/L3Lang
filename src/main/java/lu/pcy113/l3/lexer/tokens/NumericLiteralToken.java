@@ -11,25 +11,38 @@ public class NumericLiteralToken extends LiteralToken {
 
 	public static enum NumericValueType {
 		//@formatter:off
-		BOOL_1("bool", 1, TokenType.BOOLEAN),
-		FLOAT_64("double", 8, TokenType.DOUBLE),
-		FLOAT_32("float", 4, TokenType.FLOAT),
-		INT_128("int128", 16, TokenType.INT_128),
-		INT_64("int64", 8, TokenType.INT_64),
-		INT_32("int32", 4, TokenType.INT_32),
-		INT_16("int16", 2, TokenType.INT_16),
-		CHAR("char", 1, TokenType.CHAR),
-		INT_8("int8", 1, TokenType.INT_8);
-		//@formatter:on
+		BOOL_1("bool", 1, TokenType.BOOLEAN, false),
 		
+		FLOAT_64("double", 8, TokenType.DOUBLE, true),
+		FLOAT_32("float", 4, TokenType.FLOAT, true),
+		
+		INT_128("int128", 16, TokenType.INT_128, false),
+		INT_64("int64", 8, TokenType.INT_64, false),
+		INT_32("int32", 4, TokenType.INT_32, false),
+		INT_16("int16", 2, TokenType.INT_16, false),
+		
+
+		INT_128_S("int128s", 16, TokenType.INT_128_S, true),
+		INT_64_S("int64s", 8, TokenType.INT_64_S, true),
+		INT_32_S("int32s", 4, TokenType.INT_32_S, true),
+		INT_16_S("int16s", 2, TokenType.INT_16_S, true),
+		
+		CHAR("char", 1, TokenType.CHAR, false),
+		INT_8("int8", 1, TokenType.INT_8, false),
+		
+		INT_8_S("int8s", 1, TokenType.INT_8_S, true);
+		//@formatter:on
+
 		private final String name;
 		private final int bytes;
 		private final TokenType tt;
+		private final boolean signed;
 
-		private NumericValueType(String name, int bytes, TokenType tt) {
+		private NumericValueType(String name, int bytes, TokenType tt, boolean signed) {
 			this.name = name;
 			this.bytes = bytes;
 			this.tt = tt;
+			this.signed = signed;
 		}
 
 		public String getName() {
@@ -39,11 +52,19 @@ public class NumericLiteralToken extends LiteralToken {
 		public int getBytes() {
 			return bytes;
 		}
-		
+
 		public TokenType getTokenType() {
 			return tt;
 		}
-		
+
+		public boolean isSigned() {
+			return signed;
+		}
+
+		public boolean isUnsigned() {
+			return !signed;
+		}
+
 		public static NumericValueType byTokenType(TokenType tt) {
 			for (NumericValueType v : NumericValueType.values()) {
 				if (v.tt == tt) {
@@ -212,15 +233,15 @@ public class NumericLiteralToken extends LiteralToken {
 	public boolean booleanValue() {
 		return (boolean) value;
 	}
-	
+
 	public boolean isBoolean() {
 		return valueType.equals(NumericValueType.BOOL_1);
 	}
-	
+
 	public Object getValue() {
 		return value;
 	}
-	
+
 	public NumericValueType getValueType() {
 		return valueType;
 	}

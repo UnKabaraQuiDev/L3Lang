@@ -1,6 +1,7 @@
 package lu.pcy113.l3.compiler.x86_64.visitors;
 
 import lu.pcy113.l3.compiler.L3Compiler.FileCompilerUnit;
+import lu.pcy113.l3.parser.ast.CastNode;
 import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.fun.FunCallNode;
@@ -22,6 +23,8 @@ public class VisitorHelper {
 			FunCallVisitor.visit(funCall, parent, fu);
 		} else if (node instanceof StringLiteralNode str) {
 			StringLiteralVisitor.visit(str, reg, parent, fu);
+		} else if (node instanceof CastNode cast) {
+			CastVisitor.visit(cast, reg, parent, fu);
 		} else {
 			fu.implement(node);
 		}

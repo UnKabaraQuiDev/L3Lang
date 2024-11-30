@@ -30,7 +30,7 @@ public enum TokenType {
 
 	TRUE("true"), FALSE("false"),
 
-	VOID("void"), NEW("new"),
+	VOID(PRIMITIVE_TYPE, "void"), NEW("new"),
 
 	NUM_LIT(), DEC_NUM_LIT(NUM_LIT), HEX_NUM_LIT(NUM_LIT), BIN_NUM_LIT(NUM_LIT), CHAR_LIT(NUM_LIT),
 
@@ -58,27 +58,29 @@ public enum TokenType {
 
 	GOTO("goto"), YIELD("yield"),
 
-	ASSIGN(), STRICT_ASSIGN(ASSIGN, '='),
+	MATH_OP(),
+	
+	ASSIGN(MATH_OP), STRICT_ASSIGN(ASSIGN, '='),
 
-	BIT_OR('|'), BIT_AND('&'), BIT_XOR('^'), BIT_NOT('~'),
+	BIT_OR(MATH_OP, '|'), BIT_AND(MATH_OP, '&'), BIT_XOR(MATH_OP, '^'), BIT_NOT(MATH_OP, '~'),
 
 	BIT_OR_ASSIGN(ASSIGN, "|="), BIT_AND_ASSIGN(ASSIGN, "&="), BIT_XOR_ASSIGN(ASSIGN, "^="), BIT_NOT_ASSIGN(ASSIGN, "~="),
 
-	OR("||"), AND("&&"), NOT('!'), XOR("^^"),
+	OR(MATH_OP, "||"), AND(MATH_OP, "&&"), NOT(MATH_OP, '!'), XOR(MATH_OP, "^^"),
 	
-	BIT_SHIFT(),
+	BIT_SHIFT(MATH_OP),
 	
 	BIT_SHIFT_LEFT(BIT_SHIFT, "<<"), BIT_SHIFT_SIGNED_RIGHT(BIT_SHIFT, ">>"), BIT_SHIFT_UNSIGNED_RIGHT(BIT_SHIFT, ">>>"),
 
 	HASH('#'),
 
-	PLUS('+'), MINUS('-'), MUL('*'), DIV('/'), MODULO('%'),
+	PLUS(MATH_OP, '+'), MINUS(MATH_OP, '-'), MUL(MATH_OP, '*'), DIV(MATH_OP, '/'), MODULO(MATH_OP, '%'),
 
-	PLUS_PLUS("++"), MINUS_MINUS("--"),
+	PLUS_PLUS(MATH_OP, "++"), MINUS_MINUS(MATH_OP, "--"),
 
 	PLUS_ASSIGN(ASSIGN, "+="), MINUS_ASSIGN(ASSIGN, "-="), MUL_ASSIGN(ASSIGN, "*="), DIV_ASSIGN(ASSIGN, "/="), MODULO_ASSIGN(ASSIGN, "%="),
 
-	COMPARAISON(),
+	COMPARAISON(MATH_OP),
 	
 	EQUALS(COMPARAISON, "=="), NOT_EQUALS(COMPARAISON, "!="),
 

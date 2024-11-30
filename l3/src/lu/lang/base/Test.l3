@@ -6,12 +6,10 @@ let static int8 globalVar = 2;
 
 fun int8 main() {
 	
-	let int8 a = 254;
-	a = a+1;
-	a = a+1;
-	a = a+1;
+	let int64 a = 1010101;
+	let int8 b = (int8s) a;
 	
-	return a;
+	return b;
 }
 
 fun int16 strlen(let char: str) {
@@ -29,7 +27,7 @@ fun int16 strlen(let char: str) {
 	return;
 }
 
-fun int8 println(let char: str) {
+fun void println(let char: str) {
 	asm#("mov rsi, rdi");
 	strlen(str);
 	asm#("mov rdi, 1             ; File descriptor: 1 (stdout)");

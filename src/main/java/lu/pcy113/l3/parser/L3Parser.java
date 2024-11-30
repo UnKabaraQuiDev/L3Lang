@@ -11,6 +11,7 @@ import lu.pcy113.l3.lexer.impl.LexerIterator;
 import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
+import lu.pcy113.l3.parser.ast.CastNode;
 import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.abstr.Node;
 import lu.pcy113.l3.parser.ast.container.FileNode;
@@ -416,10 +417,29 @@ public class L3Parser {
 
 	private Node parseParenthesizedExpression() {
 		iterator.consume(TokenType.PAREN_OPEN);
+		
+		if(isType()) {
+			final TypeNode castType = parseType();
+			iterator.consume(TokenType.PAREN_CLOSE);
+			
+			final Node expression = parseExpression();
+			
+			return new CastNode(castType, expression);
+		}
+		
 		final Node expression = parseExpression();
 		iterator.consume(TokenType.PAREN_CLOSE);
-
+		
 		return expression;
+	}
+
+	private boolean isType() {
+		int i = 0;
+		while(iterator.peek(i, TokenType.IDENT, TokenType.DOT, TokenType.TYPE)) {
+			i++;
+		}
+		
+		return !iterator.peek(i, TokenType.MATH_OP);
 	}
 
 	private Node parsePointerDeref() {
@@ -451,6 +471,16 @@ public class L3Parser {
 		}
 
 		throw new L3Exception("Unexpected token: " + iterator.peek());
+	}
+
+	private Node parseCast() {
+		iterator.consume(TokenType.PAREN_OPEN);
+		final TypeNode castType = parseType();
+		iterator.consume(TokenType.PAREN_CLOSE);
+		
+		Node value = parsePrimary();
+		
+		return new CastNode(castType, value);
 	}
 
 	private Node parsePointerRef() {
