@@ -12,15 +12,16 @@ import lu.pcy113.l3.parser.ast.lit.StringLiteralNode;
 import lu.pcy113.l3.parser.ast.symbols.FileSymbol;
 import lu.pcy113.l3.parser.ast.symbols.FunDefSymbol;
 import lu.pcy113.l3.parser.ast.symbols.ImportSymbol;
-import lu.pcy113.pclib.datastructure.pair.Pairs;
-import lu.pcy113.pclib.datastructure.pair.ReadOnlyPair;
+
+import lu.kbra.pclib.datastructure.pair.Pairs;
+import lu.kbra.pclib.datastructure.pair.ReadOnlyPair;
 
 public class FunCallVisitor {
 
-	public static void visit(FunCallNode funCall, ListNode parent, FileCompilerUnit fu) {
+	public static void visit(final FunCallNode funCall, final ListNode parent, final FileCompilerUnit fu) {
 
 		if (funCall.isPreset()) {
-			handlePreset(funCall, parent, fu);
+			FunCallVisitor.handlePreset(funCall, parent, fu);
 			return;
 		}
 
@@ -30,7 +31,7 @@ public class FunCallVisitor {
 			VisitorHelper.compute(parent, arg, FunDefVisitor.REGISTER_ORDER[i], fu);
 		}
 
-		final ReadOnlyPair<Boolean, FunDefSymbol> funDefRet = resolveASMName(funCall, parent);
+		final ReadOnlyPair<Boolean, FunDefSymbol> funDefRet = FunCallVisitor.resolveASMName(funCall, parent);
 		final FunDefSymbol funDefSymbol = funDefRet.getValue();
 		final boolean internal = funDefRet.getKey();
 
@@ -41,27 +42,29 @@ public class FunCallVisitor {
 		fu.writeinstln("call " + funDefSymbol.name());
 	}
 
-	private static void handlePreset(FunCallNode funCall, ListNode parent, FileCompilerUnit fu) {
+	private static void handlePreset(final FunCallNode funCall, final ListNode parent, final FileCompilerUnit fu) {
 		final String name = ((IdentifierNode) funCall.getParent()).getValue();
 
-		if (name.equals("asm")) {
+		if ("asm".equals(name)) {
 			fu.writeinstln(((StringLiteralNode) funCall.getArgs().get(0)).getValue().getValue());
-		} else if (name.equals("asmln")) {
+		} else if ("asmln".equals(name)) {
 			fu.writeln(((StringLiteralNode) funCall.getArgs().get(0)).getValue().getValue());
 		}
 	}
 
-	private static ReadOnlyPair<Boolean, FunDefSymbol> resolveASMName(FunCallNode funCall, ListNode parent) {
-		Node caller = funCall.getParent();
-		if (caller instanceof IdentifierNode ident) {
+	private static ReadOnlyPair<Boolean, FunDefSymbol> resolveASMName(final FunCallNode funCall, final ListNode parent) {
+		final Node caller = funCall.getParent();
+		if (caller instanceof final IdentifierNode ident) {
 			return Pairs.readOnly(true, parent.getSymbols().<FunDefSymbol>getSymbol(ident.getValue()));
-		} else if (caller instanceof MembersAccess access) {
-			if (parent.getSymbols().contains(((IdentifierNode) access.getParent()).getValue())) { // file access (needs rework)
-				ImportNode in = parent.getSymbols().<ImportSymbol>getSymbol(((IdentifierNode) access.getParent()).getValue()).getNode();
-				FileNode fn = parent.getSymbols().<FileSymbol>getSymbol(in.getValue()).getNode();
+		} else if ((caller instanceof final MembersAccess access)
+				&& parent.getSymbols().contains(((IdentifierNode) access.getParent()).getValue())) { // file access
+																										// (needs
+			// rework)
+			final ImportNode in = parent.getSymbols()
+					.<ImportSymbol>getSymbol(((IdentifierNode) access.getParent()).getValue()).getNode();
+			final FileNode fn = parent.getSymbols().<FileSymbol>getSymbol(in.getValue()).getNode();
 
-				return Pairs.readOnly(false, fn.getSymbols().<FunDefSymbol>getSymbol(access.getProp().getValue()));
-			}
+			return Pairs.readOnly(false, fn.getSymbols().<FunDefSymbol>getSymbol(access.getProp().getValue()));
 		}
 
 		throw new RuntimeException();

@@ -7,19 +7,24 @@ import lu.pcy113.l3.parser.ast.abstr.Node;
 
 public class NumericLiteralNode extends Node {
 
-	private NumericLiteralToken value;
+	private final NumericLiteralToken value;
 
-	public NumericLiteralNode(NumericLiteralToken consume) {
+	public NumericLiteralNode(final NumericLiteralToken consume) {
 		this.value = consume;
 	}
 
 	public NumericLiteralToken getValue() {
-		return value;
+		return this.value;
 	}
-	
+
+	@Override
+	public String toSourceString() {
+		return "\"" + value.getValue() + "\"";
+	}
+
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("value", value.toJSONObject());
+		return super.toJSONObject().put("value", this.value.toJSONObject());
 	}
 
 }

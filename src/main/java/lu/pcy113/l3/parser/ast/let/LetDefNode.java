@@ -8,62 +8,63 @@ import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class LetDefNode extends Node {
 
-	private TypeNode type;
-	private IdentifierNode identifier;
+	private final TypeNode type;
+	private final IdentifierNode identifier;
 	private Node value;
 	private boolean _static;
 
-	public LetDefNode(TypeNode type, IdentifierNode identifier, Node value) {
+	public LetDefNode(final TypeNode type, final IdentifierNode identifier, final Node value) {
 		this.type = type;
 		this.identifier = identifier;
 		this.value = value;
 	}
 
-	public LetDefNode(TypeNode type, IdentifierNode identifier) {
+	public LetDefNode(final TypeNode type, final IdentifierNode identifier) {
 		this.type = type;
 		this.identifier = identifier;
 	}
 
-	public LetDefNode(TypeNode type, IdentifierNode identifier, Node value, boolean _static) {
+	public LetDefNode(final TypeNode type, final IdentifierNode identifier, final Node value, final boolean _static) {
 		this.type = type;
 		this.identifier = identifier;
 		this.value = value;
 		this._static = _static;
 	}
 
-	public LetDefNode(TypeNode type, IdentifierNode identifier, boolean _static) {
+	public LetDefNode(final TypeNode type, final IdentifierNode identifier, final boolean _static) {
 		this.type = type;
 		this.identifier = identifier;
 		this._static = _static;
 	}
 
 	public TypeNode getType() {
-		return type;
+		return this.type;
 	}
 
 	public IdentifierNode getIdentifier() {
-		return identifier;
+		return this.identifier;
 	}
 
 	public Node getValue() {
-		return value;
+		return this.value;
 	}
 
 	public boolean hasValue() {
-		return value != null;
+		return this.value != null;
 	}
 
 	public boolean isStatic() {
-		return _static;
+		return this._static;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		JSONObject obj = super.toJSONObject().put("type", type.toJSONObject()).put("identifier", identifier.toJSONObject());
-		obj.put("initialized", hasValue());
-		obj.put("static", _static);
-		if (hasValue()) {
-			obj.put("value", value.toJSONObject());
+		final JSONObject obj = super.toJSONObject().put("type", this.type.toJSONObject()).put("identifier",
+				this.identifier.toJSONObject());
+		obj.put("initialized", this.hasValue());
+		obj.put("static", this._static);
+		if (this.hasValue()) {
+			obj.put("value", this.value.toJSONObject());
 		}
 		return obj;
 	}

@@ -16,7 +16,7 @@ public final class BinFormat {
 		// Convert the binary string to a long
 		try {
 			return Long.valueOf(str, 2);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			throw new IllegalArgumentException("Invalid binary string: " + str, e);
 		}
 	}

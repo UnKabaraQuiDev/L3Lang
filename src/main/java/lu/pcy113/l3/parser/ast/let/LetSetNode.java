@@ -11,27 +11,28 @@ public class LetSetNode extends Node {
 	private final Node expr;
 	private final TokenType assignType;
 
-	public LetSetNode(Node parent, Node expr, TokenType assignType) {
+	public LetSetNode(final Node parent, final Node expr, final TokenType assignType) {
 		this.parent = parent;
 		this.expr = expr;
 		this.assignType = assignType;
 	}
 
 	public Node getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	public Node getExpr() {
-		return expr;
+		return this.expr;
 	}
 
 	public TokenType getAssignType() {
-		return assignType;
+		return this.assignType;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("expr", expr.toJSONObject()).put("assignType", assignType.name()).put("parent", parent.toJSONObject());
+		return super.toJSONObject().put("expr", this.expr.toJSONObject()).put("assignType", this.assignType.name())
+				.put("parent", this.parent.toJSONObject());
 	}
 
 }

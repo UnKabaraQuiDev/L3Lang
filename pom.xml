@@ -10,29 +10,61 @@
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
+		<lwjgl.natives>natives-linux</lwjgl.natives>
 	</properties>
 
-	<profiles>
-		<profile>
-			<id>PrivateMain</id>
-			<properties>
-				<main.class>lu.pcy113.l3.PrivateMain</main.class>
-			</properties>
-		</profile>
-	</profiles>
+	<repositories>
+		<repository>
+			<id>nexus.kbra.lu-public</id>
+			<url>https://nexus.kbra.lu/repository/maven-public/</url>
+		</repository>
+	</repositories>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>lu.kbra</groupId>
+				<artifactId>pclib</artifactId>
+				<version>1.0.4</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.lwjgl</groupId>
+				<artifactId>lwjgl-bom</artifactId>
+				<version>3.4.1</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
-		<dependency>
-			<groupId>lu.pcy113</groupId>
-			<artifactId>PCLib</artifactId>
-			<version>0.9</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
 			<version>20240303</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl</artifactId>
+			<classifier>${lwjgl.natives}</classifier>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-llvm</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.lwjgl</groupId>
+			<artifactId>lwjgl-llvm</artifactId>
+			<classifier>${lwjgl.natives}</classifier>
+			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
@@ -44,14 +76,16 @@
 
 		<dependency>
 			<groupId>lu.kbra</groupId>
-			<artifactId>gamebox.client.es</artifactId>
-			<version>0.1</version>
+			<artifactId>pclib-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>lu.kbra</groupId>
+			<artifactId>pclib-logger</artifactId>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -80,5 +114,48 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>PrivateMain</id>
+			<properties>
+				<main.class>lu.pcy113.l3.PrivateMain</main.class>
+			</properties>
+		</profile>
+		<profile>
+			<id>lwjgl-natives-linux</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<name>Linux</name>
+				</os>
+			</activation>
+			<properties>
+				<lwjgl.natives>natives-linux</lwjgl.natives>
+			</properties>
+		</profile>
+		<profile>
+			<id>lwjgl-natives-macos</id>
+			<activation>
+				<os>
+					<family>mac</family>
+				</os>
+			</activation>
+			<properties>
+				<lwjgl.natives>natives-macos</lwjgl.natives>
+			</properties>
+		</profile>
+		<profile>
+			<id>lwjgl-natives-windows</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+			<properties>
+				<lwjgl.natives>natives-windows</lwjgl.natives>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>

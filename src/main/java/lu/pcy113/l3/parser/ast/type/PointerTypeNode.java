@@ -4,9 +4,9 @@ import org.json.JSONObject;
 
 public class PointerTypeNode extends TypeNode {
 
-	private TypeNode parent;
+	private final TypeNode parent;
 
-	public PointerTypeNode(TypeNode type) {
+	public PointerTypeNode(final TypeNode type) {
 		super("pointer<" + type.getIdent() + ">");
 		this.parent = type;
 	}
@@ -15,14 +15,14 @@ public class PointerTypeNode extends TypeNode {
 	public int computeSize() {
 		return 8;
 	}
-	
+
 	public TypeNode getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("parent", parent);
+		return super.toJSONObject().put("parent", this.parent);
 	}
 
 }

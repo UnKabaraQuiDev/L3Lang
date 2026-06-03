@@ -98,3 +98,4 @@ test/
 
 .fuse_*
 .gdb_history
+.lwjgl

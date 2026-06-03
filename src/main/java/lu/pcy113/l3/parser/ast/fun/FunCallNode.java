@@ -10,31 +10,33 @@ import lu.pcy113.l3.parser.ast.abstr.Node;
 
 public class FunCallNode extends Node {
 
-	private Node parent;
-	private List<Node> args;
-	private boolean preset;
+	private final Node parent;
+	private final List<Node> args;
+	private final boolean preset;
 
-	public FunCallNode(Node parent, List<Node> args, boolean preset) {
+	public FunCallNode(final Node parent, final List<Node> args, final boolean preset) {
 		this.parent = parent;
 		this.args = args;
 		this.preset = preset;
 	}
 
 	public Node getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	public List<Node> getArgs() {
-		return args;
+		return this.args;
 	}
 
 	public boolean isPreset() {
-		return preset;
+		return this.preset;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("parent", parent.toJSONObject()).put("args", new JSONArray(args.stream().map(Node::toJSONObject).collect(Collectors.toList()))).put("preset", preset);
+		return super.toJSONObject().put("parent", this.parent.toJSONObject())
+				.put("args", new JSONArray(this.args.stream().map(Node::toJSONObject).collect(Collectors.toList())))
+				.put("preset", this.preset);
 	}
 
 }

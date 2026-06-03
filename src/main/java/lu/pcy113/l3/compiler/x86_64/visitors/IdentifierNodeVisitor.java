@@ -7,7 +7,7 @@ import lu.pcy113.l3.parser.ast.symbols.LetDefSymbol;
 
 public class IdentifierNodeVisitor {
 
-	public static void visit(IdentifierNode ident, String reg, ListNode fun, FileCompilerUnit fu) {
+	public static void visit(final IdentifierNode ident, final String reg, final ListNode fun, final FileCompilerUnit fu) {
 		fu.writeinstln("mov " + reg + ", " + fun.getSymbols().<LetDefSymbol>getSymbol(ident.getValue()).name());
 	}
 

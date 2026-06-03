@@ -8,27 +8,27 @@ public class StringLiteralToken extends LiteralToken {
 
 	protected String value;
 
-	public StringLiteralToken(TokenType type, int line, int column, String value) {
+	public StringLiteralToken(final TokenType type, final int line, final int column, final String value) {
 		super(type, line, column);
 		this.value = value;
 	}
 
 	public String getEscapedValue() {
-		return getValue().replace("\\", "\\\\");
+		return this.getValue().replace("\\", "\\\\");
 	}
 
 	public String getValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override
 	public String toString() {
-		return "StringLiteralToken [value=" + value + "]";
+		return "StringLiteralToken [value=" + this.value + "]";
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("value", getEscapedValue());
+		return super.toJSONObject().put("value", this.getEscapedValue());
 	}
 
 }

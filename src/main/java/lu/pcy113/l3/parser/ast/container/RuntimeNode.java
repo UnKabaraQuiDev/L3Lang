@@ -13,41 +13,44 @@ import lu.pcy113.l3.parser.ast.symbols.NodeSymbols;
 
 public class RuntimeNode extends ListNode {
 
-	private FileNode mainNode;
-	private List<FileNode> files;
-	private NodeSymbols symbols = new NodeSymbols();
+	private final FileNode mainNode;
+	private final List<FileNode> files;
+	private final NodeSymbols symbols = new NodeSymbols();
 
-	public RuntimeNode(FileNode mainNode, List<FileNode> files) {
+	public RuntimeNode(final FileNode mainNode, final List<FileNode> files) {
 		this.mainNode = mainNode;
 		this.files = files;
-		
+
 		this.mainNode.getSymbols().setParent(this.getSymbols());
 		this.files.forEach(f -> f.getSymbols().setParent(this.getSymbols()));
-		
+
 		this.getSymbols().registerFile(mainNode);
 		this.files.forEach(f -> this.getSymbols().registerFile(f));
 	}
 
-	public RuntimeNode(FileNode mainNode) {
+	public RuntimeNode(final FileNode mainNode) {
 		this.mainNode = mainNode;
-		this.files= new ArrayList<>();
+		this.files = new ArrayList<>();
 	}
 
 	public FileNode getMainNode() {
-		return mainNode;
+		return this.mainNode;
 	}
 
 	public List<FileNode> getFiles() {
-		return files;
+		return this.files;
 	}
-	
+
+	@Override
 	public NodeSymbols getSymbols() {
-		return symbols;
+		return this.symbols;
 	}
-	
+
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("main", mainNode.toJSONObject()).put("files", new JSONArray(files.stream().map(Node::toJSONObject).collect(Collectors.toList()))).put("symbols", symbols.toJSONObject());
+		return super.toJSONObject().put("main", this.mainNode.toJSONObject())
+				.put("files", new JSONArray(this.files.stream().map(Node::toJSONObject).collect(Collectors.toList())))
+				.put("symbols", this.symbols.toJSONObject());
 	}
 
 }

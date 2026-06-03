@@ -5,14 +5,14 @@ import lu.pcy113.l3.parser.ast.lit.NumericLiteralNode;
 
 public class NumericLiteralVisitor {
 
-	public static void visit(NumericLiteralNode num, String reg, FileCompilerUnit fu) {
+	public static void visit(final NumericLiteralNode num, final String reg, final FileCompilerUnit fu) {
 		fu.writeinstln("; NumericLiteralVisitor");
 
-		Object val = num.getValue().getValue();
+		final Object val = num.getValue().getValue();
 
-		if (val instanceof Boolean bool) {
+		if (val instanceof final Boolean bool) {
 			fu.writeinstln("mov " + reg + ", " + (bool ? 1 : 0));
-		} else if (val instanceof Integer intVal) {
+		} else if (val instanceof final Integer intVal) {
 			fu.writeinstln("mov " + reg + ", " + intVal);
 		} else {
 			fu.implement(val);

@@ -11,22 +11,22 @@ import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class CastVisitor {
 
-	public static void visit(CastNode cast, String reg, ListNode parent, FileCompilerUnit fu) {
+	public static void visit(final CastNode cast, final String reg, final ListNode parent, final FileCompilerUnit fu) {
 		final TypeNode castType = cast.getCastType();
 		final Node value = cast.getValue();
 
-		if (castType instanceof PrimitiveTypeNode primitive) {
+		if (castType instanceof final PrimitiveTypeNode primitive) {
 			VisitorHelper.compute(parent, value, "rax", fu);
 
 			final NumericValueType primType = NumericValueType.byTokenType(primitive.getType());
 
-			if (primitive.getType().equals(TokenType.BOOLEAN)) {
+			if (TokenType.BOOLEAN.equals(primitive.getType())) {
 				fu.writeinstln("cmp rax, 0", "Cast to boolean");
 				fu.writeinstln("setg al");
 				fu.writeinstln("movzx rax, al");
 			} else {
 				final String sizedReg = fu.getMemory().getAsSize("rax", primType.getBytes());
-				
+
 				if (primType.isSigned()) {
 					fu.writeinstln("movsx rax, " + sizedReg, "Cast to: " + primitive.getType());
 				} else if (primType.isUnsigned()) {

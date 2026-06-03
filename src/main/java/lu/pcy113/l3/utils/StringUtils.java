@@ -6,9 +6,9 @@ import java.io.Reader;
 
 public class StringUtils {
 
-	public static String readAll(Reader reader) throws IOException {
+	public static String readAll(final Reader reader) throws IOException {
 		try (BufferedReader r = new BufferedReader(reader)) {
-			StringBuilder stringBuilder = new StringBuilder();
+			final StringBuilder stringBuilder = new StringBuilder();
 			String line;
 
 			while ((line = r.readLine()) != null) {
@@ -19,9 +19,9 @@ public class StringUtils {
 		}
 	}
 
-	public static String repeat(String string, int indent) {
+	public static String repeat(final String string, final int indent) {
 		String str = "";
-		for(int i = 0; i < indent; i++) {
+		for (int i = 0; i < indent; i++) {
 			str += string;
 		}
 		return str;

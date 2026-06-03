@@ -14,9 +14,11 @@ public enum TokenType {
 
 	INT(PRIMITIVE_TYPE, "int"),
 
-	INT_1(INT, "int1"), INT_8(INT, "int8"), INT_16(INT, "int16"), INT_32(INT, "int32"), INT_64(INT, "int64"), INT_128(INT, "int128"),
+	INT_1(INT, "int1"), INT_8(INT, "int8"), INT_16(INT, "int16"), INT_32(INT, "int32"), INT_64(INT, "int64"),
+	INT_128(INT, "int128"),
 
-	INT_8_S(INT, "int8s"), INT_16_S(INT, "int16s"), INT_32_S(INT, "int32s"), INT_64_S(INT, "int64s"), INT_128_S(INT, "int128s"),
+	INT_8_S(INT, "int8s"), INT_16_S(INT, "int16s"), INT_32_S(INT, "int32s"), INT_64_S(INT, "int64s"),
+	INT_128_S(INT, "int128s"),
 
 	BYTE(INT_8, "byte"), CHAR(BYTE, "char"), SHORT(INT_16, "short"), LONG(INT_64, "long"),
 
@@ -59,18 +61,20 @@ public enum TokenType {
 	GOTO("goto"), YIELD("yield"),
 
 	MATH_OP(),
-	
+
 	ASSIGN(MATH_OP), STRICT_ASSIGN(ASSIGN, '='),
 
 	BIT_OR(MATH_OP, '|'), BIT_AND(MATH_OP, '&'), BIT_XOR(MATH_OP, '^'), BIT_NOT(MATH_OP, '~'),
 
-	BIT_OR_ASSIGN(ASSIGN, "|="), BIT_AND_ASSIGN(ASSIGN, "&="), BIT_XOR_ASSIGN(ASSIGN, "^="), BIT_NOT_ASSIGN(ASSIGN, "~="),
+	BIT_OR_ASSIGN(ASSIGN, "|="), BIT_AND_ASSIGN(ASSIGN, "&="), BIT_XOR_ASSIGN(ASSIGN, "^="),
+	BIT_NOT_ASSIGN(ASSIGN, "~="),
 
 	OR(MATH_OP, "||"), AND(MATH_OP, "&&"), NOT(MATH_OP, '!'), XOR(MATH_OP, "^^"),
-	
+
 	BIT_SHIFT(MATH_OP),
-	
-	BIT_SHIFT_LEFT(BIT_SHIFT, "<<"), BIT_SHIFT_SIGNED_RIGHT(BIT_SHIFT, ">>"), BIT_SHIFT_UNSIGNED_RIGHT(BIT_SHIFT, ">>>"),
+
+	BIT_SHIFT_LEFT(BIT_SHIFT, "<<"), BIT_SHIFT_SIGNED_RIGHT(BIT_SHIFT, ">>"),
+	BIT_SHIFT_UNSIGNED_RIGHT(BIT_SHIFT, ">>>"),
 
 	HASH('#'),
 
@@ -78,10 +82,11 @@ public enum TokenType {
 
 	PLUS_PLUS(MATH_OP, "++"), MINUS_MINUS(MATH_OP, "--"),
 
-	PLUS_ASSIGN(ASSIGN, "+="), MINUS_ASSIGN(ASSIGN, "-="), MUL_ASSIGN(ASSIGN, "*="), DIV_ASSIGN(ASSIGN, "/="), MODULO_ASSIGN(ASSIGN, "%="),
+	PLUS_ASSIGN(ASSIGN, "+="), MINUS_ASSIGN(ASSIGN, "-="), MUL_ASSIGN(ASSIGN, "*="), DIV_ASSIGN(ASSIGN, "/="),
+	MODULO_ASSIGN(ASSIGN, "%="),
 
 	COMPARAISON(MATH_OP),
-	
+
 	EQUALS(COMPARAISON, "=="), NOT_EQUALS(COMPARAISON, "!="),
 
 	LESS(COMPARAISON, '<'), LESS_EQUALS(COMPARAISON, "<="),
@@ -94,78 +99,81 @@ public enum TokenType {
 	private String stringValue;
 	private char charValue;
 
-	private TokenType() {
+	TokenType() {
 		this.fixed = false;
 	}
 
-	private TokenType(TokenType parent) {
+	TokenType(final TokenType parent) {
 		this.fixed = false;
 		this.parent = parent;
 	}
 
-	private TokenType(char cha) {
+	TokenType(final char cha) {
 		this.fixed = true;
 		this.string = false;
 		this.charValue = cha;
 	}
 
-	private TokenType(TokenType parent, char cha) {
+	TokenType(final TokenType parent, final char cha) {
 		this.fixed = true;
 		this.string = false;
 		this.charValue = cha;
 		this.parent = parent;
 	}
 
-	private TokenType(String str) {
+	TokenType(final String str) {
 		this.fixed = true;
 		this.string = true;
 		this.stringValue = str;
 	}
 
-	private TokenType(TokenType parent, String str) {
+	TokenType(final TokenType parent, final String str) {
 		this.fixed = true;
 		this.string = true;
 		this.stringValue = str;
 		this.parent = parent;
 	}
 
-	public boolean matches(TokenType type) {
-		return this.equals(type) || (parent != null ? parent.matches(type) : false);
+	public boolean matches(final TokenType type) {
+		return this.equals(type) || (this.parent != null ? this.parent.matches(type) : false);
 	}
 
 	public boolean isFixed() {
-		return fixed;
+		return this.fixed;
 	}
 
 	public boolean isString() {
-		return string;
+		return this.string;
 	}
 
 	public String getStringValue() {
-		return stringValue;
+		return this.stringValue;
 	}
 
 	public char getCharValue() {
-		return charValue;
+		return this.charValue;
 	}
 
 	public Object getValue() {
-		return !fixed ? name() : (string ? stringValue : charValue);
+		return !this.fixed ? this.name() : this.string ? this.stringValue : this.charValue;
 	}
 
 	@Override
 	public String toString() {
-		if (fixed && string) {
-			return TokenType.class.getSimpleName() + "[" + name() + ", fixed=" + fixed + ", string=" + string + ", stringValue=" + stringValue + "]";
-		} else if (fixed && !string) {
-			return TokenType.class.getSimpleName() + "[" + name() + ", fixed=" + fixed + ", string=" + string + ", charValue=" + charValue + "]";
+		if (this.fixed && this.string) {
+			return TokenType.class.getSimpleName() + "[" + this.name() + ", fixed=" + this.fixed + ", string="
+					+ this.string + ", stringValue=" + this.stringValue + "]";
+		} else if (this.fixed && !this.string) {
+			return TokenType.class.getSimpleName() + "[" + this.name() + ", fixed=" + this.fixed + ", string="
+					+ this.string + ", charValue=" + this.charValue + "]";
 		} else {
-			return TokenType.class.getSimpleName() + "[" + name() + ", fixed=" + fixed + ", string=" + string + "]";
+			return TokenType.class.getSimpleName() + "[" + this.name() + ", fixed=" + this.fixed + ", string="
+					+ this.string + "]";
 		}
 	}
 
 	public String toShortString() {
-		return TokenType.class.getSimpleName() + "[" + name() + "]";
+		return TokenType.class.getSimpleName() + "[" + this.name() + "]";
 	}
 
 }

@@ -11,27 +11,28 @@ public class UnaryExpressionNode extends Node {
 	private final TokenType operator;
 	private final boolean prefix;
 
-	public UnaryExpressionNode(Node child, TokenType operator, boolean prefix) {
+	public UnaryExpressionNode(final Node child, final TokenType operator, final boolean prefix) {
 		this.child = child;
 		this.operator = operator;
 		this.prefix = prefix;
 	}
 
 	public Node getChild() {
-		return child;
+		return this.child;
 	}
 
 	public TokenType getOperator() {
-		return operator;
+		return this.operator;
 	}
 
 	public boolean isPrefix() {
-		return prefix;
+		return this.prefix;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("child", child.toJSONObject()).put("operator", operator).put("prefix", prefix);
+		return super.toJSONObject().put("child", this.child.toJSONObject()).put("operator", this.operator).put("prefix",
+				this.prefix);
 	}
 
 }

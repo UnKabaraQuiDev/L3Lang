@@ -6,19 +6,19 @@ import lu.pcy113.l3.parser.ast.abstr.Node;
 
 public class PointerDerefNode extends Node {
 
-	private Node expression;
+	private final Node expression;
 
-	public PointerDerefNode(Node expression) {
+	public PointerDerefNode(final Node expression) {
 		this.expression = expression;
 	}
 
 	public Node getExpression() {
-		return expression;
+		return this.expression;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("expression", expression.toJSONObject());
+		return super.toJSONObject().put("expression", this.expression.toJSONObject());
 	}
 
 }

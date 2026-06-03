@@ -9,13 +9,14 @@ import lu.pcy113.l3.parser.ast.fun.ctrl.ReturnNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.let.LetSetNode;
 import lu.pcy113.l3.parser.ast.symbols.FunDefSymbol;
-import lu.pcy113.pclib.logger.GlobalLogger;
+
+import lu.kbra.pclib.logger.GlobalLogger;
 
 public class FunDefVisitor {
 
 	public static final String[] REGISTER_ORDER = { "rdi", "rsi", "rdx", "rcx", "r8", "r9" };
 
-	public static void visit(FunDefNode fun, FileNode file, FileCompilerUnit fu) {
+	public static void visit(final FunDefNode fun, final FileNode file, final FileCompilerUnit fu) {
 		final FunDefSymbol funSymbol = file.getSymbols().get(fun);
 
 		GlobalLogger.log("Compiling: " + funSymbol.name());
@@ -25,26 +26,26 @@ public class FunDefVisitor {
 		fu.writeinstln("mov rbp, rsp", "Set new stackframe");
 
 		for (int i = 0; i < fun.getArgs().size(); i++) {
-			if (i > REGISTER_ORDER.length) {
+			if (i > FunDefVisitor.REGISTER_ORDER.length) {
 				fun.getSymbols().get(fun.getArgs().get(i)).stack(i); // needs rework (size)
 				throw new RuntimeException();
 			}
 
-			fun.getSymbols().get(fun.getArgs().get(i)).register(REGISTER_ORDER[i]);
+			fun.getSymbols().get(fun.getArgs().get(i)).register(FunDefVisitor.REGISTER_ORDER[i]);
 		}
 
-		for (Node n : fun.getChildren()) {
-			if (n instanceof ReturnNode ret) {
+		for (final Node n : fun.getChildren()) {
+			if (n instanceof final ReturnNode ret) {
 				if (ret.hasExpression()) {
-					Node expr = ret.getExpression();
+					final Node expr = ret.getExpression();
 					VisitorHelper.compute(fun, expr, "rax", fu);
 				}
 				FunDefVisitor.return_(fun, file, fu);
-			} else if (n instanceof LetDefNode letDef) {
+			} else if (n instanceof final LetDefNode letDef) {
 				LetDefVisitor.visit(letDef, fun, fu);
-			} else if (n instanceof FunCallNode funCall) {
+			} else if (n instanceof final FunCallNode funCall) {
 				FunCallVisitor.visit(funCall, fun, fu);
-			} else if (n instanceof LetSetNode letSet) {
+			} else if (n instanceof final LetSetNode letSet) {
 				LetSetVisitor.visit(letSet, fun, fu);
 			} else {
 				fu.implement(n);
@@ -54,7 +55,7 @@ public class FunDefVisitor {
 		// FunDefVisitor.return_(fun, file, fu);
 	}
 
-	private static void return_(FunDefNode fun, FileNode file, FileCompilerUnit fu) {
+	private static void return_(final FunDefNode fun, final FileNode file, final FileCompilerUnit fu) {
 		fu.writeinstln("mov rsp, rbp", "Cleanup current stackframe");
 		fu.writeinstln("pop rbp", "Restore caller stackframe");
 		fu.writeinstln("ret");

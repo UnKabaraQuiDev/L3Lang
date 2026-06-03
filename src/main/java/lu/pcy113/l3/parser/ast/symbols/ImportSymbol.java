@@ -4,7 +4,7 @@ import lu.pcy113.l3.parser.ast.ident.ImportNode;
 
 public class ImportSymbol extends NodeSymbol<ImportNode> {
 
-	public ImportSymbol(ImportNode importNode) {
+	public ImportSymbol(final ImportNode importNode) {
 		super(importNode);
 	}
 

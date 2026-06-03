@@ -9,22 +9,22 @@ public class NodeSymbol<T extends Node> implements JSONConvertible {
 
 	protected T node;
 
-	public NodeSymbol(T node) {
+	public NodeSymbol(final T node) {
 		this.node = node;
 	}
 
 	public T getNode() {
-		return node;
+		return this.node;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return new JSONObject().put("type", getClass().getSimpleName());
+		return new JSONObject().put("type", this.getClass().getSimpleName());
 	}
-	
+
 	@Override
 	public String toString() {
-		return toJSONObject().toString(4);
+		return this.toJSONObject().toString(4);
 	}
 
 }

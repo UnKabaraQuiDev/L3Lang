@@ -6,25 +6,26 @@ import lu.pcy113.l3.parser.ast.abstr.Node;
 
 public class CastNode extends Node {
 
-	private TypeNode castType;
-	private Node value;
+	private final TypeNode castType;
+	private final Node value;
 
-	public CastNode(TypeNode castType, Node value) {
+	public CastNode(final TypeNode castType, final Node value) {
 		this.castType = castType;
 		this.value = value;
 	}
 
 	public TypeNode getCastType() {
-		return castType;
+		return this.castType;
 	}
 
 	public Node getValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("castType", castType.toJSONObject()).put("value", value.toJSONObject());
+		return super.toJSONObject().put("castType", this.castType.toJSONObject()).put("value",
+				this.value.toJSONObject());
 	}
 
 }

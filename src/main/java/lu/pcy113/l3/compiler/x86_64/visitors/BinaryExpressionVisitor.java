@@ -10,7 +10,7 @@ import lu.pcy113.l3.parser.ast.math.BinaryExpressionNode;
 
 public class BinaryExpressionVisitor {
 
-	public static void visit(BinaryExpressionNode bin, String reg, ListNode parent, FileCompilerUnit fu) {
+	public static void visit(final BinaryExpressionNode bin, final String reg, final ListNode parent, final FileCompilerUnit fu) {
 
 		final Node left = bin.getLeft();
 		final Node right = bin.getRight();
@@ -28,9 +28,9 @@ public class BinaryExpressionVisitor {
 
 		String retReg = null;
 		if (implicitType.isInt()) {
-			retReg = integer(bin, parent, regLeft, regRight, fu);
+			retReg = BinaryExpressionVisitor.integer(bin, parent, regLeft, regRight, fu);
 		} else if (implicitType.isFloat() || implicitType.isDouble()) {
-			retReg = float_double(bin, parent, regLeft, regRight, fu);
+			retReg = BinaryExpressionVisitor.float_double(bin, parent, regLeft, regRight, fu);
 		} else {
 			fu.implement();
 		}
@@ -40,7 +40,8 @@ public class BinaryExpressionVisitor {
 		}
 	}
 
-	private static String float_double(BinaryExpressionNode node, ListNode parent, String regLeft, String regRight, FileCompilerUnit fu) {
+	private static String float_double(final BinaryExpressionNode node, final ListNode parent, String regLeft, String regRight,
+			final FileCompilerUnit fu) {
 		final Node left = node.getLeft(), right = node.getRight();
 
 		//@formatter:off
@@ -55,14 +56,14 @@ public class BinaryExpressionVisitor {
 				rightDouble = ImplicitType.computeType(right, parent).isDouble();
 		//@formatter:on
 
-		final String opCodeSuffix = nodeFloat ? "ss" : (nodeDouble ? "sd" : null);
+		final String opCodeSuffix = nodeFloat ? "ss" : nodeDouble ? "sd" : null;
 
 		final String regLeftFP = "xmm0", regRightFP = "xmm1";
 
 		final TokenType operator = node.getOperator();
 
 		fu.writeinstln("; float_double");
-		
+
 		if (nodeFloat) {
 			if (leftFloat) {
 				fu.writeinstln("movd " + regLeftFP + ", " + regLeft);
@@ -99,55 +100,43 @@ public class BinaryExpressionVisitor {
 		regRight = regRightFP;
 
 		switch (operator) {
-		case OR:
-		case PLUS:
-			fu.writeinstln("add" + opCodeSuffix + " " + regLeft + ", " + regRight);
-			break;
-		case MINUS:
-			fu.writeinstln("sub" + opCodeSuffix + " " + regLeft + ", " + regRight);
-			break;
-		case MODULO:
-			fu.implement();
-			break;
-		case DIV:
-			fu.writeinstln("div" + opCodeSuffix + " " + regRight);
-			break;
-		case AND:
-		case MUL:
-			fu.writeinstln("mul" + opCodeSuffix + " " + regLeft + ", " + regRight);
-			break;
-		case EQUALS:
+		case OR, PLUS -> fu.writeinstln("add" + opCodeSuffix + " " + regLeft + ", " + regRight);
+		case MINUS -> fu.writeinstln("sub" + opCodeSuffix + " " + regLeft + ", " + regRight);
+		case MODULO -> fu.implement();
+		case DIV -> fu.writeinstln("div" + opCodeSuffix + " " + regRight);
+		case AND, MUL -> fu.writeinstln("mul" + opCodeSuffix + " " + regLeft + ", " + regRight);
+		case EQUALS -> {
 			fu.writeinstln("ucomi" + opCodeSuffix + " " + regLeft + ", " + regRight + "");
 			fu.writeinstln("sete " + regLeft);
-			break;
-		case NOT_EQUALS:
+		}
+		case NOT_EQUALS -> {
 			fu.writeinstln("ucomi" + opCodeSuffix + " " + regLeft + ", " + regRight + "");
 			fu.writeinstln("setne " + regLeft);
-			break;
-		case LESS:
+		}
+		case LESS -> {
 			fu.writeinstln("ucomi" + opCodeSuffix + " " + regLeft + ", " + regRight + "");
 			fu.writeinstln("setl " + regLeft);
-			break;
-		case LESS_EQUALS:
+		}
+		case LESS_EQUALS -> {
 			fu.writeinstln("ucomi" + opCodeSuffix + " " + regLeft + ", " + regRight + "");
 			fu.writeinstln("setle " + regLeft);
-			break;
-		case GREATER:
+		}
+		case GREATER -> {
 			fu.writeinstln("ucomi" + opCodeSuffix + " " + regLeft + ", " + regRight + "");
 			fu.writeinstln("setg " + regLeft);
-			break;
-		case GREATER_EQUALS:
+		}
+		case GREATER_EQUALS -> {
 			fu.writeinstln("ucomi" + opCodeSuffix + " " + regLeft + ", " + regRight + "");
 			fu.writeinstln("setge " + regLeft);
-			break;
-		default:
-			throw new L3Exception("Operation not supported: " + operator);
+		}
+		default -> throw new L3Exception("Operation not supported: " + operator);
 		}
 
 		return regLeft;
 	}
 
-	private static String integer(BinaryExpressionNode node, ListNode parent, String regLeft, String regRight, FileCompilerUnit fu) {
+	private static String integer(final BinaryExpressionNode node, final ListNode parent, final String regLeft, final String regRight,
+			final FileCompilerUnit fu) {
 		final Node left = node.getLeft(), right = node.getRight();
 
 		//@formatter:off
@@ -165,7 +154,7 @@ public class BinaryExpressionVisitor {
 		final TokenType operator = node.getOperator();
 
 		fu.writeinstln("; integer");
-		
+
 		switch (operator) {
 		case OR:
 		case PLUS:
@@ -176,7 +165,7 @@ public class BinaryExpressionVisitor {
 			break;
 		case MODULO:
 		case DIV:
-			if (!regLeft.equals("rax")) {
+			if (!"rax".equals(regLeft)) {
 				throw new L3Exception("Left reg should be rax !");
 			}
 			fu.writeinstln("mov qword rdx, 0");

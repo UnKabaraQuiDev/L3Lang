@@ -7,25 +7,25 @@ import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 
 public class MembersAccess extends Node {
 
-	private Node parent;
-	private IdentifierNode prop;
+	private final Node parent;
+	private final IdentifierNode prop;
 
-	public MembersAccess(Node parent, IdentifierNode prop) {
+	public MembersAccess(final Node parent, final IdentifierNode prop) {
 		this.parent = parent;
 		this.prop = prop;
 	}
 
 	public Node getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	public IdentifierNode getProp() {
-		return prop;
+		return this.prop;
 	}
-	
+
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("parent", parent.toJSONObject()).put("prop", prop.toJSONObject());
+		return super.toJSONObject().put("parent", this.parent.toJSONObject()).put("prop", this.prop.toJSONObject());
 	}
 
 }

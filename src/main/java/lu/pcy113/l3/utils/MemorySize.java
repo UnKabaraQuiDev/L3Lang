@@ -5,45 +5,56 @@ import lu.pcy113.l3.lexer.tokens.IdentifierToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 
 public class MemorySize {
-	
-	private int bits, bytes;
+
+	private final int bits, bytes;
 	private String customSizeIdent;
-	
-	public MemorySize(int bits, int bytes) {
+
+	public MemorySize(final int bits, final int bytes) {
 		this.bits = bits;
 		this.bytes = bytes;
 	}
-	public MemorySize(TokenType token) {
-		this.bits = getBits(token);
-		this.bytes = getBytes(token);
-		
-		if(bits == -1 || bytes == -1) {
+
+	public MemorySize(final TokenType token) {
+		this.bits = MemorySize.getBits(token);
+		this.bytes = MemorySize.getBytes(token);
+
+		if (this.bits == -1 || this.bytes == -1) {
 			throw new IllegalArgumentException("Invalid token type.");
 		}
 	}
-	public MemorySize(Token token) {
-		TokenType type = token.getType();
-		this.bits = getBits(type);
-		this.bytes = getBytes(type);
-		
-		if((bits == -1 || bytes == -1) && token instanceof IdentifierToken) {
+
+	public MemorySize(final Token token) {
+		final TokenType type = token.getType();
+		this.bits = MemorySize.getBits(type);
+		this.bytes = MemorySize.getBytes(type);
+
+		if ((this.bits == -1 || this.bytes == -1) && token instanceof IdentifierToken) {
 			this.customSizeIdent = ((IdentifierToken) token).getValue();
 		}
 	}
-	
-	public int getBits() {return bits;}
-	public int getBytes() {return bytes;}
-	public String getCustomSizeIdent() {return customSizeIdent;}
-	
+
+	public int getBits() {
+		return this.bits;
+	}
+
+	public int getBytes() {
+		return this.bytes;
+	}
+
+	public String getCustomSizeIdent() {
+		return this.customSizeIdent;
+	}
+
 	@Override
 	public String toString() {
-		return getClass().getSimpleName()+"{bits="+bits+", bytes="+bytes+", customSizeIdent="+customSizeIdent+"}";
+		return this.getClass().getSimpleName() + "{bits=" + this.bits + ", bytes=" + this.bytes + ", customSizeIdent="
+				+ this.customSizeIdent + "}";
 	}
-	
+
 	/**
 	 * @returns number of bits needed
 	 */
-	public static int getBits(TokenType tokenType) {
+	public static int getBits(final TokenType tokenType) {
 		switch (tokenType) {
 		case INT_1:
 			return 1;
@@ -66,33 +77,23 @@ public class MemorySize {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * @returns number of bytes needed
 	 */
-	public static int getBytes(TokenType tokenType) {
-		switch (tokenType) {
-		case INT_1:
-			return 1;
-		case INT_8:
-			return 1;
-		case INT_16:
-			return 2;
-		case INT_32:
-			return 4;
-		case INT_64:
-			return 8;
-		case INT_8_S:
-			return 1;
-		case INT_16_S:
-			return 2;
-		case INT_32_S:
-			return 4;
-		case INT_64_S:
-			return 8;
-		default:
-			return -1;
-		}
+	public static int getBytes(final TokenType tokenType) {
+		return switch (tokenType) {
+		case INT_1 -> 1;
+		case INT_8 -> 1;
+		case INT_16 -> 2;
+		case INT_32 -> 4;
+		case INT_64 -> 8;
+		case INT_8_S -> 1;
+		case INT_16_S -> 2;
+		case INT_32_S -> 4;
+		case INT_64_S -> 8;
+		default -> -1;
+		};
 	}
 
 }

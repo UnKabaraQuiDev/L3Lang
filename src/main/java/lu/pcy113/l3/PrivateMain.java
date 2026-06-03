@@ -6,65 +6,57 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 
-import lu.pcy113.l3.compiler.x86_64.X86_64Compiler;
+import lu.pcy113.l3.compiler.llvm.LwjglLlvmCompiler;
+import lu.pcy113.l3.compiler.llvm.NativeExecutableLinker;
 import lu.pcy113.l3.lexer.L3Lexer;
 import lu.pcy113.l3.lexer.LexerException;
 import lu.pcy113.l3.parser.L3Parser;
 import lu.pcy113.l3.parser.ast.container.FileNode;
 import lu.pcy113.l3.parser.ast.container.RuntimeNode;
-import lu.pcy113.pclib.logger.GlobalLogger;
+
+import lu.kbra.pclib.logger.GlobalLogger;
 
 public class PrivateMain {
 
-	public static void main(String[] args) throws FileNotFoundException, IOException, LexerException, L3Exception {
+	public static void main(final String[] args)
+			throws FileNotFoundException, IOException, LexerException, L3Exception {
 		GlobalLogger.init(new File("./config/logs.properties"));
-		// GlobalLogger.getLogger().addCallerWhiteList(PrivateMain.class.getName());
-		// GlobalLogger.getLogger().addCallerWhiteList(L3Parser.class.getName());
 
-		System.out.println(Arrays.toString(new File("./").list()));
+		final File l3Dir = new File("./l3/");
+		final File srcDir = new File(l3Dir, "src/");
+		final File binDir = new File(l3Dir, "bin/");
 
-		File l3Dir = new File("./l3/");
-		File srcDir = new File(l3Dir, "src/");
-		File binDir = new File(l3Dir, "bin/");
+		final String mainFile = args.length > 0 ? args[0] : "lu/lang/base/Test.l3";
+		final String otherFile = args.length > 1 ? args[1] : "sys/sysout.l3";
 
-		final String mainFile = "lu/lang/base/Test.l3";
-		final String otherFile = "lu/lang/base/Test2.l3";
+		final FileNode mainNode = PrivateMain.parse(srcDir, mainFile);
+		System.out.println(mainNode.toJSONObject().toString(4));
 
-		L3Parser parser = null;
-		try {
-			L3Lexer lexer = new L3Lexer(new FileReader(new File(srcDir, mainFile)));
-			System.out.println("Input:\n" + lexer.getInput());
-			lexer.lexe();
-			lexer.getTokens().forEach(System.out::println);
-			
-			parser = new L3Parser(lexer.iterator(), mainFile);
-			parser.parse();
-		} catch (Exception e) {
-			throw e;
+		final RuntimeNode runtime;
+		if (otherFile != null) {
+			final FileNode otherNode = PrivateMain.parse(srcDir, otherFile);
+			System.out.println(otherNode.toJSONObject().toString(4));
+			runtime = new RuntimeNode(mainNode, Arrays.asList(otherNode));
+		} else {
+			runtime = new RuntimeNode(mainNode);
 		}
-		
-		final FileNode file1 = parser.getFile();
-		System.out.println(file1.toJSONObject().toString(4));
-		
-		try {
-			L3Lexer lexer = new L3Lexer(new FileReader(new File(srcDir, otherFile)));
-			System.out.println("Input:\n" + lexer.getInput());
-			lexer.lexe();
-			lexer.getTokens().forEach(System.out::println);
-			
-			parser = new L3Parser(lexer.iterator(), otherFile);
-			parser.parse();
-		} catch (Exception e) {
-			throw e;
-		}
-		
-		final FileNode file2 = parser.getFile();
-		System.out.println(file2.toJSONObject().toString(4));
 
-		final RuntimeNode runtime = new RuntimeNode(file1, Arrays.asList(file2));
-		
-		X86_64Compiler compiler = new X86_64Compiler(runtime, binDir);
+		final LwjglLlvmCompiler compiler = new LwjglLlvmCompiler(runtime, binDir);
 		compiler.compile();
+		System.out.println("LLVM IR: " + compiler.getOutFileIr());
+		System.out.println("Object file: " + compiler.getOutFileObj());
+
+		final NativeExecutableLinker linker = new NativeExecutableLinker();
+		final File executableFile = linker.link(compiler.getOutFileObj());
+		System.out.println("Executable file: " + executableFile);
+	}
+
+	private static FileNode parse(final File srcDir, final String path) throws FileNotFoundException, IOException {
+		final L3Lexer lexer = new L3Lexer(new FileReader(new File(srcDir, path)));
+		lexer.lexe();
+		final L3Parser parser = new L3Parser(lexer.iterator(), path);
+		parser.parse();
+		return parser.getFile();
 	}
 
 }

@@ -8,50 +8,50 @@ import lu.pcy113.l3.lexer.tokens.Token;
 
 public class PrimitiveTypeNode extends TypeNode {
 
-	private TokenType type;
+	private final TokenType type;
 
-	public PrimitiveTypeNode(Token token) {
+	public PrimitiveTypeNode(final Token token) {
 		super(token.getType().name());
 		this.type = token.getType();
 	}
-	
-	public PrimitiveTypeNode(TokenType type) {
+
+	public PrimitiveTypeNode(final TokenType type) {
 		super(type.name());
 		this.type = type;
 	}
 
 	@Override
 	public int computeSize() {
-		return NumericLiteralToken.NumericValueType.byTokenType(type).getBytes();
+		return NumericLiteralToken.NumericValueType.byTokenType(this.type).getBytes();
 	}
-	
+
 	public TokenType getType() {
-		return type;
+		return this.type;
 	}
 
 	public boolean isDouble() {
-		return type.matches(TokenType.DOUBLE);
+		return this.type.matches(TokenType.DOUBLE);
 	}
-	
+
 	public boolean isFloat() {
-		return type.matches(TokenType.FLOAT);
+		return this.type.matches(TokenType.FLOAT);
 	}
 
 	public boolean isInt() {
-		return type.matches(TokenType.INT);
+		return this.type.matches(TokenType.INT);
 	}
 
 	public boolean isBool() {
-		return type.matches(TokenType.BOOLEAN);
+		return this.type.matches(TokenType.BOOLEAN);
 	}
 
 	public boolean isSigned() {
-		return isInt() && type.name().endsWith("_S");
+		return this.isInt() && this.type.name().endsWith("_S");
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("type", type.name());
+		return super.toJSONObject().put("type", this.type.name());
 	}
 
 }

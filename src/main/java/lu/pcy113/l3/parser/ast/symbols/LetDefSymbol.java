@@ -6,10 +6,10 @@ import lu.pcy113.l3.parser.ast.let.LetDefNode;
 public class LetDefSymbol extends NodeSymbol<LetDefNode> implements ASMNamed {
 
 	private static int STATIC_IDENT = 0;
-	
+
 	private String asmName;
 
-	public LetDefSymbol(LetDefNode node) {
+	public LetDefSymbol(final LetDefNode node) {
 		super(node);
 
 		if (node.isStatic()) {
@@ -18,24 +18,24 @@ public class LetDefSymbol extends NodeSymbol<LetDefNode> implements ASMNamed {
 	}
 
 	public void static_() {
-		asmName = "static_let_" + STATIC_IDENT++;
+		this.asmName = "static_let_" + LetDefSymbol.STATIC_IDENT++;
 	}
 
-	public void stack(int offset) {
-		asmName = "[rbp-" + offset + "]";
+	public void stack(final int offset) {
+		this.asmName = "[rbp-" + offset + "]";
 	}
 
-	public void register(String reg) {
-		asmName = reg;
+	public void register(final String reg) {
+		this.asmName = reg;
 	}
 
-	public void setName(String asmName) {
+	public void setName(final String asmName) {
 		this.asmName = asmName;
 	}
-	
+
 	@Override
 	public String name() {
-		return asmName;
+		return this.asmName;
 	}
 
 }

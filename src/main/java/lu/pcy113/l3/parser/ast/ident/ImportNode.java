@@ -10,15 +10,15 @@ import lu.pcy113.l3.parser.ast.abstr.Node;
 
 public class ImportNode extends Node {
 
-	private List<IdentifierNode> idents;
-	private IdentifierNode identifier;
-	private String value;
+	private final List<IdentifierNode> idents;
+	private final IdentifierNode identifier;
+	private final String value;
 
-	public ImportNode(List<IdentifierNode> idents) {
+	public ImportNode(final List<IdentifierNode> idents) {
 		this(idents, idents.get(idents.size() - 1));
 	}
 
-	public ImportNode(List<IdentifierNode> idents, IdentifierNode identifier) {
+	public ImportNode(final List<IdentifierNode> idents, final IdentifierNode identifier) {
 		this.idents = idents;
 		this.identifier = identifier;
 
@@ -26,20 +26,22 @@ public class ImportNode extends Node {
 	}
 
 	public IdentifierNode getIdentifier() {
-		return identifier;
+		return this.identifier;
 	}
 
 	public List<IdentifierNode> getIdents() {
-		return idents;
+		return this.idents;
 	}
 
 	public String getValue() {
-		return value;
+		return this.value;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("idents", new JSONArray(idents.stream().map(Node::toJSONObject).collect(Collectors.toList()))).put("identifier", identifier.toJSONObject());
+		return super.toJSONObject()
+				.put("idents", new JSONArray(this.idents.stream().map(Node::toJSONObject).collect(Collectors.toList())))
+				.put("identifier", this.identifier.toJSONObject());
 	}
 
 }

@@ -5,15 +5,16 @@ import lu.pcy113.l3.parser.ast.abstr.ListNode;
 import lu.pcy113.l3.parser.ast.let.LetDefNode;
 import lu.pcy113.l3.parser.ast.symbols.LetDefSymbol;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
-import lu.pcy113.pclib.PCUtils;
+
+import lu.kbra.pclib.PCUtils;
 
 public class LetDefVisitor {
 
 	private static int currentStackOffset = 0;
 
-	public static void visit(LetDefNode letDef, ListNode fun, FileCompilerUnit fu) {
-		TypeNode type = letDef.getType();
-		int byteCount = fixStackOffset(type.computeSize());
+	public static void visit(final LetDefNode letDef, final ListNode fun, final FileCompilerUnit fu) {
+		final TypeNode type = letDef.getType();
+		final int byteCount = LetDefVisitor.fixStackOffset(type.computeSize());
 
 		final LetDefSymbol letDefSymbol = fun.getSymbols().get(letDef);
 
@@ -32,20 +33,22 @@ public class LetDefVisitor {
 				fu.writeinstln("mov " + name + ", rax");
 			}
 		} else {
-			currentStackOffset += byteCount;
+			LetDefVisitor.currentStackOffset += byteCount;
 
-			letDefSymbol.stack(currentStackOffset);
+			letDefSymbol.stack(LetDefVisitor.currentStackOffset);
 
 			if (letDef.hasValue()) {
 				VisitorHelper.compute(fun, letDef.getValue(), "rax", fu);
-				fu.writeinstln("push " + fu.getMemory().getAsSize("rax", byteCount), "Save (" + byteCount + "): " + letDef.getIdentifier().getValue());
+				fu.writeinstln("push " + fu.getMemory().getAsSize("rax", byteCount),
+						"Save (" + byteCount + "): " + letDef.getIdentifier().getValue());
 			} else {
-				fu.writeinstln("sub rsp, " + byteCount, "Save space (" + byteCount + ") for: " + letDef.getIdentifier().getValue());
+				fu.writeinstln("sub rsp, " + byteCount,
+						"Save space (" + byteCount + ") for: " + letDef.getIdentifier().getValue());
 			}
 		}
 	}
 
-	private static int fixStackOffset(int byteSize) {
+	private static int fixStackOffset(final int byteSize) {
 		return byteSize < 8 ? 8 : PCUtils.snap(byteSize, 8);
 	}
 

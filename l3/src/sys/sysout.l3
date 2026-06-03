@@ -1,96 +1,153 @@
-package "sys";
+package sys;
 
-fun void memcpy(int32: from, int32: to, int32 length) {
-	asm#("mov ecx, [esp + 4]  ; Length");
-	asm#("mov edi, [esp + 8]  ; To");
-	asm#("mov esi, [esp + 12]  ; From");
-	
-	asmlb#(".copy_loop:");
-	asm#("mov eax, [esi]");
-	asm#("mov [edi], eax");
-	asm#("add esi, 4");
-	asm#("add edi, 4");
-	asm#("loop .copy_loop");
+fun void memcpy(int8: from, int8: to, int64 length) {
+    llvm#("""
+entry:
+  br label %copy_loop
+
+copy_loop:
+  %i = phi i64 [0, %entry], [%next, %copy_body]
+  %done = icmp uge i64 %i, %length
+  br i1 %done, label %copy_done, label %copy_body
+
+copy_body:
+  %src = getelementptr i8, ptr %from, i64 %i
+  %dst = getelementptr i8, ptr %to, i64 %i
+  %val = load i8, ptr %src
+  store i8 %val, ptr %dst
+  %next = add i64 %i, 1
+  br label %copy_loop
+
+copy_done:
+  ret void
+""");
 }
 
-fun int16 strlen(int8: str) {
-	asm#("mov eax, [esp + 4]  ; Copy the address of the string into eax");
-	asm#("xor ecx, ecx  ; Clear ecx (counter register)");
-	
-	asmlb#(".loop:");
-	asm#("cmp dword [eax], 0  ; Compare the byte at the current address with null terminator");
-	asm#("je .done  ; If null terminator is found, exit loop");
-	asm#("add dword eax, 4  ; Move to the next byte in the string");
-	asm#("inc ecx  ; Increment the counter");
-	asm#("jmp .loop  ; Repeat the loop");
-	
-	asmlb#(".done:");
-	
-	let int16 length = 0;
-	
-	asm#("mov [esp], ecx  ; Move strlen to var");
-	
-	return int16 length;
-}
+fun int64 strlen(int8: str) {
+    llvm#("""
+entry:
+  br label %strlen_loop
 
+strlen_loop:
+  %i = phi i64 [0, %entry], [%next, %strlen_loop]
+  %ptr = getelementptr i8, ptr %str, i64 %i
+  %ch = load i8, ptr %ptr
+  %is_zero = icmp eq i8 %ch, 0
+  %next = add i64 %i, 1
+  br i1 %is_zero, label %strlen_done, label %strlen_loop
+
+strlen_done:
+  ret i64 %i
+""");
+}
 
 fun void print(int8: str) {
-	asm#("mov ecx, [esp + 4]  ; Copy the address of the string into eax");
-	
-	asmlb#(".loop:");
-	asm#("cmp dword [ecx], 0  ; Compare the byte at the current address with null terminator");
-	asm#("je .done  ; If null terminator is found, exit loop");
-	printwrite#();
-	asm#("add dword ecx, 4  ; Move to the next byte in the string");
-	asm#("jmp .loop  ; Repeat the loop");
-	
-	asmlb#(".done:");
+    llvm#("""
+entry:
+  %len = call i64 @strlen(ptr %str)
+
+  call void asm sideeffect "syscall",
+    "{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(
+      i64 1,
+      i64 1,
+      ptr %str,
+      i64 %len
+    )
+
+  ret void
+""");
 }
 
 fun void println(int8: str) {
-	print(str);
-	
-	println();
+    print(str);
+    println();
 }
 
 fun void println() {
-	asm#("sub esp, 4");
-	asm#("mov ecx, esp");
-	asm#("mov dword [ecx], 10  ; Newline");
-	printwrite#();
-	asm#("add esp, 4");
+    llvm#("""
+entry:
+  %nl = alloca i8
+  store i8 10, ptr %nl
+
+  call void asm sideeffect "syscall",
+    "{rax},{rdi},{rsi},{rdx},~{rcx},~{r11},~{memory}"(
+      i64 1,
+      i64 1,
+      ptr %nl,
+      i64 1
+    )
+
+  ret void
+""");
 }
 
-fun void print(int16 number) {
-	let int8: str = new int8[11]; // 10 digits + null-terminator
-	
-	stringify(number, str);
-	
-	print(str);
+fun void print(int64 number) {
+    let int8: str = new int8[21];
+
+    stringify(number, str);
+
+    print(str);
 }
 
-fun void println(int16 number) {
-	print(number);
-	println();
+fun void println(int64 number) {
+    print(number);
+    println();
 }
 
-fun void stringify(int16 number, int8: str) {
-	break#("stringify");
+fun void stringify(int64 number, int8: str) {
+    llvm#("""
+entry:
+  %is_zero = icmp eq i64 %number, 0
+  br i1 %is_zero, label %zero_case, label %convert_start
 
-	asm#("lea esi, [esp + 8]  ; Load address of the number");
-	asm#("mov edi, [esp + 4]  ; Load address of the string");
-	// asm#("mov edi, [edi]");
-	
-	asmlb#(".convert_loop:");
-	asm#("mov eax, dword [esi]  ; Load the 32-bit number");
-	asm#("mov edx, 0  ; Clear EDX for division");
-	asm#("mov ecx, 10  ; Set divisor to 10");
-	asm#("div ecx  ; Divide EAX by 10");
-	
-	asm#("add dl, '0'  ; Convert remainder to ASCII");
-	asm#("mov [edi], dl  ; Store ASCII digit in buffer");
-	asm#("add edi, 4  ; Move buffer pointer back");
-	asm#("test eax, eax  ; Check if quotient is zero");
-	asm#("jnz .convert_loop  ; If not, continue conversion");
-	asm#("mov dword [edi], 0");
+zero_case:
+  store i8 48, ptr %str
+  %zero_end = getelementptr i8, ptr %str, i64 1
+  store i8 0, ptr %zero_end
+  ret void
+
+convert_start:
+  %buf = alloca [21 x i8]
+  br label %convert_loop
+
+convert_loop:
+  %n = phi i64 [%number, %convert_start], [%q, %convert_loop]
+  %idx = phi i64 [20, %convert_start], [%prev_idx, %convert_loop]
+
+  %q = udiv i64 %n, 10
+  %r = urem i64 %n, 10
+  %digit64 = add i64 %r, 48
+  %digit = trunc i64 %digit64 to i8
+
+  %slot = getelementptr [21 x i8], ptr %buf, i64 0, i64 %idx
+  store i8 %digit, ptr %slot
+
+  %prev_idx = sub i64 %idx, 1
+  %more = icmp ne i64 %q, 0
+  br i1 %more, label %convert_loop, label %copy_start
+
+copy_start:
+  %start = add i64 %prev_idx, 1
+  br label %copy_loop
+
+copy_loop:
+  %read_idx = phi i64 [%start, %copy_start], [%next_read, %copy_loop]
+  %write_idx = phi i64 [0, %copy_start], [%next_write, %copy_loop]
+
+  %src = getelementptr [21 x i8], ptr %buf, i64 0, i64 %read_idx
+  %dst = getelementptr i8, ptr %str, i64 %write_idx
+  %ch = load i8, ptr %src
+  store i8 %ch, ptr %dst
+
+  %next_read = add i64 %read_idx, 1
+  %next_write = add i64 %write_idx, 1
+
+  %done = icmp ugt i64 %next_read, 20
+  br i1 %done, label %copy_done, label %copy_loop
+
+copy_done:
+  %end = getelementptr i8, ptr %str, i64 %next_write
+  store i8 0, ptr %end
+  ret void
+""");
 }

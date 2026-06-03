@@ -16,7 +16,7 @@ public final class HexFormat {
 		// Convert the hex string to a long
 		try {
 			return Long.valueOf(str, 16);
-		} catch (NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			throw new IllegalArgumentException("Invalid hex string: " + str, e);
 		}
 	}

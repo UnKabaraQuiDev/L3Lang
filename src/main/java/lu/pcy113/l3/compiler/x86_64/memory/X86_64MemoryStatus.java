@@ -19,62 +19,64 @@ public class X86_64MemoryStatus implements MemoryStatus {
 	private static final Map<String, String[]> registerMap = new HashMap<>();
 
 	static {
-		registerMap.put("rax", new String[] { "rax", "eax", "ax", "al" });
-		registerMap.put("rbx", new String[] { "rbx", "ebx", "bx", "bl" });
-		registerMap.put("rcx", new String[] { "rcx", "ecx", "cx", "cl" });
-		registerMap.put("rdx", new String[] { "rdx", "edx", "dx", "dl" });
-		registerMap.put("rsi", new String[] { "rsi", "esi", "si", "sil" });
-		registerMap.put("rdi", new String[] { "rdi", "edi", "di", "dil" });
-		registerMap.put("rsp", new String[] { "rsp", "esp", "sp", "spl" });
-		registerMap.put("rbp", new String[] { "rbp", "ebp", "bp", "bpl" });
+		X86_64MemoryStatus.registerMap.put("rax", new String[] { "rax", "eax", "ax", "al" });
+		X86_64MemoryStatus.registerMap.put("rbx", new String[] { "rbx", "ebx", "bx", "bl" });
+		X86_64MemoryStatus.registerMap.put("rcx", new String[] { "rcx", "ecx", "cx", "cl" });
+		X86_64MemoryStatus.registerMap.put("rdx", new String[] { "rdx", "edx", "dx", "dl" });
+		X86_64MemoryStatus.registerMap.put("rsi", new String[] { "rsi", "esi", "si", "sil" });
+		X86_64MemoryStatus.registerMap.put("rdi", new String[] { "rdi", "edi", "di", "dil" });
+		X86_64MemoryStatus.registerMap.put("rsp", new String[] { "rsp", "esp", "sp", "spl" });
+		X86_64MemoryStatus.registerMap.put("rbp", new String[] { "rbp", "ebp", "bp", "bpl" });
 		for (int i = 8; i < 16; i++) {
-			registerMap.put("r" + i, new String[] { "r" + i, "r" + i + "d", "r" + i + "w", "r" + i + "b" });
+			X86_64MemoryStatus.registerMap.put("r" + i,
+					new String[] { "r" + i, "r" + i + "d", "r" + i + "w", "r" + i + "b" });
 		}
 		for (int i = 0; i < 16; i++) {
-			registerMap.put("xmm" + i, new String[] { "xmm" + i });
+			X86_64MemoryStatus.registerMap.put("xmm" + i, new String[] { "xmm" + i });
 		}
 	}
 
-	private final List<String> freeRegisters = new ArrayList<>(Arrays.asList("rax", "rbx", "rcx", "rdx")), freeFPRegisters = new ArrayList<String>();
+	private final List<String> freeRegisters = new ArrayList<>(Arrays.asList("rax", "rbx", "rcx", "rdx")),
+			freeFPRegisters = new ArrayList<>();
 	private final Set<String> usedRegisters = new HashSet<>(), usedFPRegisters = new HashSet<>();
 
 	private String latest = null;
 
 	public X86_64MemoryStatus() {
-		freeRegisters.addAll(IntStream.range(8, 16).mapToObj(a -> "r" + a).collect(Collectors.toList()));
-		freeFPRegisters.addAll(IntStream.range(0, 16).mapToObj(a -> "xmm" + a).collect(Collectors.toList()));
+		this.freeRegisters.addAll(IntStream.range(8, 16).mapToObj(a -> "r" + a).collect(Collectors.toList()));
+		this.freeFPRegisters.addAll(IntStream.range(0, 16).mapToObj(a -> "xmm" + a).collect(Collectors.toList()));
 	}
 
 	@Override
 	public String alloc() {
-		if (freeRegisters.isEmpty()) {
+		if (this.freeRegisters.isEmpty()) {
 			throw new RuntimeException("No free registers available.");
 		}
-		String reg = freeRegisters.remove(0);
-		latest = reg;
-		usedRegisters.add(reg);
+		final String reg = this.freeRegisters.remove(0);
+		this.latest = reg;
+		this.usedRegisters.add(reg);
 		return reg;
 	}
 
 	@Override
 	public String allocFP() {
-		if (freeFPRegisters.isEmpty()) {
+		if (this.freeFPRegisters.isEmpty()) {
 			throw new RuntimeException("No free registers available.");
 		}
-		String reg = freeFPRegisters.remove(0);
-		latest = reg;
-		usedFPRegisters.add(reg);
+		final String reg = this.freeFPRegisters.remove(0);
+		this.latest = reg;
+		this.usedFPRegisters.add(reg);
 		return reg;
 	}
 
 	@Override
-	public void free(String reg) {
-		if (usedRegisters.remove(reg)) {
-			freeRegisters.add(0, reg);
-			latest = reg;
-		} else if (usedFPRegisters.remove(reg)) {
-			freeFPRegisters.add(0, reg);
-			latest = reg;
+	public void free(final String reg) {
+		if (this.usedRegisters.remove(reg)) {
+			this.freeRegisters.add(0, reg);
+			this.latest = reg;
+		} else if (this.usedFPRegisters.remove(reg)) {
+			this.freeFPRegisters.add(0, reg);
+			this.latest = reg;
 		} else {
 			throw new RuntimeException("Trying to free a register that is not allocated: " + reg);
 		}
@@ -82,30 +84,30 @@ public class X86_64MemoryStatus implements MemoryStatus {
 
 	@Override
 	public boolean hasFree() {
-		return !freeRegisters.isEmpty();
+		return !this.freeRegisters.isEmpty();
 	}
 
 	@Override
 	public boolean hasFreeFP() {
-		return !freeRegisters.isEmpty();
+		return !this.freeRegisters.isEmpty();
 	}
 
 	@Override
-	public boolean isFree(String reg) {
-		return freeRegisters.contains(reg) || freeFPRegisters.contains(reg);
+	public boolean isFree(final String reg) {
+		return this.freeRegisters.contains(reg) || this.freeFPRegisters.contains(reg);
 	}
 
 	@Override
-	public boolean alloc(String reg) {
-		if (!isFree(reg)) {
+	public boolean alloc(final String reg) {
+		if (!this.isFree(reg)) {
 			return false;
-		} else if (freeRegisters.contains(reg)) {
-			freeRegisters.remove(reg);
-			usedRegisters.add(reg);
+		} else if (this.freeRegisters.contains(reg)) {
+			this.freeRegisters.remove(reg);
+			this.usedRegisters.add(reg);
 			return true;
-		} else if (freeFPRegisters.contains(reg)) {
-			freeFPRegisters.remove(reg);
-			usedFPRegisters.add(reg);
+		} else if (this.freeFPRegisters.contains(reg)) {
+			this.freeFPRegisters.remove(reg);
+			this.usedFPRegisters.add(reg);
 			return true;
 		}
 		throw new L3Exception("Unknown register: " + reg);
@@ -113,51 +115,47 @@ public class X86_64MemoryStatus implements MemoryStatus {
 
 	@Override
 	public String getLatest() {
-		return latest;
+		return this.latest;
 	}
 
 	@Override
-	public void setLatest(String latest) {
+	public void setLatest(final String latest) {
 		this.latest = latest;
 	}
 
 	@Override
 	public void freeAll() {
-		freeRegisters.addAll(usedRegisters);
-		freeFPRegisters.addAll(usedFPRegisters);
-		usedRegisters.clear();
-		usedFPRegisters.clear();
+		this.freeRegisters.addAll(this.usedRegisters);
+		this.freeFPRegisters.addAll(this.usedFPRegisters);
+		this.usedRegisters.clear();
+		this.usedFPRegisters.clear();
 	}
 
 	@Override
-	public String getAsSize(String reg, int bytes) {
-		if (!registerMap.containsKey(reg)) {
+	public String getAsSize(final String reg, final int bytes) {
+		if (!X86_64MemoryStatus.registerMap.containsKey(reg)) {
 			throw new IllegalArgumentException("Unknown register: " + reg);
 		}
 
-		String[] sizes = registerMap.get(reg);
-		switch (bytes) {
-		case 8:
-			return sizes[0];
-		case 4:
-			return sizes[1];
-		case 2:
-			return sizes[2];
-		case 1:
-			return sizes[3];
-		default:
-			throw new IllegalArgumentException("Invalid size: " + bytes + ". Supported sizes are 1, 2, 4, and 8 bytes.");
-		}
+		final String[] sizes = X86_64MemoryStatus.registerMap.get(reg);
+		return switch (bytes) {
+		case 8 -> sizes[0];
+		case 4 -> sizes[1];
+		case 2 -> sizes[2];
+		case 1 -> sizes[3];
+		default -> throw new IllegalArgumentException(
+				"Invalid size: " + bytes + ". Supported sizes are 1, 2, 4, and 8 bytes.");
+		};
 	}
 
 	@Override
-	public void dump(PrintStream out) {
+	public void dump(final PrintStream out) {
 		out.println("- - <" + this.getClass().getName() + "> - -");
-		out.println("Free: " + freeRegisters);
-		out.println("Used: " + usedRegisters);
-		out.println("Free FP: " + freeFPRegisters);
-		out.println("Used FP: " + usedFPRegisters);
-		out.println("Latest: " + latest);
+		out.println("Free: " + this.freeRegisters);
+		out.println("Used: " + this.usedRegisters);
+		out.println("Free FP: " + this.freeFPRegisters);
+		out.println("Used FP: " + this.usedFPRegisters);
+		out.println("Latest: " + this.latest);
 	}
 
 }

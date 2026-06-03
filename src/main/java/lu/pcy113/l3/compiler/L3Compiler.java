@@ -10,7 +10,8 @@ import lu.pcy113.l3.L3Exception;
 import lu.pcy113.l3.compiler.memory.MemoryStatus;
 import lu.pcy113.l3.compiler.x86_64.memory.X86_64MemoryStatus;
 import lu.pcy113.l3.parser.ast.container.RuntimeNode;
-import lu.pcy113.pclib.PCUtils;
+
+import lu.kbra.pclib.PCUtils;
 
 public abstract class L3Compiler {
 
@@ -19,7 +20,7 @@ public abstract class L3Compiler {
 	protected FileWriter fw;
 	protected X86_64MemoryStatus memory = new X86_64MemoryStatus();
 
-	public L3Compiler(RuntimeNode env, File outDir) {
+	public L3Compiler(final RuntimeNode env, final File outDir) {
 		this.root = env;
 		this.outDir = outDir;
 		this.outFileExec = new File(PCUtils.removeFileExtension(outDir.getPath() + "/" + env.getMainNode().getName()));
@@ -30,14 +31,14 @@ public abstract class L3Compiler {
 	private int sectionIndex = 1;
 
 	public String newSection() {
-		return "sec_" + (sectionIndex++);
+		return "sec_" + this.sectionIndex++;
 	}
 
-	protected void exec(String cmd, File dir) throws IOException, InterruptedException {
-		ProcessBuilder processBuilder = new ProcessBuilder(cmd.split(" "));
+	protected void exec(final String cmd, final File dir) throws IOException, InterruptedException {
+		final ProcessBuilder processBuilder = new ProcessBuilder(cmd.split(" "));
 		processBuilder.directory(dir);
 
-		Process process = processBuilder.start();
+		final Process process = processBuilder.start();
 
 		System.out.println("--- Process: " + cmd + ", in " + dir);
 
@@ -53,14 +54,14 @@ public abstract class L3Compiler {
 			System.err.println(line);
 		}
 
-		int exitCode = process.waitFor();
+		final int exitCode = process.waitFor();
 		System.out.println("--- Process exited with code: " + exitCode);
 	}
 
 	public abstract MemoryStatus getMemoryStatus();
 
 	public File getOutFileExec() {
-		return outFileExec;
+		return this.outFileExec;
 	}
 
 	public class FileCompilerUnit {
@@ -68,98 +69,100 @@ public abstract class L3Compiler {
 		protected File outFileAsm, outFileObj;
 		protected StringBuilder dataBuilder, textBuilder, bssBuilder;
 
-		public FileCompilerUnit(File outDir, String path) {
-			outFileAsm = new File(PCUtils.replaceFileExtension(path, "asm"));
-			outFileObj = new File(PCUtils.replaceFileExtension(path, "o"));
+		public FileCompilerUnit(final File outDir, final String path) {
+			this.outFileAsm = new File(PCUtils.replaceFileExtension(path, "asm"));
+			this.outFileObj = new File(PCUtils.replaceFileExtension(path, "o"));
 		}
 
-		public void writeinstln(String string) {
-			writeln("\t" + string);
+		public void writeinstln(final String string) {
+			this.writeln("\t" + string);
 		}
 
 		public static final int TAB_WIDTH = 4;
-		private int commentIndent = 5 * TAB_WIDTH;
+		private final int commentIndent = 5 * FileCompilerUnit.TAB_WIDTH;
 
-		public void writeinstln(String string, String comment) {
-			writeinstln(string + "\t".repeat((PCUtils.snap(commentIndent - string.length(), TAB_WIDTH)) / TAB_WIDTH) + "; " + comment);
+		public void writeinstln(final String string, final String comment) {
+			this.writeinstln(
+					string + "\t".repeat(PCUtils.snap(this.commentIndent - string.length(), FileCompilerUnit.TAB_WIDTH)
+							/ FileCompilerUnit.TAB_WIDTH) + "; " + comment);
 		}
 
-		public void writedataln(String string) {
-			dataBuilder.append("\t" + string + "\n");
+		public void writedataln(final String string) {
+			this.dataBuilder.append("\t" + string + "\n");
 		}
 
-		public void writebssln(String string) {
-			bssBuilder.append("\t" + string + "\n");
+		public void writebssln(final String string) {
+			this.bssBuilder.append("\t" + string + "\n");
 		}
 
-		public void writetextln(String string) {
-			textBuilder.append("\t" + string + "\n");
+		public void writetextln(final String string) {
+			this.textBuilder.append("\t" + string + "\n");
 		}
 
-		public void writeln(String string) {
+		public void writeln(final String string) {
 			try {
-				fw.write(string + "\n");
-				fw.flush();
-			} catch (IOException e) {
-				throw new L3Exception("Could not write to output writer to: " + outFileAsm, e);
+				L3Compiler.this.fw.write(string + "\n");
+				L3Compiler.this.fw.flush();
+			} catch (final IOException e) {
+				throw new L3Exception("Could not write to output writer to: " + this.outFileAsm, e);
 			}
 		}
 
 		public void appendData() {
 			try {
-				fw.write("section .data\n");
-				fw.write(dataBuilder.toString());
-			} catch (IOException e) {
-				throw new L3Exception("Could not append data section to output writer: " + outFileAsm, e);
+				L3Compiler.this.fw.write("section .data\n");
+				L3Compiler.this.fw.write(this.dataBuilder.toString());
+			} catch (final IOException e) {
+				throw new L3Exception("Could not append data section to output writer: " + this.outFileAsm, e);
 			}
 		}
 
 		public void appendBSS() {
 			try {
-				fw.write("section .bss\n");
-				fw.write(bssBuilder.toString());
-			} catch (IOException e) {
-				throw new L3Exception("Could not append bss section to output writer: " + outFileAsm, e);
+				L3Compiler.this.fw.write("section .bss\n");
+				L3Compiler.this.fw.write(this.bssBuilder.toString());
+			} catch (final IOException e) {
+				throw new L3Exception("Could not append bss section to output writer: " + this.outFileAsm, e);
 			}
 		}
 
 		public void appendText() {
 			try {
-				fw.write("section .text\n");
-				fw.write(textBuilder.toString());
-			} catch (IOException e) {
-				throw new L3Exception("Could not append text section to output writer: " + outFileAsm, e);
+				L3Compiler.this.fw.write("section .text\n");
+				L3Compiler.this.fw.write(this.textBuilder.toString());
+			} catch (final IOException e) {
+				throw new L3Exception("Could not append text section to output writer: " + this.outFileAsm, e);
 			}
 		}
 
 		public void flushAndClose() {
 			try {
-				fw.flush();
-				fw.close();
-			} catch (IOException e) {
-				throw new L3Exception("Could not flush and close output writer to: " + outFileAsm, e);
+				L3Compiler.this.fw.flush();
+				L3Compiler.this.fw.close();
+			} catch (final IOException e) {
+				throw new L3Exception("Could not flush and close output writer to: " + this.outFileAsm, e);
 			}
 		}
 
 		public FileWriter createWriter() {
-			final File realFile = new File(outDir, outFileAsm.getPath());
+			final File realFile = new File(L3Compiler.this.outDir, this.outFileAsm.getPath());
 
 			try {
-				dataBuilder = new StringBuilder();
-				textBuilder = new StringBuilder();
-				bssBuilder = new StringBuilder();
+				this.dataBuilder = new StringBuilder();
+				this.textBuilder = new StringBuilder();
+				this.bssBuilder = new StringBuilder();
 				return new FileWriter(realFile);
-			} catch (IOException e) {
-				throw new L3Exception("Could not create output writer to: " + outFileAsm, e);
+			} catch (final IOException e) {
+				throw new L3Exception("Could not create output writer to: " + this.outFileAsm, e);
 			}
 		}
 
 		public void createFile() {
-			final File realFile = new File(outDir, outFileAsm.getPath());
+			final File realFile = new File(L3Compiler.this.outDir, this.outFileAsm.getPath());
 
 			try {
-				if (!outDir.exists()) {
-					outDir.mkdirs();
+				if (!L3Compiler.this.outDir.exists()) {
+					L3Compiler.this.outDir.mkdirs();
 				}
 
 				if (!realFile.getParentFile().exists()) {
@@ -167,40 +170,40 @@ public abstract class L3Compiler {
 				}
 
 				realFile.createNewFile();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				throw new L3Exception("Could not create output file: " + realFile, e);
 			}
 		}
 
 		public RuntimeNode getInput() {
-			return root;
+			return L3Compiler.this.root;
 		}
 
 		public FileWriter getFw() {
-			return fw;
+			return L3Compiler.this.fw;
 		}
 
 		public File getOutFileAsm() {
-			return outFileAsm;
+			return this.outFileAsm;
 		}
 
 		public File getOutFileObj() {
-			return outFileObj;
+			return this.outFileObj;
 		}
 
 		public File getOutDir() {
-			return outDir;
+			return L3Compiler.this.outDir;
 		}
-		
+
 		public X86_64MemoryStatus getMemory() {
-			return memory;
+			return L3Compiler.this.memory;
 		}
 
 		public void implement() {
 			throw new L3Exception("Not implemented.");
 		}
 
-		public void implement(Object obj) {
+		public void implement(final Object obj) {
 			throw new L3Exception("Not implemented (" + obj.getClass() + "): " + obj + ".");
 		}
 

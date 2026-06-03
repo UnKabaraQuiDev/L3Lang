@@ -12,18 +12,18 @@ import lu.pcy113.l3.parser.ast.type.CastNode;
 
 public class VisitorHelper {
 
-	public static void compute(ListNode parent, Node node, String reg, FileCompilerUnit fu) {
-		if (node instanceof NumericLiteralNode num) {
+	public static void compute(final ListNode parent, final Node node, final String reg, final FileCompilerUnit fu) {
+		if (node instanceof final NumericLiteralNode num) {
 			NumericLiteralVisitor.visit(num, reg, fu);
-		} else if (node instanceof IdentifierNode ident) {
+		} else if (node instanceof final IdentifierNode ident) {
 			IdentifierNodeVisitor.visit(ident, reg, parent, fu);
-		} else if (node instanceof BinaryExpressionNode bin) {
+		} else if (node instanceof final BinaryExpressionNode bin) {
 			BinaryExpressionVisitor.visit(bin, reg, parent, fu);
-		} else if (node instanceof FunCallNode funCall) {
+		} else if (node instanceof final FunCallNode funCall) {
 			FunCallVisitor.visit(funCall, parent, fu);
-		} else if (node instanceof StringLiteralNode str) {
+		} else if (node instanceof final StringLiteralNode str) {
 			StringLiteralVisitor.visit(str, reg, parent, fu);
-		} else if (node instanceof CastNode cast) {
+		} else if (node instanceof final CastNode cast) {
 			CastVisitor.visit(cast, reg, parent, fu);
 		} else {
 			fu.implement(node);

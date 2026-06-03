@@ -7,19 +7,24 @@ import lu.pcy113.l3.parser.ast.abstr.Node;
 
 public class StringLiteralNode extends Node {
 
-	private StringLiteralToken value;
+	private final StringLiteralToken value;
 
-	public StringLiteralNode(StringLiteralToken consume) {
+	public StringLiteralNode(final StringLiteralToken consume) {
 		this.value = consume;
 	}
 
 	public StringLiteralToken getValue() {
-		return value;
+		return this.value;
 	}
-	
+
+	@Override
+	public String toSourceString() {
+		return "\"" + value.getValue() + "\"";
+	}
+
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("value", value.toJSONObject());
+		return super.toJSONObject().put("value", this.value.toJSONObject());
 	}
 
 }

@@ -7,15 +7,15 @@ import lu.pcy113.l3.parser.ast.ident.IdentifierNode;
 
 public class PointerRefNode extends Node {
 
-	private IdentifierNode ident;
+	private final IdentifierNode ident;
 
-	public PointerRefNode(IdentifierNode ident) {
+	public PointerRefNode(final IdentifierNode ident) {
 		this.ident = ident;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("ident", ident.toJSONObject());
+		return super.toJSONObject().put("ident", this.ident.toJSONObject());
 	}
 
 }

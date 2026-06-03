@@ -8,9 +8,9 @@ public class StringLiteralVisitor {
 
 	static int currentStringIndex = 0;
 
-	public static void visit(StringLiteralNode node, String reg, ListNode parent, FileCompilerUnit fu) {
+	public static void visit(final StringLiteralNode node, final String reg, final ListNode parent, final FileCompilerUnit fu) {
 
-		final String name = "str_" + currentStringIndex++;
+		final String name = "str_" + StringLiteralVisitor.currentStringIndex++;
 
 		fu.writedataln(name + " db \"" + node.getValue().getEscapedValue() + "\", 0");
 		fu.writedataln(name + "_length equ $ - " + name);

@@ -104,19 +104,18 @@ import lu.pcy113.l3.lexer.tokens.NumericLiteralToken;
 import lu.pcy113.l3.lexer.tokens.StringLiteralToken;
 import lu.pcy113.l3.lexer.tokens.Token;
 import lu.pcy113.l3.utils.StringUtils;
-import lu.pcy113.pclib.logger.GlobalLogger;
 
 public class L3Lexer {
 
 	private int index = 0, line = 0, column = 0;
 	private final String input;
-	private final List<Token> tokens = new ArrayList<Token>();
+	private final List<Token> tokens = new ArrayList<>();
 
-	public L3Lexer(String str) {
+	public L3Lexer(final String str) {
 		this.input = str;
 	}
 
-	public L3Lexer(Reader reader) throws IOException {
+	public L3Lexer(final Reader reader) throws IOException {
 		this.input = StringUtils.readAll(reader);
 	}
 
@@ -124,548 +123,552 @@ public class L3Lexer {
 	private String strValue = "";
 
 	public void lexe() {
-		while (hasNext()) {
+		while (this.hasNext()) {
 			next: {
-				char current = consume();
+				final char current = this.consume();
 
 				switch (current) {
 				case '+':
-					if (peek() == '=') {
-						consume();
-						type = PLUS_ASSIGN;
-					} else if (peek() == '+') {
-						consume();
-						type = PLUS_PLUS;
+					if (this.peek() == '=') {
+						this.consume();
+						this.type = PLUS_ASSIGN;
+					} else if (this.peek() == '+') {
+						this.consume();
+						this.type = PLUS_PLUS;
 					} else {
-						type = PLUS;
+						this.type = PLUS;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 				case '-':
-					if (peek() == '>') {
-						consume();
-						type = ARROW;
-					} else if (peek() == '=') {
-						consume();
-						type = MINUS_ASSIGN;
-					} else if (peek() == '-') {
-						consume();
-						type = MINUS_MINUS;
+					if (this.peek() == '>') {
+						this.consume();
+						this.type = ARROW;
+					} else if (this.peek() == '=') {
+						this.consume();
+						this.type = MINUS_ASSIGN;
+					} else if (this.peek() == '-') {
+						this.consume();
+						this.type = MINUS_MINUS;
 					} else {
-						type = MINUS;
+						this.type = MINUS;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 				case '*':
-					if (peek() == '=') {
-						consume();
-						type = MUL_ASSIGN;
+					if (this.peek() == '=') {
+						this.consume();
+						this.type = MUL_ASSIGN;
 					} else {
-						type = MUL;
+						this.type = MUL;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 				case '/':
-					if (peek() == '/') {
-						type = COMMENT;
-						strValue = "/";
-						while (hasNext() && peek() != '\n') { // ignore ligne
-							strValue += consume();
+					if (this.peek() == '/') {
+						this.type = COMMENT;
+						this.strValue = "/";
+						while (this.hasNext() && this.peek() != '\n') { // ignore ligne
+							this.strValue += this.consume();
 						}
-						flushToken();
+						this.flushToken();
 						break next;
-					} else if (peek() == '=') {
-						consume();
-						type = DIV_ASSIGN;
+					} else if (this.peek() == '=') {
+						this.consume();
+						this.type = DIV_ASSIGN;
 					} else {
-						type = DIV;
+						this.type = DIV;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 
 				case '(':
-					type = PAREN_OPEN;
-					flushToken();
+					this.type = PAREN_OPEN;
+					this.flushToken();
 					break next;
 				case ')':
-					type = PAREN_CLOSE;
-					flushToken();
+					this.type = PAREN_CLOSE;
+					this.flushToken();
 					break next;
 				case '[':
-					type = BRACKET_OPEN;
-					flushToken();
+					this.type = BRACKET_OPEN;
+					this.flushToken();
 					break next;
 				case ']':
-					type = BRACKET_CLOSE;
-					flushToken();
+					this.type = BRACKET_CLOSE;
+					this.flushToken();
 					break next;
 				case '{':
-					type = CURLY_OPEN;
-					flushToken();
+					this.type = CURLY_OPEN;
+					this.flushToken();
 					break next;
 				case '}':
-					type = CURLY_CLOSE;
-					flushToken();
+					this.type = CURLY_CLOSE;
+					this.flushToken();
 					break next;
 
 				case '\"':
-					type = STRING_LIT;
-					strValue = "";
-					int cl = line, cc = column;
-					while (hasNext() && peek() != '\"') {
-						if (peek("\\")) {
-							consume();
-							if (peek('0', 'e', 'f', 'v', 'b', 't', 'n', 'r')) {
-								String strV = ("\\" + consume()).replace("\\n", "\n").replace("\\r", "\r").replace("\\t", "\t").replace("\\b", "\b")
-										// .replace("\\v", "\v")
-										.replace("\\f", "\f")
-										// .replace("\\e", "\e")
+					this.type = STRING_LIT;
+					this.strValue = "";
+
+					int cl = this.line;
+					int cc = this.column;
+
+					// """ ... """ block string
+					if (this.peek("\"\"")) {
+						this.consume(2);
+
+						while (this.hasNext() && !this.peek("\"\"\"")) {
+							this.strValue += this.consume();
+						}
+
+						if (!this.hasNext()) {
+							throw new LexerException("Unterminated string block, starting at: " + cl + ":" + cc);
+						}
+
+						this.consume(3);
+
+						this.flushToken();
+						break next;
+					}
+
+					// Normal "..." string
+					while (this.hasNext() && this.peek() != '\"') {
+						if (this.peek("\\")) {
+							this.consume();
+
+							if (this.peek('0', 'e', 'f', 'v', 'b', 't', 'n', 'r')) {
+								final String strV = ("\\" + this.consume()).replace("\\n", "\n").replace("\\r", "\r")
+										.replace("\\t", "\t").replace("\\b", "\b").replace("\\f", "\f")
 										.replace("\\0", "\0");
-								strValue += strV;
+
+								this.strValue += strV;
 							}
 						} else {
-							strValue += consume();
+							this.strValue += this.consume();
 						}
 					}
-					if (!hasNext()) {
+
+					if (!this.hasNext()) {
 						throw new LexerException("Unterminated string, starting at: " + cl + ":" + cc);
 					}
-					consume();
-					flushToken();
+
+					this.consume();
+					this.flushToken();
 					break next;
 
 				case '\'':
-					type = CHAR_LIT;
-					cl = line;
-					cc = column;
-					strValue = consume() + "";
-					if (!peek("'") || !hasNext()) {
+					this.type = CHAR_LIT;
+					cl = this.line;
+					cc = this.column;
+					this.strValue = this.consume() + "";
+					if (!this.peek("'") || !this.hasNext()) {
 						throw new LexerException("Unterminated string, starting at: " + cl + ":" + cc);
 					}
-					consume();
-					flushToken();
+					this.consume();
+					this.flushToken();
 					break next;
 
 				case '$':
-					type = DOLLAR;
-					flushToken();
+					this.type = DOLLAR;
+					this.flushToken();
 					break next;
 
 				case ':':
-					type = COLON;
-					flushToken();
+					this.type = COLON;
+					this.flushToken();
 					break next;
 
 				case ';':
-					type = SEMICOLON;
-					flushToken();
+					this.type = SEMICOLON;
+					this.flushToken();
 					break next;
 
 				case ',':
-					type = COMMA;
-					flushToken();
+					this.type = COMMA;
+					this.flushToken();
 					break next;
 
 				case '.':
-					type = DOT;
-					flushToken();
+					this.type = DOT;
+					this.flushToken();
 					break next;
 
 				case 'i':
-					strValue = "i";
-					if (peek("nt")) {
-						consume(2);
-						strValue += "nt";
+					this.strValue = "i";
+					if (this.peek("nt")) {
+						this.consume(2);
+						this.strValue += "nt";
 					}
-					if (peek("8")) {
-						consume(1);
-						type = INT_8;
-						strValue += "8";
-					} else if (peek("16")) {
-						consume(2);
-						type = INT_16;
-						strValue += "16";
-					} else if (peek("32")) {
-						consume(2);
-						type = INT_32;
-						strValue += "32";
-					} else if (peek("64")) {
-						consume(2);
-						type = INT_64;
-						strValue += "64";
-					} else if (peek("1")) {
-						consume(2);
-						type = INT_1;
-						strValue += "1";
-					} else if (strValue.equals("int")) {
-						type = INT;
+					if (this.peek("8")) {
+						this.consume(1);
+						this.type = INT_8;
+						this.strValue += "8";
+					} else if (this.peek("16")) {
+						this.consume(2);
+						this.type = INT_16;
+						this.strValue += "16";
+					} else if (this.peek("32")) {
+						this.consume(2);
+						this.type = INT_32;
+						this.strValue += "32";
+					} else if (this.peek("64")) {
+						this.consume(2);
+						this.type = INT_64;
+						this.strValue += "64";
+					} else if (this.peek("1")) {
+						this.consume(2);
+						this.type = INT_1;
+						this.strValue += "1";
+					} else if ("int".equals(this.strValue)) {
+						this.type = INT;
 					} else {
-						checkOthers(current);
+						this.checkOthers(current);
 						break next;
 					}
-					if (type != null && type.matches(TYPE) && peek("s")) {
-						consume();
+					if (this.type != null && this.type.matches(TYPE) && this.peek("s")) {
+						this.consume();
 						try {
-							type = TokenType.valueOf(type.name() + "_S");
-						} catch (IllegalArgumentException e) {
-							throw new LexerException(e, "Unknown variable type: " + strValue, line, column);
+							this.type = TokenType.valueOf(this.type.name() + "_S");
+						} catch (final IllegalArgumentException e) {
+							throw new LexerException(e, "Unknown variable type: " + this.strValue, this.line,
+									this.column);
 						}
 					}
-					if (type != null) {
-						flushToken();
+					if (this.type != null) {
+						this.flushToken();
 						break next;
 					}
 					break;
 
 				case '|':
-					if (peek() == '|') {
-						consume();
-						type = OR;
-					} else if (peek() == '=') {
-						consume();
-						type = BIT_OR_ASSIGN;
+					if (this.peek() == '|') {
+						this.consume();
+						this.type = OR;
+					} else if (this.peek() == '=') {
+						this.consume();
+						this.type = BIT_OR_ASSIGN;
 					} else {
-						type = BIT_OR;
+						this.type = BIT_OR;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 
 				case '&':
-					if (peek() == '&') {
-						consume();
-						type = AND;
-					} else if (peek() == '=') {
-						consume();
-						type = BIT_AND_ASSIGN;
+					if (this.peek() == '&') {
+						this.consume();
+						this.type = AND;
+					} else if (this.peek() == '=') {
+						this.consume();
+						this.type = BIT_AND_ASSIGN;
 					} else {
-						type = BIT_AND;
+						this.type = BIT_AND;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 
 				case '%':
-					if (peek() == '=') {
-						consume();
-						type = MODULO_ASSIGN;
+					if (this.peek() == '=') {
+						this.consume();
+						this.type = MODULO_ASSIGN;
 					} else {
-						type = MODULO;
+						this.type = MODULO;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 
 				case '#':
-					type = HASH;
-					flushToken();
+					this.type = HASH;
+					this.flushToken();
 					break next;
 
 				case '!':
-					if (peek() == '=') {
-						consume();
-						type = NOT_EQUALS;
+					if (this.peek() == '=') {
+						this.consume();
+						this.type = NOT_EQUALS;
 					} else {
-						type = NOT;
+						this.type = NOT;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 
 				case '^':
-					if (peek() == '^') {
-						consume();
-						type = XOR;
-					} else if (peek() == '=') {
-						consume();
-						type = BIT_XOR_ASSIGN;
+					if (this.peek() == '^') {
+						this.consume();
+						this.type = XOR;
+					} else if (this.peek() == '=') {
+						this.consume();
+						this.type = BIT_XOR_ASSIGN;
 					} else {
-						type = BIT_XOR;
+						this.type = BIT_XOR;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 
 				case '~':
-					if (peek() == '=') {
-						consume();
-						type = BIT_NOT_ASSIGN;
+					if (this.peek() == '=') {
+						this.consume();
+						this.type = BIT_NOT_ASSIGN;
 					} else {
-						type = BIT_NOT;
+						this.type = BIT_NOT;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 
 				case '=':
-					if (peek() == '=') {
-						consume();
-						type = EQUALS;
+					if (this.peek() == '=') {
+						this.consume();
+						this.type = EQUALS;
 					} else {
-						type = STRICT_ASSIGN;
+						this.type = STRICT_ASSIGN;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 				case '<':
-					if (peek() == '=') {
-						consume();
-						type = LESS_EQUALS;
-					} else if( peek() == '<') {
-						type = BIT_SHIFT_LEFT;
-						consume();
+					if (this.peek() == '=') {
+						this.consume();
+						this.type = LESS_EQUALS;
+					} else if (this.peek() == '<') {
+						this.type = BIT_SHIFT_LEFT;
+						this.consume();
 					} else {
-						type = LESS;
+						this.type = LESS;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 				case '>':
-					if (peek() == '=') {
-						consume();
-						type = GREATER_EQUALS;
-					} else if( peek() == '>') {
-						type = BIT_SHIFT_SIGNED_RIGHT;
-						consume();
-						if( peek() == '>') {
-							type = BIT_SHIFT_UNSIGNED_RIGHT;
-							consume();
+					if (this.peek() == '=') {
+						this.consume();
+						this.type = GREATER_EQUALS;
+					} else if (this.peek() == '>') {
+						this.type = BIT_SHIFT_SIGNED_RIGHT;
+						this.consume();
+						if (this.peek() == '>') {
+							this.type = BIT_SHIFT_UNSIGNED_RIGHT;
+							this.consume();
 						}
-					} else{
-						type = GREATER;
+					} else {
+						this.type = GREATER;
 					}
-					flushToken();
+					this.flushToken();
 					break next;
 
 				case ' ':
 				case '\t':
 				case '\n':
 				case '\r':
-					if (IDENT.equals(type) || NUM_LIT.equals(type) || DEC_NUM_LIT.equals(type)) {
-						flushToken();
+					if (IDENT.equals(this.type) || NUM_LIT.equals(this.type) || DEC_NUM_LIT.equals(this.type)) {
+						this.flushToken();
 						break next;
 					}
 					break;
 
 				case '0':
-					if (peek() == 'x') {
-						consume();
-						strValue = "0x";
-						type = HEX_NUM_LIT;
+					if (this.peek() == 'x') {
+						this.consume();
+						this.strValue = "0x";
+						this.type = HEX_NUM_LIT;
 						do {
-							strValue += consume();
-						} while (Character.isLetterOrDigit(peek()) || peek() == '_');
-						flushToken();
+							this.strValue += this.consume();
+						} while (Character.isLetterOrDigit(this.peek()) || this.peek() == '_');
+						this.flushToken();
 						break next;
-					} else if (peek() == 'b') {
-						consume();
-						strValue = "0b";
-						type = BIN_NUM_LIT;
+					} else if (this.peek() == 'b') {
+						this.consume();
+						this.strValue = "0b";
+						this.type = BIN_NUM_LIT;
 						do {
-							strValue += consume();
-						} while (peek() == '1' || peek() == '0' || peek() == '_');
-						flushToken();
+							this.strValue += this.consume();
+						} while (this.peek() == '1' || this.peek() == '0' || this.peek() == '_');
+						this.flushToken();
 						break next;
-					} else if (peek() == 'o') {
-						consume();
-						strValue = "0o";
-						type = BIN_NUM_LIT;
+					} else if (this.peek() == 'o') {
+						this.consume();
+						this.strValue = "0o";
+						this.type = BIN_NUM_LIT;
 						do {
-							strValue += consume();
-						} while (isOctalDigit((char) peek()) || peek() == '_');
-						flushToken();
+							this.strValue += this.consume();
+						} while (L3Lexer.isOctalDigit((char) this.peek()) || this.peek() == '_');
+						this.flushToken();
 						break next;
 					}
 				}
 
-				checkOthers(current);
+				this.checkOthers(current);
 			}
 		}
 		// flushToken();
 	}
 
-	private void checkOthers(char current) {
-		if (type == null && Character.isLetter(current)) {
-			type = IDENT;
-			strValue = "" + current;
-			while (Character.isLetterOrDigit(peek()) || peek() == '_') {
-				strValue += consume();
+	private void checkOthers(final char current) {
+		if (this.type == null && Character.isLetter(current)) {
+			this.type = IDENT;
+			this.strValue = "" + current;
+			while (Character.isLetterOrDigit(this.peek()) || this.peek() == '_') {
+				this.strValue += this.consume();
 			}
 
-			switch (strValue.toLowerCase()) {
+			switch (this.strValue.toLowerCase()) {
 			case "if":
-				type = IF;
+				this.type = IF;
 				break;
 			case "else":
-				type = ELSE;
+				this.type = ELSE;
 				break;
 			case "finally":
-				type = FINALLY;
+				this.type = FINALLY;
 				break;
 			case "for":
-				type = FOR;
+				this.type = FOR;
 				break;
 			case "while":
-				type = WHILE;
+				this.type = WHILE;
 				break;
 			case "switch":
-				type = SWITCH;
+				this.type = SWITCH;
 				break;
 			case "case":
-				type = CASE;
+				this.type = CASE;
 				break;
 			case "default":
-				type = DEFAULT;
+				this.type = DEFAULT;
 				break;
 			case "void":
-				type = VOID;
+				this.type = VOID;
 				break;
 			case "true":
-				type = TRUE;
+				this.type = TRUE;
 				break;
 			case "false":
-				type = FALSE;
+				this.type = FALSE;
 				break;
 			case "new":
-				type = NEW;
+				this.type = NEW;
 				break;
 			case "let":
-				type = LET;
+				this.type = LET;
 				break;
 			case "fun":
-				type = FUN;
+				this.type = FUN;
 				break;
 			case "static":
-				type = STATIC;
+				this.type = STATIC;
 				break;
 			case "return":
-				type = RETURN;
+				this.type = RETURN;
 				break;
 			case "package":
-				type = PACKAGE;
+				this.type = PACKAGE;
 				break;
 			case "import":
-				type = IMPORT;
+				this.type = IMPORT;
 				break;
 			case "as":
-				type = AS;
+				this.type = AS;
 				break;
 			case "struct":
-				type = STRUCT;
+				this.type = STRUCT;
 				break;
 			case "byte":
-				type = BYTE;
+				this.type = BYTE;
 				break;
 			case "short":
-				type = SHORT;
+				this.type = SHORT;
 				break;
 			case "char":
-				type = CHAR;
+				this.type = CHAR;
 				break;
 			case "long":
-				type = LONG;
+				this.type = LONG;
 				break;
 			case "float":
-				type = FLOAT;
+				this.type = FLOAT;
 				break;
 			case "double":
-				type = DOUBLE;
+				this.type = DOUBLE;
 				break;
 			case "bool":
-				type = BOOLEAN;
+				this.type = BOOLEAN;
 				break;
 			}
 
-			flushToken();
-		} else if (type == null && Character.isDigit(current)) {
-			type = NUM_LIT;
-			strValue = "" + current;
-			while (Character.isLetterOrDigit(peek()) || peek() == '_' || peek() == '.' || peek() == 'f') {
-				strValue += consume();
+			this.flushToken();
+		} else if (this.type == null && Character.isDigit(current)) {
+			this.type = NUM_LIT;
+			this.strValue = "" + current;
+			while (Character.isLetterOrDigit(this.peek()) || this.peek() == '_' || this.peek() == '.'
+					|| this.peek() == 'f') {
+				this.strValue += this.consume();
 			}
-			if (strValue.contains(".") || strValue.contains("f")) {
-				type = DEC_NUM_LIT;
+			if (this.strValue.contains(".") || this.strValue.contains("f")) {
+				this.type = DEC_NUM_LIT;
 			}
-			flushToken();
+			this.flushToken();
 		}
 	}
 
 	public void flushToken() {
-		if (type == null)
+		if (this.type == null) {
 			return;
-
-		if (IDENT.equals(type)) {
-			tokens.add(new IdentifierToken(type, line, column - strValue.length(), strValue));
-		} else if (NUM_LIT.equals(type) || CHAR_LIT.equals(type) || DEC_NUM_LIT.equals(type) || HEX_NUM_LIT.equals(type) || BIN_NUM_LIT.equals(type) || TRUE.equals(type) || FALSE.equals(type)) {
-			tokens.add(NumericLiteralToken.parseNumeric(type, line, column - strValue.length(), strValue));
-		} else if (STRING_LIT.equals(type)) {
-			tokens.add(new StringLiteralToken(type, line, column - strValue.length(), strValue));
-		} else if (COMMENT.equals(type)) {
-			tokens.add(new CommentToken(type, line, column - strValue.length(), strValue));
-		} else {
-			tokens.add(new Token(type, line, column - strValue.length()));
 		}
 
-		type = null;
-		strValue = "";
+		if (IDENT.equals(this.type)) {
+			this.tokens.add(
+					new IdentifierToken(this.type, this.line, this.column - this.strValue.length(), this.strValue));
+		} else if (NUM_LIT.equals(this.type) || CHAR_LIT.equals(this.type) || DEC_NUM_LIT.equals(this.type)
+				|| HEX_NUM_LIT.equals(this.type) || BIN_NUM_LIT.equals(this.type) || TRUE.equals(this.type)
+				|| FALSE.equals(this.type)) {
+			this.tokens.add(NumericLiteralToken.parseNumeric(this.type, this.line, this.column - this.strValue.length(),
+					this.strValue));
+		} else if (STRING_LIT.equals(this.type)) {
+			this.tokens.add(
+					new StringLiteralToken(this.type, this.line, this.column - this.strValue.length(), this.strValue));
+		} else if (COMMENT.equals(this.type)) {
+			this.tokens
+					.add(new CommentToken(this.type, this.line, this.column - this.strValue.length(), this.strValue));
+		} else {
+			this.tokens.add(new Token(this.type, this.line, this.column - this.strValue.length()));
+		}
+
+		this.type = null;
+		this.strValue = "";
 	}
 
 	public boolean hasNext() {
-		return index < input.length();
+		return this.index < this.input.length();
 	}
 
-	public boolean hasNext(int i) {
-		return index + 1 < input.length();
+	public boolean hasNext(final int i) {
+		return this.index + 1 < this.input.length();
 	}
 
 	public char consume() {
-		return consume(1);
+		return this.consume(1);
 	}
 
-	public char consume(int i) {
-		char c = input.charAt(index);
-		index += i;
-		column++;
+	public char consume(final int i) {
+		final char c = this.input.charAt(this.index);
+		this.index += i;
+		this.column++;
 		if (c == '\n') {
-			line++;
-			column = 0;
+			this.line++;
+			this.column = 0;
 		}
 		return c;
 	}
 
 	public int peek() {
-		return peek(0);
+		return this.peek(0);
 	}
 
 	public void reverse() {
-		index--;
+		this.index--;
 	}
 
-	public boolean peek(String s) {
+	public boolean peek(final String s) {
 		boolean b = true;
 		for (int i = 0; i < s.length(); i++) {
-			if (peek(i) == s.charAt(i))
-				continue;
-			b = false;
-			break;
-		}
-		return b;
-	}
-
-	public boolean peek(char... s) {
-		int c = peek();
-		for (char cs : s) {
-			if (cs == c)
-				return true;
-		}
-		return false;
-	}
-
-	public boolean peek(int x, char... s) {
-		int c = peek(x);
-		for (char cs : s) {
-			if (cs == c)
-				return true;
-		}
-		return false;
-	}
-
-	public boolean peek(int x, String s) {
-		boolean b = true;
-		for (int i = 0; i < s.length(); i++) {
-			if (peek(i + x) == s.charAt(i)) {
+			if (this.peek(i) == s.charAt(i)) {
 				continue;
 			}
 			b = false;
@@ -674,22 +677,54 @@ public class L3Lexer {
 		return b;
 	}
 
-	public int peek(int i) {
-		return input.charAt(index + i);
+	public boolean peek(final char... s) {
+		final int c = this.peek();
+		for (final char cs : s) {
+			if (cs == c) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean peek(final int x, final char... s) {
+		final int c = this.peek(x);
+		for (final char cs : s) {
+			if (cs == c) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean peek(final int x, final String s) {
+		boolean b = true;
+		for (int i = 0; i < s.length(); i++) {
+			if (this.peek(i + x) == s.charAt(i)) {
+				continue;
+			}
+			b = false;
+			break;
+		}
+		return b;
+	}
+
+	public int peek(final int i) {
+		return this.input.charAt(this.index + i);
 	}
 
 	// public int getIndex() {return index;}
 	public String getInput() {
-		return input;
+		return this.input;
 	}
 
 	public List<Token> getTokens() {
-		return tokens;
+		return this.tokens;
 	}
 
-	public static boolean isOctalDigit(char digit) {
+	public static boolean isOctalDigit(final char digit) {
 		if (Character.isDigit(digit)) {
-			int numericValue = Character.getNumericValue(digit);
+			final int numericValue = Character.getNumericValue(digit);
 			return numericValue >= 0 && numericValue <= 7;
 		}
 		return false;
@@ -701,63 +736,64 @@ public class L3Lexer {
 			int pos = 0;
 
 			@Override
-			public TokenType peek(int i) {
-				return pos < tokens.size() ? tokens.get(pos + i).getType() : null;
+			public TokenType peek(final int i) {
+				return this.pos < L3Lexer.this.tokens.size() ? L3Lexer.this.tokens.get(this.pos + i).getType() : null;
 			}
 
 			@Override
 			public TokenType peek() {
-				return peek(0);
+				return this.peek(0);
 			}
 
 			@Override
-			public boolean peek(TokenType type) {
-				return peek().matches(type);
+			public boolean peek(final TokenType type) {
+				return this.peek().matches(type);
 			}
 
-			
 			@Override
-			public boolean peek(int i, TokenType type) {
-				return peek(i).matches(type);
+			public boolean peek(final int i, final TokenType type) {
+				return this.peek(i).matches(type);
 			}
-			
+
 			@Override
 			public boolean hasNext() {
-				return pos < tokens.size();
+				return this.pos < L3Lexer.this.tokens.size();
 			}
 
 			@Override
-			public Token consume(TokenType type) {
-				GlobalLogger.log();
+			public Token consume(final TokenType type) {
+//				GlobalLogger.log();
 
-				if (peek(type))
-					return consume();
+				if (this.peek(type)) {
+					return this.consume();
+				}
 
-				throw new L3Exception("Expected: " + type + " but got: " + peek());
+				throw new L3Exception("Expected: " + type + " but got: " + this.peek());
 			}
 
 			@Override
 			public Token consume() {
-				GlobalLogger.log();
+//				GlobalLogger.log();
 
-				return tokens.get(pos++);
+				return L3Lexer.this.tokens.get(this.pos++);
 			}
 
 			@Override
-			public boolean peek(TokenType... types) {
+			public boolean peek(final TokenType... types) {
 				return Arrays.stream(types).anyMatch(this::peek);
 			}
-			
+
 			@Override
-			public boolean peek(int i, TokenType... types) {
-				return Arrays.stream(types).anyMatch(t -> peek(i, t));
+			public boolean peek(final int i, final TokenType... types) {
+				return Arrays.stream(types).anyMatch(t -> this.peek(i, t));
 			}
 
 			@Override
-			public Token consume(TokenType... types) {
-				if (peek(types))
-					return consume();
-				throw new L3Exception("Expected: " + types + " but got: " + peek());
+			public Token consume(final TokenType... types) {
+				if (this.peek(types)) {
+					return this.consume();
+				}
+				throw new L3Exception("Expected: " + types + " but got: " + this.peek());
 			}
 		};
 	}

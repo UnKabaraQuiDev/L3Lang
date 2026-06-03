@@ -27,51 +27,51 @@ import lu.pcy113.l3.parser.ast.type.CastNode;
 import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 /**
- * 
+ *
  */
 public class NodeSymbols implements JSONConvertible {
 
-	private Map<String, List<NodeSymbol<?>>> symbols = new HashMap<String, List<NodeSymbol<?>>>();
+	private final Map<String, List<NodeSymbol<?>>> symbols = new HashMap<>();
 	private NodeSymbols parent;
 
-	public void registerFile(FileNode fileNode) {
-		addSymbol(fileNode.getPackageNode().getValue() + "." + fileNode.getName(), new FileSymbol(fileNode));
+	public void registerFile(final FileNode fileNode) {
+		this.addSymbol(fileNode.getPackageNode().getValue() + "." + fileNode.getName(), new FileSymbol(fileNode));
 	}
 
-	public void registerImport(ImportNode importNode) {
-		addSymbol(importNode.getIdentifier().getValue(), new ImportSymbol(importNode));
+	public void registerImport(final ImportNode importNode) {
+		this.addSymbol(importNode.getIdentifier().getValue(), new ImportSymbol(importNode));
 	}
 
-	public void registerLet(LetDefNode letDef) {
-		addSymbol(letDef.getIdentifier().getValue(), new LetDefSymbol(letDef));
+	public void registerLet(final LetDefNode letDef) {
+		this.addSymbol(letDef.getIdentifier().getValue(), new LetDefSymbol(letDef));
 	}
 
-	public void registerFun(FunDefNode funDef) {
-		addSymbol(funDef.getIdentifier().getValue(), new FunDefSymbol(funDef));
+	public void registerFun(final FunDefNode funDef) {
+		this.addSymbol(funDef.getIdentifier().getValue(), new FunDefSymbol(funDef));
 	}
 
-	public void checkDependencies(Node expr) {
-		if (expr instanceof BinaryExpressionNode bin) {
-			checkDependencies(bin.getLeft());
-			checkDependencies(bin.getRight());
+	public void checkDependencies(final Node expr) {
+		if (expr instanceof final BinaryExpressionNode bin) {
+			this.checkDependencies(bin.getLeft());
+			this.checkDependencies(bin.getRight());
 
-		} else if (expr instanceof LetDefNode letDef) {
-			checkDependencies(letDef.getValue());
-			checkDependencies(letDef.getType());
+		} else if (expr instanceof final LetDefNode letDef) {
+			this.checkDependencies(letDef.getValue());
+			this.checkDependencies(letDef.getType());
 
-		} else if (expr instanceof TypeNode type) {
-			throwError(this.<TypeSymbol>getSymbol(type.getIdent()) == null, expr);
+		} else if (expr instanceof final TypeNode type) {
+			this.throwError(this.<TypeSymbol>getSymbol(type.getIdent()) == null, expr);
 
-		} else if (expr instanceof FunCallNode funCall) {
+		} else if (expr instanceof final FunCallNode funCall) {
 			// checkDependencies(funCall.getParent());
 			// functions are checked at compile time
 			funCall.getArgs().forEach(this::checkDependencies);
 
-		} else if (expr instanceof UnaryExpressionNode unary) {
-			checkDependencies(unary.getChild());
+		} else if (expr instanceof final UnaryExpressionNode unary) {
+			this.checkDependencies(unary.getChild());
 
-		} else if (expr instanceof MembersAccess access) {
-			checkDependencies(access.getParent());
+		} else if (expr instanceof final MembersAccess access) {
+			this.checkDependencies(access.getParent());
 
 			/*
 			 * final TypeNode type = evalType(access.getParent()); throwError(type == null,
@@ -79,24 +79,24 @@ public class NodeSymbols implements JSONConvertible {
 			 */
 			// if user type -> match access.getProp() with a property of the type
 
-		} else if (expr instanceof IdentifierNode ident) {
-			throwError(getSymbol(ident.getValue()) == null, ident);
+		} else if (expr instanceof final IdentifierNode ident) {
+			this.throwError(this.getSymbol(ident.getValue()) == null, ident);
 			// if user type -> match access.getProp() with a property of the type
 
 		} else if (expr instanceof NumericLiteralNode || expr instanceof StringLiteralNode) {
 			// everything ok
 
-		} else if (expr instanceof CastNode cast) {
-			checkDependencies(cast.getValue());
+		} else if (expr instanceof final CastNode cast) {
+			this.checkDependencies(cast.getValue());
 		} else {
 			throw new L3Exception("Unsupported expression: " + expr);
 		}
 	}
 
-	private TypeNode evalType(Node parent) {
-		if (parent instanceof MembersAccess access) {
-			return evalType(access);
-		} else if (parent instanceof IdentifierNode ident) {
+	private TypeNode evalType(final Node parent) {
+		if (parent instanceof final MembersAccess access) {
+			return this.evalType(access);
+		} else if (parent instanceof final IdentifierNode ident) {
 			final LetDefNode letDef = this.<LetDefSymbol>getSymbol(ident.getValue()).getNode();
 			return letDef == null ? null : letDef.getType();
 		}
@@ -104,65 +104,67 @@ public class NodeSymbols implements JSONConvertible {
 		throw new L3Exception("Unsupported parent type: " + parent);
 	}
 
-	private void throwError(boolean b, Node expr) {
+	private void throwError(final boolean b, final Node expr) {
 		if (b) {
 			throw new L3Exception("Symbol not found: " + expr);
 		}
 	}
 
-	public LetDefSymbol get(LetDefNode letDef) {
+	public LetDefSymbol get(final LetDefNode letDef) {
 		return this.<LetDefSymbol>getSymbol(letDef.getIdentifier().getValue());
 	}
 
-	public FunDefSymbol get(FunDefNode funDef) {
+	public FunDefSymbol get(final FunDefNode funDef) {
 		return this.<FunDefSymbol>getSymbol(funDef.getIdentifier().getValue());
 	}
 
-	public FunDefSymbol get(FunCallNode funCall) {
-		return this.<FunDefSymbol>getSymbol(((IdentifierNode) funCall.getParent()).getValue()); // doesn't support nested fun. call
+	public FunDefSymbol get(final FunCallNode funCall) {
+		return this.<FunDefSymbol>getSymbol(((IdentifierNode) funCall.getParent()).getValue()); // doesn't support
+																								// nested fun. call
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends NodeSymbol<?>> T getSymbol(String name) {
-		if (contains(name) && getSymbols(name).size() == 1) {
-			return (T) getSymbols(name).get(0);
+	public <T extends NodeSymbol<?>> T getSymbol(final String name) {
+		if (this.contains(name) && this.getSymbols(name).size() == 1) {
+			return (T) this.getSymbols(name).get(0);
 		} else {
 			throw new L3Exception("No or multiple matches for: `" + name + "`");
 		}
 	}
 
-	public List<NodeSymbol<?>> getSymbols(String name) {
+	public List<NodeSymbol<?>> getSymbols(final String name) {
 		List<NodeSymbol<?>> symbols = this.symbols.get(name);
 
-		if (symbols == null && parent != null) {
-			symbols = parent.getSymbols(name);
+		if (symbols == null && this.parent != null) {
+			symbols = this.parent.getSymbols(name);
 		}
 
 		return symbols;
 	}
 
-	public boolean contains(String name) {
-		return symbols.containsKey(name) || (parent != null && parent.contains(name));
+	public boolean contains(final String name) {
+		return this.symbols.containsKey(name) || this.parent != null && this.parent.contains(name);
 	}
 
-	public void addSymbol(String name, NodeSymbol<?> symbol) {
-		symbols.computeIfAbsent(name, k -> new ArrayList<>()).add(symbol);
+	public void addSymbol(final String name, final NodeSymbol<?> symbol) {
+		this.symbols.computeIfAbsent(name, k -> new ArrayList<>()).add(symbol);
 	}
 
-	public void setParent(NodeSymbols parent) {
+	public void setParent(final NodeSymbols parent) {
 		this.parent = parent;
 	}
 
 	public NodeSymbols getParent() {
-		return parent;
+		return this.parent;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		final JSONObject obj = parent == null ? new JSONObject() : parent.toJSONObject();
+		final JSONObject obj = this.parent == null ? new JSONObject() : this.parent.toJSONObject();
 
-		symbols.forEach((k, v) -> {
-			obj.accumulate("symbols", new JSONObject().put("key", k).put("values", new JSONArray(v.stream().map(NodeSymbol::toJSONObject).collect(Collectors.toList()))));
+		this.symbols.forEach((k, v) -> {
+			obj.accumulate("symbols", new JSONObject().put("key", k).put("values",
+					new JSONArray(v.stream().map(NodeSymbol::toJSONObject).collect(Collectors.toList()))));
 		});
 
 		return obj;
@@ -170,7 +172,7 @@ public class NodeSymbols implements JSONConvertible {
 
 	@Override
 	public String toString() {
-		return toJSONObject().toString(4);
+		return this.toJSONObject().toString(4);
 	}
 
 }

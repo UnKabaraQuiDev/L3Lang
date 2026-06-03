@@ -11,50 +11,50 @@ import lu.pcy113.l3.parser.ast.symbols.NodeSymbols;
 
 public class ListNode extends Node implements Iterable<Node> {
 
-	protected List<Node> children = new ArrayList<Node>();
+	protected List<Node> children = new ArrayList<>();
 	protected NodeSymbols symbols = new NodeSymbols();
 
 	public ListNode() {
 	}
 
-	public ListNode(List<Node> children) {
+	public ListNode(final List<Node> children) {
 		this.children = children;
 	}
 
 	@Override
 	public Iterator<Node> iterator() {
-		return children.iterator();
+		return this.children.iterator();
 	}
 
 	public boolean isEmpty() {
-		return children.isEmpty();
+		return this.children.isEmpty();
 	}
 
 	public int size() {
-		return children.size();
+		return this.children.size();
 	}
 
 	public Stream<Node> stream() {
-		return children.stream();
+		return this.children.stream();
 	}
 
 	public NodeSymbols getSymbols() {
-		return symbols;
+		return this.symbols;
 	}
 
 	public List<Node> getChildren() {
-		return children;
+		return this.children;
 	}
 
-	public void setChildren(List<Node> children) {
+	public void setChildren(final List<Node> children) {
 		this.children = children;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		JSONObject obj = super.toJSONObject();
-		forEach((c) -> obj.accumulate("children", c.toJSONObject()));
-		obj.put("symbols", symbols.toJSONObject());
+		final JSONObject obj = super.toJSONObject();
+		this.forEach(c -> obj.accumulate("children", c.toJSONObject()));
+		obj.put("symbols", this.symbols.toJSONObject());
 		return obj;
 	}
 

@@ -16,11 +16,11 @@ import lu.pcy113.l3.parser.ast.type.TypeNode;
 
 public class FunDefNode extends ListNode {
 
-	private TypeNode returnType;
-	private IdentifierNode identifier;
-	private List<ArgDefNode> args;
+	private final TypeNode returnType;
+	private final IdentifierNode identifier;
+	private final List<ArgDefNode> args;
 
-	public FunDefNode(ListNode file, TypeNode returnType, IdentifierNode identifier, List<ArgDefNode> args) {
+	public FunDefNode(final ListNode file, final TypeNode returnType, final IdentifierNode identifier, final List<ArgDefNode> args) {
 		super.symbols.setParent(file.getSymbols());
 		this.returnType = returnType;
 		this.identifier = identifier;
@@ -28,24 +28,27 @@ public class FunDefNode extends ListNode {
 	}
 
 	public boolean isMain() {
-		return returnType instanceof PrimitiveTypeNode pt && pt.getType().matches(TokenType.INT_8) && identifier.getValue().equals("main") && args.isEmpty();
+		return this.returnType instanceof final PrimitiveTypeNode pt && pt.getType().matches(TokenType.INT_8)
+				&& "main".equals(this.identifier.getValue()) && this.args.isEmpty();
 	}
 
 	public TypeNode getReturnType() {
-		return returnType;
+		return this.returnType;
 	}
 
 	public IdentifierNode getIdentifier() {
-		return identifier;
+		return this.identifier;
 	}
 
 	public List<ArgDefNode> getArgs() {
-		return args;
+		return this.args;
 	}
 
 	@Override
 	public JSONObject toJSONObject() {
-		return super.toJSONObject().put("returnType", returnType.toJSONObject()).put("identifier", identifier.toJSONObject()).put("args", new JSONArray(args.stream().map(Node::toJSONObject).collect(Collectors.toList())));
+		return super.toJSONObject().put("returnType", this.returnType.toJSONObject())
+				.put("identifier", this.identifier.toJSONObject())
+				.put("args", new JSONArray(this.args.stream().map(Node::toJSONObject).collect(Collectors.toList())));
 	}
 
 }

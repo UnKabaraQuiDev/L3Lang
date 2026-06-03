@@ -1,58 +1,7 @@
 package lu.lang.base;
 
-import lu.lang.base.Test2;
-
-let static int8 globalVar = 2;
-
-fun int8 main() {
-	
-	let int64 a = 1010101;
-	let int8 b = (int8s) a;
-	
-	let char: str = "test";
-	
-	println(str);
-	
-	return strlen(str);
+int64 main() {
+    int64 a = 1;
+    print("test");
+    return a;
 }
-
-fun int16 strlen(let char: str) {
-	asm#("xor rax, rax");
-	
-	asm#("mov rsi, rdi");
-	asm#("mov al, 0x00");
-	asm#("mov rcx, 0xFFFFFFFF");
-	asm#("repne scasb");
-	asm#("add rcx, 1");
-	
-	asm#("mov rax, 0xFFFFFFFF");
-	
-	asm#("sub rax, rcx");
-	
-	return;
-	
-	asmln#(".find_length:");
-	asm#("mov al, byte [rdi]     ; Load a byte from the string");
-	asm#("test al, al            ; Check if the byte is null (0x00)");
-	asm#("jz .length_found       ; If zero, we found the end");
-	asm#("inc rcx                ; Increment the length counter");
-	asm#("inc rdi                ; Move to the next character");
-	asm#("jmp .find_length       ; Repeat");
-
-	asmln#(".length_found:");
-	asm#("mov rax, rcx");
-	
-	return;
-}
-
-fun void println(let char: str) {
-	asm#("mov rsi, rdi");
-	strlen(str);
-	asm#("mov rdi, 1             ; File descriptor: 1 (stdout)");
-	asm#("mov rdx, rax           ; Length of the string");
-	asm#("mov rax, 1             ; System call number: 1 (write)");
-	asm#("syscall ");
-	
-	return;
-}
-
